@@ -7,7 +7,9 @@ export default class Module {
     }
 
     send(msg) {
-        //TODO this._mts...(msg);
+        this._mts.Bus.Message.enqueue(msg);
+
+        return this;
     }
     receive(msg) {}
 }

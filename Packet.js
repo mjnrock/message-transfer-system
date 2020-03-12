@@ -33,4 +33,21 @@ export default class Packet extends Message {
             obj.protocol
         );
     }
+
+    static conforms(obj) {
+        return Message.conforms(obj)
+            && ("protocol" in obj);
+    }
+
+    static fromMessage(msg, protocol) {
+        if(msg instanceof Message) {            
+            return new Packet(
+                msg.type,
+                msg.payload,
+                msg.destination,
+                msg.source,
+                protocol
+            );
+        }
+    }
 };

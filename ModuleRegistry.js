@@ -3,9 +3,13 @@ import Module from "./Module";
 export default class ModuleRegistry {
     constructor(mts, modules = []) {
         this._mts = mts;
-        this.Modules = {};
+        this.modules = {};
 
         modules.forEach(mod => this.register(mod));
+    }
+
+    get(name) {
+        return this.modules[ name ];
     }
 
     register(module) {
@@ -14,7 +18,7 @@ export default class ModuleRegistry {
         }
 
         module._mts = this._mts;
-        this.Modules[ module.name ] = module;
+        this.modules[ module.name ] = module;
 
         return this;
     }
@@ -23,7 +27,8 @@ export default class ModuleRegistry {
             throw new Error("@module does not extends <Module>");
         }
 
-        delete this.Modules[ module.name ];
+        module._mts = null;
+        delete this.modules[ module.name ];
 
         return this;
     }

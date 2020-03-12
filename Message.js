@@ -27,4 +27,12 @@ export default class Message {
             obj.source
         );
     }
+
+    static conforms(obj) {
+        return ("type" in obj)
+            && ("payload" in obj)
+            && ("destination" in obj)
+            && ("source" in obj)
+            && ("timestamp" in obj);
+    }
 };
