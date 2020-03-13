@@ -9,11 +9,11 @@ export default class Message {
         return Object.freeze(this);
     }
 
-    toJson() {
+    toJSON() {
         return JSON.stringify(this);
     }
 
-    static fromJson(json) {
+    static fromJSON(json) {
         let obj = json;
 
         while(typeof obj === "string" || obj instanceof String) {
