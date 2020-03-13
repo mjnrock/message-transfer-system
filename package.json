@@ -1,0 +1,26 @@
+{
+    "name": "message-transfer-system",
+    "version": "0.1.0",
+    "description": "",
+    "main": "index.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mjnrock/message-transfer-system.git"
+    },
+    "author": "Matt Nawrocki",
+    "license": "UNLICENSED",
+    "bugs": {
+        "url": "https://github.com/mjnrock/message-transfer-system/issues"
+    },
+    "homepage": "https://github.com/mjnrock/message-transfer-system#readme",
+    "dependencies": {},
+    "devDependencies": {
+        "esm": "^3.2.25"
+    }
+}

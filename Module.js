@@ -13,10 +13,8 @@ export default class Module {
         this._subscriptions = {};
     }
 
-    get next(...args) {
-        if(typeof this._next === "function") {
-            return this._next(...args);
-        }
+    get next() {
+        return this._next;
     }
     set next(fn) {
         if(typeof fn === "function") {
@@ -25,7 +23,7 @@ export default class Module {
     }
     
     /**
-     * Directly queue a Message to be sent to another Module
+     * Directly queue a Message to be sent to another Module, via the MessageBus queue
      * @param {Message} msg 
      */
     send(msg) {
@@ -38,10 +36,8 @@ export default class Module {
      * @param {Message} msg 
      */
     
-    get receive(msg) {
-        if(typeof this._receive === "function") {
-            return this._receive(msg);
-        }
+    get receive() {
+        return this._receive;
     }
     set receive(fn) {
         if(typeof fn === "function") {
@@ -50,16 +46,18 @@ export default class Module {
     }
 
     /**
-     * Invoke the MTS module's .next(msg) function, passing the Event wrapped in a Message to be forwarded to another Module
+     * Allow for direct, Module-to-Module Message forwarding via Module.receive(...)
      * @param {string} type 
      * @param {string} destination 
-     * @param {Event} e 
+     * @param {Event|any} payload 
      */
-    forward(type, destination, e) {
-        if(e instanceof Event) {
-            this._mts.next(new Message(
+    forward(type, destination, payload) {
+        let module = this._mts.Registry.get(destination);
+
+        if(module instanceof Module) {
+            module.receive(new Message(
                 type,
-                e,
+                payload,
                 destination,
                 this
             ));
@@ -76,10 +74,10 @@ export default class Module {
     emit(eOrType, payload) {
         let e;
 
-        if(args.length === 1) {
+        if(arguments.length === 1) {
             e = eOrType;
-        } else if(args.length === 2) {
-            e = new Event(eOrType, payload, this);
+        } else if(arguments.length === 2) {
+            e = new Event(eOrType, payload, this.uuid);
         }
 
         if(e instanceof Event) {

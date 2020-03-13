@@ -8,12 +8,16 @@ export default class ModuleRegistry {
         modules.forEach(mod => this.register(mod));
     }
 
+    lookup(uuid) {
+        console.log(uuid, this.modules)
+        return Object.values(this.modules).filter(m => m.uuid === uuid)[ 0 ];
+    }
     get(name) {
         return this.modules[ name ];
     }
 
-    register(module, { subMessageBus = false, subPacketBus = false } = {}) {
-        if(module instanceof Module) {
+    register(module, { subMessageBus = false, subPacketBus = false, twoWay = false } = {}) {
+        if(!(module instanceof Module)) {
             throw new Error("@module does not extends <Module>");
         }
 
@@ -25,6 +29,9 @@ export default class ModuleRegistry {
             module.subscribe(this._mts.Bus.Packet);
         }
 
+        if(twoWay) {
+            this._mts.subscribe(module);
+        }
         module.subscribe(this._mts);
         module._mts = this._mts;
         this.modules[ module.name ] = module;
@@ -32,10 +39,11 @@ export default class ModuleRegistry {
         return this;
     }
     unregister(module) {
-        if(module instanceof Module) {
+        if(!(module instanceof Module)) {
             throw new Error("@module does not extends <Module>");
         }
 
+        this._mts.unsubscribe(module);
         module.unsubscribe(this._mts);
         module.unsubscribe(this._mts.Bus.Message);
         module.unsubscribe(this._mts.Bus.Packet);
