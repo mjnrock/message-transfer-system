@@ -25,36 +25,10 @@ export default class WebSocketManager extends Manager {
     connect(uri, { protocol = "ws" } = {}) {
         this._ws = new WebSocket(`${ protocol }://${ uri }`);
 
-        this._ws.onopen = e => {
-            this.send(this.packager(
-                WebSocketManager.MessageTypes.OPEN,
-                e,
-                this.signet
-            ));
-
-            this._ws.send("I have connected on the client!");
-        };
-        this._ws.onmessage = e => {
-            this.send(this.packager(
-                WebSocketManager.MessageTypes.MESSAGE,
-                e,
-                this.signet
-            ));
-        };
-        this._ws.onclose = e => {
-            this.send(this.packager(
-                WebSocketManager.MessageTypes.CLOSE,
-                e,
-                this.signet
-            ));
-        };
-        this._ws.onerror = e => {
-            this.send(this.packager(
-                WebSocketManager.MessageTypes.ERROR,
-                e,
-                this.signet
-            ));
-        };
+        this._ws.onopen = e => this.send(WebSocketManager.MessageTypes.OPEN, e);
+        this._ws.onmessage = e => this.send(WebSocketManager.MessageTypes.MESSAGE, e);
+        this._ws.onclose = e => this.send(WebSocketManager.MessageTypes.CLOSE, e);
+        this._ws.onerror = e => this.send(WebSocketManager.MessageTypes.ERROR, e);
 
         return this;
     }
@@ -63,11 +37,7 @@ export default class WebSocketManager extends Manager {
         if(this._ws) {
             this._ws.close();
 
-            this.send(this.packager(
-                WebSocketManager.MessageTypes.CLOSE,
-                null,
-                this.signet
-            ));
+            this.send(WebSocketManager.MessageTypes.CLOSE);
         }
 
         return 
