@@ -29,7 +29,7 @@ export default class Manager {
     }
 
     send(type, payload) {
-        this._parent.MessageBus.route(new Message(
+        this._parent.Router.route(new Message(
             type,
             payload,
             this.signet

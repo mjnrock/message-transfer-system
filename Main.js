@@ -3,7 +3,7 @@ import MTS from "./package";
 export default class Main {
     constructor(managers = []) {
         this.Registry = new MTS.Registry(this);
-        this.MessageBus = new MTS.MessageBus(this);
+        this.Router = new MTS.Router(this);
 
         this.Registry.register(...managers);
     }

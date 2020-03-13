@@ -21,7 +21,7 @@ import MTS from "./../package";
         Mgr2
     ]);
 
-    Main.MessageBus
+    Main.Router
         .addRoute(Mgr1.name, true)
         .addRoute(Mgr2.name, [ "Dog" ]);
 
@@ -29,7 +29,7 @@ import MTS from "./../package";
     Main.get("mgr-1").send("Dog", "purpies!");
     Main.get("mgr-2").send("Dog", "!seiprup");
 
-    // Main.MessageBus
+    // Main.Router
     //     .route(new MTS.Message(
     //         "Cat",
     //         "KiTTIes!",

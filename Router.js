@@ -1,7 +1,7 @@
 import Message from "./Message";
 import Manager from "./Manager";
 
-export default class MessageBus {
+export default class Router {
     constructor(parent) {
         this._parent = parent;
         

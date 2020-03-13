@@ -1,9 +1,9 @@
 import Message from "./Message";
 import Manager from "./Manager";
-import MessageBus from "./MessageBus";
+import Router from "./Router";
 
 export default {
     Message,
     Manager,
-    MessageBus
+    Router
 };
