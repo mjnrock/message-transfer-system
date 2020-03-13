@@ -18,7 +18,7 @@ import MTS from "../package";
 
     Mgr1.subscribe(Mgr2);
     Mgr1.subscribeTo(Mgr2);
-    Mgr2.subscribe(Mgr1);
+    Mgr2.subscribe(Mgr1);   // Should do nothing, and it seems to work correctly
 
     Mgr1.emit("Cats", "Kitties!");
     Mgr2.emit("Dogs", "Purpies!");
