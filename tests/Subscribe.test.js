@@ -1,4 +1,4 @@
-import MTS from "../package";
+import MTS from "../src/package";
 
 (function() {
     let Mgr1 = new MTS.Manager("mgr-1", {

@@ -35,7 +35,11 @@ export default class Manager {
     set packager(fn) {
         if(typeof fn === "function") {
             this._packager = fn;
+
+            return true;
         }
+
+        return false;
     }
 
     send(type, payload) {

@@ -5,11 +5,17 @@ import Router from "./Router";
 
 import Main from "./Main";
 
+
+import WebSocketManager from "./WebSocketManager";
+
 export default {
     Message,
     Manager,
     Registry,
     Router,
 
-    Main
+    Main,
+
+    
+    WebSocketManager
 };
