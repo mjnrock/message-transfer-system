@@ -9,6 +9,7 @@ export default class Message {
         return Object.freeze(this);
     }
 
+    //! If this causes a circular issue, rename it to "toJson" | I don't know if the custom toJSON will cause circularity in JSON.stringify()
     toJSON() {
         return JSON.stringify(this);
     }
