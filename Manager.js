@@ -1,8 +1,9 @@
+import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
 export default class Manager {
     constructor(name, { receive = null, parent = null } = {}) {
-        this.id = Symbol(name);
+        this.id = GenerateUUID();
         this.name = name;
 
         this._parent = parent;
@@ -53,25 +54,36 @@ export default class Manager {
         return this;
     }
 
-    subscribe(nextOrFn) {
-        let uuid,
+    subscribe(mgrOrFn) {
+        let id,
             sub;
 
-        if(typeof nextOrFn === "function" || typeof nextOrFn.next === "function") {
-            sub = nextOrFn;
-            uuid = GenerateUUID();
+        if(mgrOrFn instanceof Manager) {
+            sub = mgrOrFn;
+            id = mgrOrFn.id;
+        } else if(typeof mgrOrFn === "function" || typeof mgrOrFn.receive === "function") {
+            sub = mgrOrFn;
+            id = GenerateUUID();
         }
 
-        if(uuid) {
-            this._subscriptions[ uuid ] = sub;
+        if(id) {
+            this._subscriptions[ id ] = sub;
 
-            return uuid;
+            return id;
+        }
+
+        return false;
+    }
+
+    subscribeTo(mgr) {
+        if(mgr instanceof Manager) {
+            return mgr.subscribe(this);
         }
 
         return false;
     }
     
-    unsubscribe(fnOrUuid) {
+    unsubscribe(mgrFnOrId) {
         let hashCode = str => {
             let hash = 0, i, chr;
 
@@ -88,15 +100,17 @@ export default class Manager {
             return hash;
         };
 
-        if (typeof fnOrUuid === "string" || fnOrUuid instanceof String) {
-            delete this._subscriptions[fnOrUuid];
-        } else if (typeof fnOrUuid.next === "function" || typeof fnOrUuid === "function") {
-            let fn = fnOrUuid.next || fnOrUuid,
+        if (mgrFnOrId instanceof Manager) {
+            delete this._subscriptions[ mgrFnOrId.id ];
+        } else if (typeof mgrFnOrId === "string" || mgrFnOrId instanceof String) {
+            delete this._subscriptions[ mgrFnOrId ];
+        } else if (typeof mgrFnOrId.receive === "function" || typeof mgrFnOrId === "function") {
+            let fn = mgrFnOrId.receive || mgrFnOrId,
                 hash = hashCode(fn.toString());
 
             for (let [ key, sub ] of Object.entries(this._subscriptions)) {
-                if (typeof sub.next === "function" || typeof sub === "function") {
-                    let ifn = sub.next || sub;
+                if (typeof sub.receive === "function" || typeof sub === "function") {
+                    let ifn = sub.receive || sub;
 
                     if (hashCode(ifn.toString()) === hash) {
                         delete this._subscriptions[key];
@@ -108,5 +122,13 @@ export default class Manager {
         }
 
         return this;
+    }
+
+    unsubscribeTo(mgr) {
+        if(mgr instanceof Manager) {
+            return mgr.unsubscribe(this);
+        }
+
+        return false;
     }
 };

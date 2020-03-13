@@ -22,12 +22,12 @@ import MTS from "./../package";
     ]);
 
     Main.MessageBus
-        .addRoute(Mgr1.name)
+        .addRoute(Mgr1.name, true)
         .addRoute(Mgr2.name, [ "Dog" ]);
 
-    Main.Registry.get("mgr-1").send("Cat", "bootsandcatsandbootsandcats");
-    Main.Registry.get("mgr-1").send("Dog", "purpies!");
-    Main.Registry.get("mgr-2").send("Dog", "!seiprup");
+    Main.get("mgr-1").send("Cat", "bootsandcatsandbootsandcats");
+    Main.get("mgr-1").send("Dog", "purpies!");
+    Main.get("mgr-2").send("Dog", "!seiprup");
 
     // Main.MessageBus
     //     .route(new MTS.Message(

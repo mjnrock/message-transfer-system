@@ -1,4 +1,3 @@
-import Registry from "./Registry";
 import Message from "./Message";
 import Manager from "./Manager";
 
@@ -25,7 +24,13 @@ export default class MessageBus {
     }
 
     addRoute(managerName, msgTypes = []) {
-        if(msgTypes.length === 0) {
+        if(managerName instanceof Manager) {
+            managerName = managerName.name;
+        }
+
+        this.removeRoute(managerName);
+
+        if(msgTypes === "*" || msgTypes === true) {
             this._routes["*"].push(managerName);
         } else {
             for(let type of msgTypes) {
@@ -42,7 +47,11 @@ export default class MessageBus {
         return this;
     }
     removeRoute(managerName) {
-        Object.entries(this._routes).forEach((type, mods) => {
+        if(managerName instanceof Manager) {
+            managerName = managerName.name;
+        }
+
+        Object.entries(this._routes).forEach(([ type, mods ]) => {
             this._routes[ type ] = mods.filter(m => m !== managerName);
         });
 
