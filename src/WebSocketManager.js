@@ -22,11 +22,6 @@ export default class WebSocketManager extends Manager {
         this._ws = null;
     }
 
-    //! DEBUGGING ONLY
-    send(...args) {
-        this.receive(...args);
-    }
-
     connect(uri, { protocol = "ws" } = {}) {
         this._ws = new WebSocket(`${ protocol }://${ uri }`);
 
