@@ -14,6 +14,16 @@ export default class Packet extends Message {
         return Object.freeze(this);
     }
 
+    /**
+     * Allow the PacketBus to enqueue Packets in an observable pattern
+     * @param {Packet} packet 
+     */
+    next(packet) {
+        if(Packet.conforms(packet)) {
+            this.enqueue(packet);
+        }
+    }
+
     toJson() {
         return JSON.stringify(this);
     }

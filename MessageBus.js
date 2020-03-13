@@ -17,6 +17,16 @@ export default class MessageBus {
         this.maxBatchSize = maxBatchSize;
     }
 
+    /**
+     * Allow the MessageBus to enqueue Messsages in an observable pattern
+     * @param {Message} msg 
+     */
+    next(msg) {
+        if(Message.conforms(msg)) {
+            this.enqueue(msg);
+        }
+    }
+
     size() {
         return this.queue.length;
     }

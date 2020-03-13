@@ -12,11 +12,20 @@ export default class ModuleRegistry {
         return this.modules[ name ];
     }
 
-    register(module) {
+    register(module, { subMessageBus = false, subPacketBus = false } = {}) {
         if(module instanceof Module) {
             throw new Error("@module does not extends <Module>");
         }
 
+        
+        if(subMessageBus) {
+            module.subscribe(this._mts.Bus.Message);
+        }
+        if(subPacketBus) {
+            module.subscribe(this._mts.Bus.Packet);
+        }
+
+        module.subscribe(this._mts);
         module._mts = this._mts;
         this.modules[ module.name ] = module;
 
@@ -27,6 +36,9 @@ export default class ModuleRegistry {
             throw new Error("@module does not extends <Module>");
         }
 
+        module.unsubscribe(this._mts);
+        module.unsubscribe(this._mts.Bus.Message);
+        module.unsubscribe(this._mts.Bus.Packet);
         module._mts = null;
         delete this.modules[ module.name ];
 
