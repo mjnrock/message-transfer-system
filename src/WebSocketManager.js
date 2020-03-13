@@ -22,7 +22,7 @@ export default class WebSocketManager extends Manager {
         this._ws = null;
     }
 
-    connect(uri, { protocol = "wss" } = {}) {
+    connect(uri, { protocol = "ws" } = {}) {
         this._ws = new WebSocket(`${ protocol }://${ uri }`);
 
         this._ws.onopen = e => {
