@@ -2,11 +2,12 @@ import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
 export default class Manager {
-    constructor(name, { receive = null, parent = null } = {}) {
+    constructor(name, { receive = null, parent = null, packager = null } = {}) {
         this.id = GenerateUUID();
         this.name = name;
 
         this._parent = parent;
+        this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
         this._receive = receive;
         this._subscriptions = {};
     }
@@ -28,8 +29,17 @@ export default class Manager {
         return false;
     }
 
+    get packager() {
+        return this._packager;
+    }
+    set packager(fn) {
+        if(typeof fn === "function") {
+            this._packager = fn;
+        }
+    }
+
     send(type, payload) {
-        this._parent.Router.route(new Message(
+        this._parent.Router.route(this.packager(
             type,
             payload,
             this.signet
@@ -37,7 +47,7 @@ export default class Manager {
     }
 
     emit(type, payload) {
-        let msg = new Message(
+        let msg = this.packager(
             type,
             payload,
             this.signet

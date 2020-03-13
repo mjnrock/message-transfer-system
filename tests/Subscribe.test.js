@@ -20,6 +20,8 @@ import MTS from "../package";
     Mgr1.subscribeTo(Mgr2);
     Mgr2.subscribe(Mgr1);   // Should do nothing, and it seems to work correctly
 
+    Mgr1.packager = (type, payload) => new MTS.Message(type, payload, "CATS");  // Custom packager works, too
+
     Mgr1.emit("Cats", "Kitties!");
     Mgr2.emit("Dogs", "Purpies!");
 })();

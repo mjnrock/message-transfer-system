@@ -1,9 +1,8 @@
 export default class Message {
-    constructor(type, payload, source, destination = null) {
+    constructor(type, payload, source) {
         this.type = type;
         this.payload = payload;
         this.source = source;
-        this.destination = destination;
         this.timestamp = Date.now();
 
         return Object.freeze(this);
@@ -24,7 +23,6 @@ export default class Message {
         return new Message(
             obj.type,
             obj.payload,
-            obj.destination,
             obj.source
         );
     }
@@ -32,7 +30,6 @@ export default class Message {
     static conforms(obj) {
         return ("type" in obj)
             && ("payload" in obj)
-            && ("destination" in obj)
             && ("source" in obj)
             && ("timestamp" in obj);
     }
