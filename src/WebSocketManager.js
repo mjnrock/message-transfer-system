@@ -6,9 +6,9 @@ import Message from "./Message";
 
 export default class WebSocketManager extends Manager {
     static MessageTypes = {
-        CONNECT: `WebSocketManager.Connect`,
+        OPEN: `WebSocketManager.Open`,
         MESSAGE: `WebSocketManager.Message`,
-        DISCONNECT: `WebSocketManager.Disconnect`,
+        CLOSE: `WebSocketManager.Close`,
         ERROR: `WebSocketManager.Error`,
     };
 
@@ -26,8 +26,8 @@ export default class WebSocketManager extends Manager {
         this._ws = new WebSocket(`${ protocol }://${ uri }`);
 
         this._ws.onopen = e => {
-            this.receive(this.packager(
-                WebSocketManager.MessageTypes.CONNECT,
+            this.send(this.packager(
+                WebSocketManager.MessageTypes.OPEN,
                 e,
                 this.signet
             ));
@@ -35,21 +35,21 @@ export default class WebSocketManager extends Manager {
             this._ws.send("I have connected on the client!");
         };
         this._ws.onmessage = e => {
-            this.receive(this.packager(
+            this.send(this.packager(
                 WebSocketManager.MessageTypes.MESSAGE,
                 e,
                 this.signet
             ));
         };
         this._ws.onclose = e => {
-            this.receive(this.packager(
-                WebSocketManager.MessageTypes.DISCONNECT,
+            this.send(this.packager(
+                WebSocketManager.MessageTypes.CLOSE,
                 e,
                 this.signet
             ));
         };
         this._ws.onerror = e => {
-            this.receive(this.packager(
+            this.send(this.packager(
                 WebSocketManager.MessageTypes.ERROR,
                 e,
                 this.signet
@@ -57,6 +57,20 @@ export default class WebSocketManager extends Manager {
         };
 
         return this;
+    }
+
+    disconnect() {
+        if(this._ws) {
+            this._ws.close();
+
+            this.send(this.packager(
+                WebSocketManager.MessageTypes.CLOSE,
+                null,
+                this.signet
+            ));
+        }
+
+        return 
     }
 
 
