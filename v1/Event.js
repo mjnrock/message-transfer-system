@@ -1,4 +1,4 @@
-import { GenerateUUID } from "./helper";
+import { GenerateUUID } from "../helper";
 
 export default class Event {
     constructor(type, payload, emitter = null) {

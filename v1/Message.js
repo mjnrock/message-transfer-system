@@ -1,9 +1,9 @@
 export default class Message {
-    constructor(type, payload, source, destination = null) {
+    constructor(type, payload, destination, source = null) {
         this.type = type;
         this.payload = payload;
-        this.source = source;
         this.destination = destination;
+        this.source = source;
         this.timestamp = Date.now();
 
         return Object.freeze(this);

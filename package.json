@@ -2,12 +2,12 @@
     "name": "message-transfer-system",
     "version": "0.1.0",
     "description": "",
-    "main": "index.js",
+    "main": "esm-index.js",
     "directories": {
         "test": "tests"
     },
     "scripts": {
-        "start": "node index.js"
+        "start": "node esm-index.js"
     },
     "repository": {
         "type": "git",

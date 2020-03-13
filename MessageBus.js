@@ -1,104 +1,65 @@
+import Registry from "./Registry";
 import Message from "./Message";
-import Packet from "./Packet";
-import Module from "./Module";
+import Manager from "./Manager";
 
 export default class MessageBus {
-    constructor(mts, {
-        isReceiving = true,
-        isProcessing = true,
-        maxBatchSize = 1000,
-    } = {}) {
-        this._mts = mts;
-
-        this.queue = [];
-
-        this.isReceiving = isReceiving;
-        this.isProcessing = isProcessing;
-        this.maxBatchSize = maxBatchSize;
+    constructor(parent) {
+        this._parent = parent;
+        
+        this._routes = {
+            "*": []
+        };
     }
 
-    /**
-     * Allow the MessageBus to enqueue Messsages in an observable pattern
-     * @param {Message} msg 
-     */
-    next(msg) {
-        if(Message.conforms(msg)) {
-            this.enqueue(msg);
-        }
-    }
+    get(type, wildcard = false) {
+        let routes = this._routes[ type ] || [];
 
-    size() {
-        return this.queue.length;
-    }
-    isEmpty() {
-        return this.queue.length === 0;
-    }
-
-    priority(msg) {
-        if(Message.conforms(msg)) {
-            let mod = this._mts.Registry.get(msg.destination);
-
-            if(mod instanceof Module) {
-                mod.receive(msg.payload, msg);
-            }
-
-            return this;
+        if(wildcard) {
+            return [
+                ...routes,
+                ...this._routes[ "*" ]
+            ];
         }
 
-        return false;
+        return routes;
     }
 
-    enqueue(msg) {
-        if(!this.isReceiving) {
-            return false;
-        }
-
-        if(Message.conforms(msg)) {
-            this.queue.push(msg);
-        }
-
-        return this;
-    }
-    dequeue() {
-        return this.queue.pop();
-    }
-
-    process() {
-        if(!this.isProcessing) {
-            return false;
-        }
-
-        let iters = 0;
-
-        for(let i = 0; i < this.queue.length; i++) {
-            if(iters < this.maxBatchSize) {
-                let msg = this.dequeue(),
-                    mod = this._mts.Registry.get(msg.destination);
-
-                if(mod instanceof Module) {
-                    mod.receive(msg.payload, msg);
+    addRoute(managerName, msgTypes = []) {
+        if(msgTypes.length === 0) {
+            this._routes["*"].push(managerName);
+        } else {
+            for(let type of msgTypes) {
+                if(!Array.isArray(this._routes[ type ])) {
+                    this._routes[ type ] = [];
                 }
-            } else {
-                return -1;
+    
+                if(!this._routes[ type ].includes(managerName)) {
+                    this._routes[ type ].push(managerName);
+                }
             }
-
-            ++iters;
         }
 
         return this;
     }
-
-    elevate(msg, protocol) {
-        this._mts.Bus.Packet.enqueue(Packet.fromMessage(msg, protocol));
+    removeRoute(managerName) {
+        Object.entries(this._routes).forEach((type, mods) => {
+            this._routes[ type ] = mods.filter(m => m !== managerName);
+        });
 
         return this;
     }
 
-    extract(msg) {
+    route(msg) {
         if(Message.conforms(msg)) {
-            return msg.payload;
+            let managers = this.get(msg.type, true).map(name => this._parent.Registry.get(name));
+
+            for(let mgr of managers) {
+                if(mgr instanceof Manager && mgr.signet !== msg.source) {
+                    mgr.receive(msg);
+                }
+            }
         }
 
-        return false;
+        return this;
     }
-}
+};
