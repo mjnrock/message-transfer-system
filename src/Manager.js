@@ -10,6 +10,34 @@ export default class Manager {
         this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
         this._receive = receive;
         this._subscriptions = {};
+
+        this._state = {};
+        this._emitStateChange = false;
+    }
+
+    makePublic() {
+        this._emitStateChange = true;
+
+        return this;
+    }
+    makePrivate() {
+        this._emitStateChange = false;
+
+        return this;
+    }
+
+    get state() {
+        return this._state;
+    }
+    set state(value) {
+        if(this._emitStateChange === true) {
+            this.emit(`state::${ this.signet }`, {
+                previous: this._state,
+                current: value
+            });
+        }
+        
+        this._state = state;
     }
 
     get signet() {
@@ -48,6 +76,11 @@ export default class Manager {
             payload,
             this.signet
         ));
+    }
+    message(msg) {
+        if(Message.conforms(msg)) {
+            this._parent.Router.route(msg);
+        }
     }
 
     emit(type, payload) {

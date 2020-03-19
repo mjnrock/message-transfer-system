@@ -1,4 +1,4 @@
-import Message from "../Message";
+import Message from "./Message";
 
 export default class Packet extends Message {
     constructor(type, payload, source, destination) {
@@ -22,6 +22,18 @@ export default class Packet extends Message {
             obj.source,
             obj.destination
         );
+    }
+
+    static extractMessage(packet) {
+        if(Packet.conforms(packet)) {
+            let payload = packet.payload;
+
+            if(Message.conforms(payload)) {
+                return payload;
+            }
+        }
+
+        return false;
     }
 
     static conforms(obj) {

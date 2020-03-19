@@ -4,12 +4,12 @@ import { GenerateUUID } from "./helper";
 import Manager from "./Manager";
 import Message from "./Message";
 
-export default class WebSocketManager extends Manager {
+export default class WebSocketClient extends Manager {
     static MessageTypes = {
-        OPEN: `WebSocketManager.Open`,
-        MESSAGE: `WebSocketManager.Message`,
-        CLOSE: `WebSocketManager.Close`,
-        ERROR: `WebSocketManager.Error`,
+        OPEN: `WebSocketClient.Open`,
+        MESSAGE: `WebSocketClient.Message`,
+        CLOSE: `WebSocketClient.Close`,
+        ERROR: `WebSocketClient.Error`,
     };
 
     constructor({ parent = null, packager = null } = {}) {
@@ -25,10 +25,10 @@ export default class WebSocketManager extends Manager {
     connect(uri, { protocol = "ws" } = {}) {
         this._ws = new WebSocket(`${ protocol }://${ uri }`);
 
-        this._ws.onopen = e => this.send(WebSocketManager.MessageTypes.OPEN, e);
-        this._ws.onmessage = e => this.send(WebSocketManager.MessageTypes.MESSAGE, e);
-        this._ws.onclose = e => this.send(WebSocketManager.MessageTypes.CLOSE, e);
-        this._ws.onerror = e => this.send(WebSocketManager.MessageTypes.ERROR, e);
+        this._ws.onopen = e => this.send(WebSocketClient.MessageTypes.OPEN, e);
+        this._ws.onmessage = e => this.send(WebSocketClient.MessageTypes.MESSAGE, e);
+        this._ws.onclose = e => this.send(WebSocketClient.MessageTypes.CLOSE, e);
+        this._ws.onerror = e => this.send(WebSocketClient.MessageTypes.ERROR, e);
 
         return this;
     }
@@ -37,7 +37,7 @@ export default class WebSocketManager extends Manager {
         if(this._ws) {
             this._ws.close();
 
-            this.send(WebSocketManager.MessageTypes.CLOSE);
+            this.send(WebSocketClient.MessageTypes.CLOSE);
         }
 
         return 
