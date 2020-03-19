@@ -1,6 +1,6 @@
 import MTS from "./../src/package";
 
-let ws = new MTS.WebSocketClient();
+let ws = new MTS.WebSocketManager();
 
 ws.send = ws.receive;   //! Debugging simplification
 ws.subscribe(console.log);

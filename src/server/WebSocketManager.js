@@ -1,9 +1,9 @@
-import { GenerateUUID } from "./../helper";
-import Manager from "./../Manager";
-import Packet from "./../Packet";
-import Message from "./../Message";
+import { GenerateUUID } from "../helper";
+import Manager from "../Manager";
+import Packet from "../Packet";
+import Message from "../Message";
 
-export default class WebSocketServer extends Manager {
+export default class WebSocketManager extends Manager {
     constructor(wss, { receive = null, parent = null, packager = null } = {}) {
         super(GenerateUUID(), {
             receive: receive,
