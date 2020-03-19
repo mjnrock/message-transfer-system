@@ -12,18 +12,23 @@ export default class WebSocketManager extends Manager {
         ERROR: `WebSocketManager.Error`,
     };
 
-    constructor({ parent = null, packager = null } = {}) {
+    constructor(ws = null, { receive = null, parent = null, packager = null } = {}) {
         super(GenerateUUID(), {
+            receive: receive,
             parent: parent,
             packager: packager
         });
 
+        this._ws = ws;
+
+        //!DEBUGGING
         this._receive = this.receive;
-        this._ws = null;
     }
 
-    connect(uri, { protocol = "ws" } = {}) {
-        this._ws = new WebSocket(`${ protocol }://${ uri }`);
+    connect({ uri = "localhost:3000", protocol = "ws" } = {}) {
+        if(!this._ws) {
+            this._ws = new WebSocket(`${ protocol }://${ uri }`);
+        }
 
         this._ws.onopen = e => this.send(WebSocketManager.MessageTypes.OPEN, e);
         this._ws.onmessage = e => this.send(WebSocketManager.MessageTypes.MESSAGE, e);
@@ -43,7 +48,7 @@ export default class WebSocketManager extends Manager {
         return 
     }
 
-
+    //!DEBUGGING
     receive(msg) {
         if(Message.conforms(msg)) {
             console.log(msg);

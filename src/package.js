@@ -7,7 +7,8 @@ import Router from "./Router";
 import Main from "./Main";
 
 
-import WebSocketManager from "./WebSocketManager";
+import Client from "./client/package";
+import Server from "./server/package";
 
 export default {
     Message,
@@ -19,5 +20,6 @@ export default {
     Main,
 
     
-    WebSocketManager
+    Client,
+    Server
 };
