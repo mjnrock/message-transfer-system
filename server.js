@@ -10,9 +10,7 @@ app.set("trust proxy", true);
 //  https://stackoverflow.com/questions/31338927/how-to-create-securetls-ssl-websocket-server
 
 app.ws("/", function (ws, req) {
-    //TODO The server (when it's an MTS server, should send the client the assigned UUID for bookkeeping)
-    //!     ws.ClientUUID = GenerateUUID();
-    //!     ws.send({ type: "ConnectionId", payload: ws.ClientUUID });
+    //TODO Instantiate a Server.WebSocketManager(ws) and .register to the server Main instance
     ws.on("message", function (msg) {
         console.log(msg);
         ws.send("You have connected to the server!");

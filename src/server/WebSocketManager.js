@@ -4,16 +4,20 @@ import Packet from "../Packet";
 import Message from "../Message";
 
 export default class WebSocketManager extends Manager {
-    constructor(wss, { receive = null, parent = null, packager = null } = {}) {
+    static MessageTypes = {
+        CLIENT_ID: `WebSocketManager.ClientId`,
+    };
+
+    //? This is a one-to-one wrapper for 
+    constructor(wsClient, { receive = null, parent = null, packager = null } = {}) {
         super(GenerateUUID(), {
             receive: receive,
             parent: parent,
             packager: packager
         });
 
-        this._wss = wss;
-
-        this._wss.on("message", packet => {
+        this._ws = wsClient;
+        this._ws.on("message", packet => {
             if(Packet.conforms(packet)) {
                 let msg = Packet.extractMessage(packet);
 
@@ -22,5 +26,9 @@ export default class WebSocketManager extends Manager {
                 }
             }
         });
+        
+        this.ClientId = GenerateUUID();
+        this._ws.ClientId = this.ClientId;
+        this._ws.send(WebSocketManager.MessageTypes.CLIENT_ID, this._ws.CLIENT_ID); // Send the UUID to the client
     }
 };
