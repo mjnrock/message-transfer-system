@@ -8,3 +8,7 @@ MTS.register(ws);
 
 // ws.subscribe(console.log);
 ws.start({ uri: `localhost:3000` });
+
+setTimeout(() => {
+    ws.end();
+}, 1000);
