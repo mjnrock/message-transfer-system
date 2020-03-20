@@ -4,6 +4,7 @@ import { GenerateUUID } from "./../helper";
 import Manager from "./../Manager";
 import Message from "./../Message";
 import Packet from "./Packet";
+// import Main from "../Main";
 
 export default class WebSocketManager extends Manager {
     static MessageTypes = {
@@ -32,6 +33,10 @@ export default class WebSocketManager extends Manager {
         if(ws) {
             this.start();
         }
+
+        // if(parent instanceof Main) {
+        //     parent.register(this);
+        // }
     }
 
     get signet() {
@@ -67,10 +72,10 @@ export default class WebSocketManager extends Manager {
             }
         };
 
-        //!DEBUGGING
-        if(this._ws) {
-            console.log(`[${ this.signet }] running on ${ this.isAuthority ? "SERVER" : "CLIENT" }`);
-        }
+        // //!DEBUGGING
+        // if(this._ws) {
+        //     console.log(`[${ this.signet }] running on ${ this.isAuthority ? "SERVER" : "CLIENT" }`);
+        // }
 
         return this;
     }
@@ -85,8 +90,8 @@ export default class WebSocketManager extends Manager {
     }
 
     receive(msg) {
-        //!DEBUGGING
-        console.log(msg);
+        // //!DEBUGGING
+        // console.log(msg);
 
         if(!this.isAuthority) {
             if(msg.type === WebSocketManager.MessageTypes.CLIENT_ID) {
