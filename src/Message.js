@@ -8,6 +8,12 @@ export default class Message {
         return this;
     }
 
+    elevate() {
+        this._elevate = true;
+
+        return this;
+    }
+
     toJson() {
         return JSON.stringify(this);
     }
@@ -26,7 +32,7 @@ export default class Message {
         );
     }
 
-    static conforms(message) {
+    static conforms(obj) {
         if(typeof obj === "object") {
             return ("type" in obj)
                 && ("payload" in obj)

@@ -31,15 +31,19 @@ export default class WebSocketManager extends Manager {
         this.isMaster = isMaster;
         
         if(ws) {
-            this.start();
+            this.create();
         }
+    }
+
+    isReady() {
+        return this._ws && this._ws.readyState === 1;
     }
 
     get signet() {
         return this.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
     }
 
-    start({ ws = null, uri = "localhost:3000", protocol = "ws" } = {}) {
+    create({ ws = null, uri = "localhost:3000", protocol = "ws" } = {}) {
         if(ws) {
             this._ws = ws;
         }
@@ -69,7 +73,7 @@ export default class WebSocketManager extends Manager {
 
         return this;
     }
-    end() {
+    destroy() {
         if(this._ws) {
             this._ws.close();
 
@@ -122,7 +126,7 @@ export default class WebSocketManager extends Manager {
 
             if(msg !== false) {
                 //!DEBUGGING
-                console.log(`Received [${ msg.type }] from [${ msg.source }]`);
+                console.log(`|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
 
                 if(msg.type === WebSocketManager.SignalTypes.CLIENT_ID && !this.isMaster) {
                     //!DEBUGGING
