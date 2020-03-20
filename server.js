@@ -18,7 +18,7 @@ app.ws("/", function (ws, req) {
     let wsm = new MTSLib.Network.WebSocketManager(ws, { isServerSide: true });
     
     MTS.register(wsm);
-    MTS.Router.addRoute(wsm, MTSLib.Network.WebSocketManager.AllMessageTypes());
+    // MTS.Router.addRoute(wsm, MTSLib.Network.WebSocketManager.AllMessageTypes()); //? .register(WebSocketManager) auto-hooks the routes
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));

@@ -1,4 +1,5 @@
 import Manager from "./Manager";
+import WebSocketManager from "./network/WebSocketManager";
 
 export default class Registry {
     constructor(parent) {
@@ -20,6 +21,11 @@ export default class Registry {
             if(manager instanceof Manager) {
                 manager._parent = this._parent;
                 this._entries[ manager.name ] = manager;
+
+                //? Special routing instructions for convenience
+                if(manager instanceof WebSocketManager) {
+                    manager._parent.Router.addRoute(manager, WebSocketManager.AllMessageTypes());
+                }
             }
         }
 
@@ -30,6 +36,11 @@ export default class Registry {
             if(manager instanceof Manager) {
                 manager._parent = null;
                 delete this._entries[ manager.name ];
+
+                //? Special routing instructions for convenience
+                if(manager instanceof WebSocketManager) {
+                    manager._parent.Router.removeRoute(manager, WebSocketManager.AllMessageTypes());
+                }
             }
         }
 
