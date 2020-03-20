@@ -19,13 +19,13 @@ export default class WebSocketManager extends Manager {
         return Object.values(WebSocketManager.MessageTypes);
     }
 
-    constructor(ws = null, { parent = null, packager = null, isServerSide = false } = {}) {
+    constructor(ws = null, { parent = null, packager = null, isAuthority = false } = {}) {
         super(GenerateUUID(), {
             parent: parent,
             packager: packager
         });
 
-        this.isServerSide = isServerSide;
+        this.isAuthority = isAuthority;
         this._ws = ws;
         this._receive = this.receive;
         
@@ -35,7 +35,7 @@ export default class WebSocketManager extends Manager {
     }
 
     get signet() {
-        return this.isServerSide ? `S:${ this.id }` : `C:${ this.id }`;
+        return this.isAuthority ? `S:${ this.id }` : `C:${ this.id }`;
     }
 
     start({ ws = null, uri = "localhost:3000", protocol = "ws" } = {}) {
@@ -43,7 +43,7 @@ export default class WebSocketManager extends Manager {
             this._ws = ws;
         }
 
-        if(this.isServerSide) {        
+        if(this.isAuthority) {        
             this._wssend(WebSocketManager.MessageTypes.CLIENT_ID, this.id);
         } else {
             if(!this._ws) {
@@ -69,7 +69,7 @@ export default class WebSocketManager extends Manager {
 
         //!DEBUGGING
         if(this._ws) {
-            console.log(`[${ this.signet }] running on ${ this.isServerSide ? "SERVER" : "CLIENT" }`);
+            console.log(`[${ this.signet }] running on ${ this.isAuthority ? "SERVER" : "CLIENT" }`);
         }
 
         return this;
@@ -88,7 +88,7 @@ export default class WebSocketManager extends Manager {
         //!DEBUGGING
         console.log(msg);
 
-        if(!this.isServerSide) {
+        if(!this.isAuthority) {
             if(msg.type === WebSocketManager.MessageTypes.CLIENT_ID) {
                 this.id = msg.payload;  // This will force a mirroring of the UUID between the client and server version of the WSM
                 this._wssend(WebSocketManager.MessageTypes.ACKNOWLEDGE, this.id);

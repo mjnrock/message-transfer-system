@@ -15,7 +15,7 @@ const MTS = new MTSLib.Main();
 
 //TODO There is presently no cleanup for disconnected clients
 app.ws("/", function (ws, req) {
-    let wsm = new MTSLib.Network.WebSocketManager(ws, { isServerSide: true });
+    let wsm = new MTSLib.Network.WebSocketManager(ws, { isAuthority: true });
     
     MTS.register(wsm);
     // MTS.Router.addRoute(wsm, MTSLib.Network.WebSocketManager.AllMessageTypes()); //? .register(WebSocketManager) auto-hooks the routes
