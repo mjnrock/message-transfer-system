@@ -11,17 +11,14 @@ app.set("trust proxy", true);
 
 //  https://stackoverflow.com/questions/31338927/how-to-create-securetls-ssl-websocket-server
 
-const MTS = new MTSLib.Main();
-
 // console.log(expressWs.getWss());
 // console.log(expressWs.getWss().clients);
 
+const MTS = new MTSLib.Main({ isMaster: true });
+
 //TODO There is presently no cleanup for disconnected clients
 app.ws("/", function (ws, req) {
-    let wsm = new MTSLib.Network.WebSocketManager(ws, { isMaster: true });
-    
-    MTS.register(wsm);
-    // MTS.Router.addRoute(wsm, MTSLib.Network.WebSocketManager.AllMessageTypes()); //? .register(WebSocketManager) auto-hooks the routes
+    MTS.Network.WebSocket.create({ ws });
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));

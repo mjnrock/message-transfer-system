@@ -1,9 +1,9 @@
 import Packet from "./Packet";
 import WebSocketManager from "./WebSocketManager";
-import ConnectionManager from "./ConnectionManager";
+import ConnectionBroker from "./ConnectionBroker";
 
 export default {
     Packet,
     WebSocketManager,
-    ConnectionManager
+    ConnectionBroker
 }

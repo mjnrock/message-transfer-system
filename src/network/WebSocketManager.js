@@ -43,9 +43,12 @@ export default class WebSocketManager extends Manager {
         return this.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
     }
 
-    create({ ws = null, uri = "localhost:3000", protocol = "ws" } = {}) {
+    create({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = false } = {}) {
         if(ws) {
             this._ws = ws;
+        }
+        if(isMaster) {
+            this.isMaster = true;
         }
         
         if(!this._ws) {

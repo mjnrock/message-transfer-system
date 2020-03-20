@@ -3,12 +3,12 @@ import Message from "./Message";
 import { GenerateUUID } from "./helper";
 
 export default class Main {
-    constructor(managers = []) {
+    constructor({ isMaster = false, managers = [] } = {}) {
         this._manager = new MTS.Manager(GenerateUUID());
 
         this.Registry = new MTS.Registry(this);
         this.Router = new MTS.Router(this);
-        this.Network = new MTS.Network.ConnectionManager(this);
+        this.Network = new MTS.Network.ConnectionBroker(this, { isMaster });
 
         this.Registry.register(this._manager, ...managers);
     }

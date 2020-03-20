@@ -1,7 +1,7 @@
 import WebSocketManager from "./WebSocketManager";
 import Message from "../Message";
 
-export default class ConnectionManager {
+export default class ConnectionBroker {
     constructor(parent, { ws = null, isMaster = false } = {}) {
         this._parent = parent;
 
