@@ -26,10 +26,14 @@ export default class Message {
         );
     }
 
-    static conforms(obj) {
-        return ("type" in obj)
-            && ("payload" in obj)
-            && ("source" in obj)
-            && ("timestamp" in obj);
+    static conforms(message) {
+        if(typeof obj === "object") {
+            return ("type" in obj)
+                && ("payload" in obj)
+                && ("source" in obj)
+                && ("timestamp" in obj);
+        }
+
+        return false;
     }
 };

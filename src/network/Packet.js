@@ -27,8 +27,14 @@ export default class Packet extends Message {
     }
 
     static extractMessage(packet) {
-        if(Packet.conforms(packet)) {
-            let payload = packet.payload;
+        let obj = packet;
+
+        while(typeof obj === "string" || obj instanceof String) {
+            obj = JSON.parse(obj);
+        }
+
+        if(Packet.conforms(obj)) {
+            let payload = obj.payload;
 
             if(Message.conforms(payload)) {
                 return payload;
@@ -39,10 +45,14 @@ export default class Packet extends Message {
     }
 
     static conforms(obj) {
-        return ("type" in obj)
-            && ("payload" in obj)
-            && ("source" in obj)
-            && ("destination" in obj)
-            && ("timestamp" in obj);
+        if(typeof obj === "object") {
+            return ("type" in obj)
+                && ("payload" in obj)
+                && ("source" in obj)
+                && ("destination" in obj)
+                && ("timestamp" in obj);
+        }
+
+        return false;
     }
 };

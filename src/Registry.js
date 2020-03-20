@@ -24,7 +24,7 @@ export default class Registry {
 
                 //? Special routing instructions for convenience
                 if(manager instanceof WebSocketManager) {
-                    manager._parent.Router.addRoute(manager, WebSocketManager.AllMessageTypes());
+                    manager._parent.Router.addRoute(manager, WebSocketManager.AllSignalTypes());
                 }
             }
         }
@@ -39,7 +39,7 @@ export default class Registry {
 
                 //? Special routing instructions for convenience
                 if(manager instanceof WebSocketManager) {
-                    manager._parent.Router.removeRoute(manager, WebSocketManager.AllMessageTypes());
+                    manager._parent.Router.removeRoute(manager, WebSocketManager.AllSignalTypes());
                 }
             }
         }
