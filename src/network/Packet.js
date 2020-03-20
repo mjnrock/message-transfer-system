@@ -1,15 +1,15 @@
-import Message from "./Message";
+import Message from "./../Message";
 
 export default class Packet extends Message {
-    constructor(type, payload, source, destination) {
+    constructor(payload, source, destination, { type = 0 } = {}) {
         super(type, payload, source);
         
         this.destination = destination;
 
-        return Object.freeze(this);
+        return this;
     }
 
-    static fromJSON(json) {
+    static fromJson(json) {
         let obj = json;
 
         while(typeof obj === "string" || obj instanceof String) {
@@ -17,10 +17,12 @@ export default class Packet extends Message {
         }
         
         return new Packet(
-            obj.type,
             obj.payload,
             obj.source,
-            obj.destination
+            obj.destination,
+            {
+                type: obj.type
+            }
         );
     }
 

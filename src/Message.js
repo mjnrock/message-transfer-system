@@ -5,15 +5,14 @@ export default class Message {
         this.source = source;
         this.timestamp = Date.now();
 
-        return Object.freeze(this);
+        return this;
     }
 
-    //! If this causes a circular issue, rename it to "toJson" | I don't know if the custom toJSON will cause circularity in JSON.stringify(), if used in this way
-    toJSON() {
+    toJson() {
         return JSON.stringify(this);
     }
 
-    static fromJSON(json) {
+    static fromJson(json) {
         let obj = json;
 
         while(typeof obj === "string" || obj instanceof String) {

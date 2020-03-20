@@ -7,7 +7,8 @@
         "test": "tests"
     },
     "scripts": {
-        "start": "node esm-index.js"
+        "start": "node esm-index.js",
+        "server": "node esm-server.js"
     },
     "repository": {
         "type": "git",

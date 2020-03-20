@@ -1,8 +1,10 @@
-import MTS from "./../src/package";
+import MTSLib from "./../src/package";
 
-let ws = new MTS.WebSocketManager();
+const MTS = new MTSLib.Main();
 
-ws.send = ws.receive;   //! Debugging simplification
-ws.subscribe(console.log);
+let ws = new MTSLib.Network.WebSocketManager();
+MTS.register(ws);
+MTS.Router.addRoute(ws, [ MTSLib.Network.WebSocketManager.MessageTypes.CLIENT_ID ]);
 
-ws.connect({ uri: `localhost:3000` });
+// ws.subscribe(console.log);
+ws.start({ uri: `localhost:3000` });
