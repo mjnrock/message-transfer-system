@@ -22,20 +22,14 @@ export default class KeyboardManager extends Manager {
 
         this.Window = window;
 
-        this.Handlers = {
-            onKeyMask: mask,
-            onKeyDown: down,
-            onKeyUp: up
-        };
-
-        this.Keys = {
+        this.state = {
             Map: keymap,
-            Flags: keyflags
+            Flags: keyflags,
+            Mask: 0
         };
-        this.Mask = 0;
 
-        if(!this.Keys.Map && !this.Keys.Flags) {
-            //  Default: WASD/Arrows and Modifier keys
+        //*  Default: WASD/Arrows and Modifier keys
+        if(!this.state.Map && !this.state.Flags) {
             this.registerKeys([
                 [ "UP", [ 87, 38 ], 2 << 0 ],
                 [ "DOWN", [ 83, 40 ], 2 << 1 ],
@@ -50,12 +44,12 @@ export default class KeyboardManager extends Manager {
     }
 
     updateMask(e) {
-        Object.keys(this.Keys.Map).forEach(keyCode => {
-            if(this.Keys.Map[ keyCode ].includes(e.which)) {
+        Object.keys(this.state.Map).forEach(keyCode => {
+            if(this.state.Map[ keyCode ].includes(e.which)) {
                 if(e.type === "keyup") {
-                    this.Mask = Bitwise.remove(this.Mask, this.Keys.Flags[ keyCode ]);
+                    this.state.Mask = Bitwise.remove(this.state.Mask, this.state.Flags[ keyCode ]);
                 } else if(e.type === "keydown") {
-                    this.Mask = Bitwise.add(this.Mask, this.Keys.Flags[ keyCode ]);
+                    this.state.Mask = Bitwise.add(this.state.Mask, this.state.Flags[ keyCode ]);
                 }
             }
         });
@@ -104,10 +98,10 @@ export default class KeyboardManager extends Manager {
      * @param {number} flag 
      */
     registerKey(name, keyCodes, flag) {
-        this.Keys.Map[ name ] = Array.isArray(keyCodes) ? keyCodes : [ keyCodes ];
-        this.Keys.Flags[ name ] = flag;
+        this.state.Map[ name ] = Array.isArray(keyCodes) ? keyCodes : [ keyCodes ];
+        this.state.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.Mask, this.Keys.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
 
         return this;
     }
@@ -127,8 +121,8 @@ export default class KeyboardManager extends Manager {
      * @param {string} name 
      */
     unregisterKey(name) {
-        delete this.Keys.Map[ name ];
-        delete this.Keys.Flags[ name ];
+        delete this.state.Map[ name ];
+        delete this.state.Flags[ name ];
 
         delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ];
 

@@ -37,7 +37,7 @@ export default class Manager {
             });
         }
         
-        this._state = state;
+        this._state = value;
     }
 
     get signet() {

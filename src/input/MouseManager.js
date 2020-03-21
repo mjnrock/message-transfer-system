@@ -29,14 +29,14 @@ export default class MouseManager extends Manager {
 
         this.Window = window;
 
-        this.Buttons = {
+        this.state = {
             Map: btnmap,
-            Flags: btnflags
+            Flags: btnflags,
+            Mask: 0
         };
-        this.Mask = 0;
 
-        if(!this.Buttons.Map && !this.Buttons.Flags) {
-            //  Default: Left/Right/Middle
+        //*  Default: Left/Right/Middle
+        if(!this.state.Map && !this.state.Flags) {
             this.registerButtons([
                 [ "LEFT", [ 0 ], 2 << 0 ],
                 [ "MIDDLE", [ 1 ], 2 << 1 ],
@@ -46,19 +46,19 @@ export default class MouseManager extends Manager {
     }
 
     updateMask(e) {
-        Object.keys(this.Buttons.Map).forEach(btnCode => {
-            if(this.Buttons.Map[ btnCode ].includes(e.button)) {
+        Object.keys(this.state.Map).forEach(btnCode => {
+            if(this.state.Map[ btnCode ].includes(e.button)) {
                 if(e.type === "mouseup") {
-                    this.Mask = Bitwise.remove(this.Mask, this.Buttons.Flags[ btnCode ]);
+                    this.state.Mask = Bitwise.remove(this.state.Mask, this.state.Flags[ btnCode ]);
                 } else if(e.type === "mousedown") {
-                    this.Mask = Bitwise.add(this.Mask, this.Buttons.Flags[ btnCode ]);
+                    this.state.Mask = Bitwise.add(this.state.Mask, this.state.Flags[ btnCode ]);
                 }
             }
         });
 
         this.message(new Message(
             MouseManager.SignalTypes.MOUSE_MASK,
-            this.Mask,
+            this.state.Mask,
             this.signet
         ));
 
@@ -152,10 +152,10 @@ export default class MouseManager extends Manager {
      * @param {number} flag 
      */
     registerButton(name, btnCodes, flag) {
-        this.Buttons.Map[ name ] = Array.isArray(btnCodes) ? btnCodes : [ btnCodes ];
-        this.Buttons.Flags[ name ] = flag;
+        this.state.Map[ name ] = Array.isArray(btnCodes) ? btnCodes : [ btnCodes ];
+        this.state.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.Mask, this.Buttons.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
 
         return this;
     }
@@ -175,8 +175,8 @@ export default class MouseManager extends Manager {
      * @param {string} name 
      */
     unregisterButton(name) {
-        delete this.Buttons.Map[ name ];
-        delete this.Buttons.Flags[ name ];
+        delete this.state.Map[ name ];
+        delete this.state.Flags[ name ];
 
         delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ];
 

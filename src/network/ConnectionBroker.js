@@ -4,16 +4,18 @@ import Message from "../Message";
 export default class ConnectionBroker {
     constructor(parent, { isMaster = false } = {}) {
         this._parent = parent;
-        this.isMaster = isMaster;
 
-        this.WebSocket = {};
+        this.state = {
+            isMaster: isMaster,
+            WebSocket: {}
+        };
     }
 
     getWebSocket(indexOrUuid = 0) {
         if(typeof indexOrUuid === "number") {
-            return Object.values(this.WebSocket)[ indexOrUuid ];
+            return Object.values(this.state.WebSocket)[ indexOrUuid ];
         } else {
-            return this.WebSocket[ indexOrUuid ];
+            return this.state.WebSocket[ indexOrUuid ];
         }
     }
 
@@ -21,16 +23,16 @@ export default class ConnectionBroker {
         let websocket = new WebSocketManager();
 
         if(ws) {
-            websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.isMaster });
+            websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.state.isMaster });
         } else {            
-            websocket.create({ uri, protocol, isMaster: isMaster !== null ? isMaster : this.isMaster });
+            websocket.create({ uri, protocol, isMaster: isMaster !== null ? isMaster : this.state.isMaster });
         }
 
         this._parent.register(websocket);
-        this.WebSocket[ websocket.id ] = websocket;
+        this.state.WebSocket[ websocket.id ] = websocket;
 
         // //!DEBUGGING
-        // console.log(Object.keys(this.WebSocket));
+        // console.log(Object.keys(this.state.WebSocket));
     }
 
     route(msg) {
@@ -39,13 +41,13 @@ export default class ConnectionBroker {
             delete msg._elevate;
 
             if(destination === -1) {    // All
-                for(let websocket of Object.values(this.WebSocket)) {
+                for(let websocket of Object.values(this.state.WebSocket)) {
                     if(websocket.isReady()) {
                         websocket.wsmessage(msg);
                     }
                 }
-            } else if(this.WebSocket[ destination ] && this.WebSocket[ destination ].isReady()) {    // Targeted
-                this.WebSocket[ destination ].wsmessage(msg);
+            } else if(this.state.WebSocket[ destination ] && this.state.WebSocket[ destination ].isReady()) {    // Targeted
+                this.state.WebSocket[ destination ].wsmessage(msg);
             }
         }
     }

@@ -27,8 +27,10 @@ export default class WebSocketManager extends Manager {
             packager: packager
         });
 
-        this._ws = ws;
-        this.isMaster = isMaster;
+        this.state = {
+            isMaster: isMaster,
+            WebSocket: ws,
+        };
         
         if(ws) {
             this.create();
@@ -36,31 +38,31 @@ export default class WebSocketManager extends Manager {
     }
 
     isReady() {
-        return this._ws && this._ws.readyState === 1;
+        return this.state.WebSocket && this.state.WebSocket.readyState === 1;
     }
 
     get signet() {
-        return this.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
+        return this.state.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
     }
 
     create({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = false } = {}) {
         if(ws) {
-            this._ws = ws;
+            this.state.WebSocket = ws;
         }
         if(isMaster) {
-            this.isMaster = true;
+            this.state.isMaster = true;
         }
         
-        if(!this._ws) {
-            this._ws = new WebSocket(`${ protocol }://${ uri }`);
+        if(!this.state.WebSocket) {
+            this.state.WebSocket = new WebSocket(`${ protocol }://${ uri }`);
         }
 
-        this._ws.onopen = this._onWsOpen.bind(this);
-        this._ws.onclose = this._onWsClose.bind(this);
-        this._ws.onerror = this._onWsError.bind(this);
-        this._ws.onmessage = this._onWsMessage.bind(this);
+        this.state.WebSocket.onopen = this._onWsOpen.bind(this);
+        this.state.WebSocket.onclose = this._onWsClose.bind(this);
+        this.state.WebSocket.onerror = this._onWsError.bind(this);
+        this.state.WebSocket.onmessage = this._onWsMessage.bind(this);
 
-        if(this.isMaster) {
+        if(this.state.isMaster) {
             //* Send the initialization message to the client containing the client's assigned ID (it is the same as @this.id)
             this.wsmessage(new Message(
                 WebSocketManager.SignalTypes.CLIENT_ID,
@@ -70,15 +72,15 @@ export default class WebSocketManager extends Manager {
         }
 
         //!DEBUGGING
-        if(this._ws) {
-            console.log(`[${ this.signet }] running as [${ this.isMaster ? "Master" : "Slave" }]`);
+        if(this.state.WebSocket) {
+            console.log(`[${ this.signet }] running as [${ this.state.isMaster ? "Master" : "Slave" }]`);
         }
 
         return this;
     }
     destroy() {
-        if(this._ws) {
-            this._ws.close();
+        if(this.state.WebSocket) {
+            this.state.WebSocket.close();
 
             this.send(WebSocketManager.SignalTypes.CLOSE, this.id);
         }
@@ -103,11 +105,11 @@ export default class WebSocketManager extends Manager {
     wsmessage(msg) {
         let packet = new Packet(msg, this.signet, this.id);
 
-        this._ws.send(packet.toJson());
+        this.state.WebSocket.send(packet.toJson());
     }
     wspacket(packet) {
         if(Packet.conforms(packet)) {
-            this._ws.send(packet.toJson());
+            this.state.WebSocket.send(packet.toJson());
         }
     }
 
@@ -131,7 +133,7 @@ export default class WebSocketManager extends Manager {
                 //!DEBUGGING
                 console.log(`|${ this.id }|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
 
-                if(msg.type === WebSocketManager.SignalTypes.CLIENT_ID && !this.isMaster) {
+                if(msg.type === WebSocketManager.SignalTypes.CLIENT_ID && !this.state.isMaster) {
                     //!DEBUGGING
                     let oldId = this.id;
                     console.log(`[${ oldId }] reassigned to [${ msg.payload }]`);

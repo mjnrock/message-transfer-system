@@ -1,15 +1,16 @@
 import MTS from "./package";
-import Message from "./Message";
+import Manager from "./Manager";
 import { GenerateUUID } from "./helper";
 
-export default class Main {
+export default class Main extends Manager {
     constructor({ managers = [] } = {}) {
-        this._manager = new MTS.Manager(GenerateUUID());
+        super(GenerateUUID());
+        this._parent = this;
 
         this.Registry = new MTS.Registry(this);
         this.Router = new MTS.Router(this);
 
-        this.Registry.register(this._manager, ...managers);
+        this.Registry.register(this, ...managers);
     }
 
 
@@ -49,18 +50,6 @@ export default class Main {
     }
 
     
-
-    //? Generic messaging system
-    get signet() {
-        return this._manager.signet;
-    }
-    get send() {
-        return this._manager.send.bind(this._manager);
-    }
-    get message() {
-        return this._manager.message.bind(this._manager);
-    }
-
     //? Elevated registry functions
     get get() {
         return this.Registry.get.bind(this.Registry);
