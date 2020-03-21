@@ -13,6 +13,22 @@ export default class Main {
         this.Registry.register(this._manager, ...managers);
     }
 
+    /**
+     * On-demand module in scopes where <Window> exists
+     * @param {<Window>} window 
+     */
+    loadInput(window) {
+        let keys = new MTS.Input.KeyboardManager(window);
+        let mouse = new MTS.Input.MouseManager(window);
+
+        this.Input = {
+            Key: keys,
+            Mouse: mouse
+        };
+
+        return this;
+    }
+
     //? Generic messaging system
     get signet() {
         return this._manager.signet;
