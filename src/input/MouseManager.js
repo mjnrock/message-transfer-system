@@ -1,6 +1,6 @@
-import { Bitwise, GenerateUUID } from "../helper";
-import Manager from "../Manager";
-import Message from "../Message";
+import { Bitwise, GenerateUUID } from "./../helper";
+import Manager from "./../Manager";
+import Message from "./../Message";
 
 export default class MouseManager extends Manager {
     static SignalTypes = {

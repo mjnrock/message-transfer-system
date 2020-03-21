@@ -1,10 +1,10 @@
 import Event from "./Event";
-import Message from "../Message";
+import Message from "./../Message";
 import Packet from "./Packet";
-import MessageBus from "../MessageBus";
+import MessageBus from "./../MessageBus";
 import PacketBus from "./PacketBus";
-import Module from "../Module";
-import ModuleRegistry from "../ModuleRegistry";
+import Module from "./../Module";
+import ModuleRegistry from "./../ModuleRegistry";
 
 export function create(next) {
     let MTS = new Module("MTS", next);

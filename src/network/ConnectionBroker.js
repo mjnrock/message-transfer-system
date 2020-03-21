@@ -1,5 +1,5 @@
 import WebSocketManager from "./WebSocketManager";
-import Message from "../Message";
+import Message from "./../Message";
 
 export default class ConnectionBroker {
     constructor(parent, { isMaster = false } = {}) {

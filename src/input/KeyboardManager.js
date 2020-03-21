@@ -1,6 +1,6 @@
 import { Bitwise, GenerateUUID } from "./../helper";
 import Manager from "./../Manager";
-import Message from "../Message";
+import Message from "./../Message";
 
 //* @keymap and @keyflags should ALWAYS contain the same KEYS
 export default class KeyboardManager extends Manager {
