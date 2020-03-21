@@ -8,8 +8,8 @@ export default class Message {
         return this;
     }
 
-    elevate() {
-        this._elevate = true;
+    elevate(destination = -1) {
+        this._elevate = destination;
 
         return this;
     }

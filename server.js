@@ -18,7 +18,7 @@ const MTS = new MTSLib.Main({ isMaster: true });
 
 //TODO There is presently no cleanup for disconnected clients
 app.ws("/", function (ws, req) {
-    MTS.Network.WebSocket.create({ ws });
+    MTS.Network.createWebSocket({ ws });
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));

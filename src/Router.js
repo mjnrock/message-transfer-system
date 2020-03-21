@@ -61,7 +61,7 @@ export default class Router {
     //TODO Allow for "domain level" types (e.g. 'WebSocketManager.*') and create unique @managers list to avoid duplicate .receive(...)
     route(msg) {
         if(Message.conforms(msg)) {
-            if(msg._elevate === true) {
+            if(msg._elevate) {
                 this._parent.Network.route(msg);
             } else {
                 let managers = this.get(msg.type, true).map(name => this._parent.Registry.get(name));
