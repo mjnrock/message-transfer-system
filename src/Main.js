@@ -12,9 +12,10 @@ export default class Main {
         this.Registry.register(this._manager, ...managers);
     }
 
+
     /**
      * On-demand module for network communication
-     * @param {<Window>} window 
+     * @param {boolean} isMaster 
      */
     loadNetwork(isMaster = false) {
         this.Network = new MTS.Network.ConnectionBroker(this, { isMaster });
@@ -46,6 +47,8 @@ export default class Main {
 
         return this;
     }
+
+    
 
     //? Generic messaging system
     get signet() {
