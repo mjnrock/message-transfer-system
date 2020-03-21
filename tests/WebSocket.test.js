@@ -1,7 +1,7 @@
 import MTSLib from "./../src/package";
 
 //  Artificial Client #1
-const MTS = new MTSLib.Main();
+const MTS = (new MTSLib.Main()).loadNetwork(false);
 MTS.Network.createWebSocket({ uri: `localhost:3000` });
 
 
@@ -13,7 +13,7 @@ setTimeout(() => {
 
 
 //  Artificial Client #2
-const MTS2 = new MTSLib.Main();
+const MTS2 = (new MTSLib.Main()).loadNetwork(false);
 MTS2.Network.createWebSocket({ uri: `localhost:3000` });
 
 setTimeout(() => {
