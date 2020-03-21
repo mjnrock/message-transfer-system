@@ -129,7 +129,7 @@ export default class WebSocketManager extends Manager {
 
             if(msg !== false) {
                 //!DEBUGGING
-                console.log(`|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
+                console.log(`|${ this.id }|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
 
                 if(msg.type === WebSocketManager.SignalTypes.CLIENT_ID && !this.isMaster) {
                     //!DEBUGGING

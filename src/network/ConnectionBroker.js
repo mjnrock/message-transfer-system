@@ -5,7 +5,7 @@ export default class ConnectionBroker {
     constructor(parent, { isMaster = false } = {}) {
         this._parent = parent;
         this.isMaster = isMaster;
-        
+
         this.WebSocket = {};
 
         this._parent.register(this.WebSocket);
@@ -45,7 +45,7 @@ export default class ConnectionBroker {
                         websocket.wsmessage(msg);
                     }
                 }
-            } else if(this.WebSocket[ destination ].isReady()) {    // Targeted
+            } else if(this.WebSocket[ destination ] && this.WebSocket[ destination ].isReady()) {    // Targeted
                 this.WebSocket[ destination ].wsmessage(msg);
             }
         }
