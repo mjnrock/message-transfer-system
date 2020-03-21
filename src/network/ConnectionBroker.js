@@ -31,7 +31,8 @@ export default class ConnectionBroker {
         this._parent.register(websocket);
         this.WebSocket[ websocket.id ] = websocket;
 
-        console.log(Object.keys(this.WebSocket));
+        // //!DEBUGGING
+        // console.log(Object.keys(this.WebSocket));
     }
 
     route(msg) {

@@ -21,17 +21,18 @@ app.ws("/", function (ws, req) {
     MTS.Network.createWebSocket({ ws });
 });
 
-setTimeout(() => {
-    let id1 = MTS.Network.getWebSocket(0).id;
-    let id2 = MTS.Network.getWebSocket(1).id;
+// //!DEBUGGING
+// setTimeout(() => {
+//     let id1 = MTS.Network.getWebSocket(0).id;
+//     let id2 = MTS.Network.getWebSocket(1).id;
 
-    console.log(id1);
-    console.log(id2);
+//     console.log(id1);
+//     console.log(id2);
     
-    let msg = (new MTSLib.Message("ReplyAAAA", "Oi!", MTS.signet)).elevate(id1);
-    MTS.message(msg);
-    // let msg2 = (new MTSLib.Message("ReplyBBBB", "Oi!", MTS.signet)).elevate(id2);
-    // MTS.message(msg2);
-}, 3000);
+//     let msg = (new MTSLib.Message("ReplyAAAA", "Oi!", MTS.signet)).elevate(id1);
+//     MTS.message(msg);
+//     // let msg2 = (new MTSLib.Message("ReplyBBBB", "Oi!", MTS.signet)).elevate(id2);
+//     // MTS.message(msg2);
+// }, 5000);
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));
