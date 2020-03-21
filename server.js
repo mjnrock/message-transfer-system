@@ -14,7 +14,7 @@ app.set("trust proxy", true);
 // console.log(expressWs.getWss());
 // console.log(expressWs.getWss().clients);
 
-const MTS = new MTSLib.Main({ isMaster: true });
+const MTS = (new MTSLib.Main()).loadNetwork(true);
 
 //TODO There is presently no cleanup for disconnected clients
 app.ws("/", function (ws, req) {

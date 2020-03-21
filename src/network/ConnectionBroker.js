@@ -7,8 +7,6 @@ export default class ConnectionBroker {
         this.isMaster = isMaster;
 
         this.WebSocket = {};
-
-        this._parent.register(this.WebSocket);
     }
 
     getWebSocket(indexOrUuid = 0) {
