@@ -12,6 +12,10 @@ export default class MouseManager extends Manager {
         MOUSE_UP: "MouseManager.MouseUp",
         MOUSE_DOWN: "MouseManager.MouseDown",
     };
+    //* The primary use of this function is for <Router>
+    static AllSignalTypes() {
+        return Object.values(MouseManager.SignalTypes);
+    }
 
     constructor(window, { btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
         super(GenerateUUID(), {

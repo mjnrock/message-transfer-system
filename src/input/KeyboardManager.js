@@ -9,6 +9,10 @@ export default class KeyboardManager extends Manager {
         KEY_UP: "KeyboardManager.KeyUp",
         KEY_DOWN: "KeyboardManager.KeyDown",
     };
+    //* The primary use of this function is for <Router>
+    static AllSignalTypes() {
+        return Object.values(KeyboardManager.SignalTypes);
+    }
 
     constructor(window, { keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
         super(GenerateUUID(), {

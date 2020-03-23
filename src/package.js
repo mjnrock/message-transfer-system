@@ -1,5 +1,6 @@
 import Message from "./Message";
 import Manager from "./Manager";
+import Repeater from "./Repeater";
 import Registry from "./Registry";
 import Router from "./Router";
 
@@ -11,6 +12,7 @@ import Network from "./network/package";
 export default {
     Message,
     Manager,
+    Repeater,
     Registry,
     Router,
 

@@ -1,5 +1,7 @@
 import Manager from "./Manager";
 import WebSocketManager from "./network/WebSocketManager";
+import KeyboardManager from "./input/KeyboardManager";
+import MouseManager from "./input/MouseManager";
 
 export default class Registry {
     constructor(parent) {
@@ -25,6 +27,10 @@ export default class Registry {
                 //? Special routing instructions for convenience
                 if(manager instanceof WebSocketManager) {
                     manager._parent.Router.addRoute(manager, WebSocketManager.AllSignalTypes());
+                } else if(manager instanceof KeyboardManager) {
+                    manager._parent.Router.addRoute(manager, KeyboardManager.AllSignalTypes());
+                } else if(manager instanceof MouseManager) {
+                    manager._parent.Router.addRoute(manager, MouseManager.AllSignalTypes());
                 }
             }
         }
@@ -40,6 +46,10 @@ export default class Registry {
                 //? Special routing instructions for convenience
                 if(manager instanceof WebSocketManager) {
                     manager._parent.Router.removeRoute(manager, WebSocketManager.AllSignalTypes());
+                } else if(manager instanceof KeyboardManager) {
+                    manager._parent.Router.removeRoute(manager, KeyboardManager.AllSignalTypes());
+                } else if(manager instanceof MouseManager) {
+                    manager._parent.Router.removeRoute(manager, MouseManager.AllSignalTypes());
                 }
             }
         }

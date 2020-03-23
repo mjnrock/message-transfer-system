@@ -1,10 +1,9 @@
 import MTS from "./package";
-import Manager from "./Manager";
-import { GenerateUUID } from "./helper";
+import Repeater from "./Repeater";
 
-export default class Main extends Manager {
+export default class Main extends Repeater {
     constructor({ managers = [] } = {}) {
-        super(GenerateUUID());
+        super();
         this._parent = this;
 
         this.Registry = new MTS.Registry(this);
