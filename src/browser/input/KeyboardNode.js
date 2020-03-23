@@ -8,7 +8,7 @@ export default class KeyboardNode extends Node {
         KEY_UP: "KeyboardNode.KeyUp",
         KEY_DOWN: "KeyboardNode.KeyDown",
     };
-    
+    //* The primary use of this function is for <Router>
     static AllSignalTypes(...filter) {
         return Object.values(KeyboardNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
@@ -36,7 +36,7 @@ export default class KeyboardNode extends Node {
         };
 
         //*  Default: WASD/Arrows and Modifier keys
-        if(!this.state.Map && !this.state.Flags) {
+        if(Object.keys(this.state.Map).length === 0 && Object.keys(this.state.Flags).length === 0) {
             this.registerKeys([
                 [ "UP", [ 87, 38 ], 2 << 0 ],
                 [ "DOWN", [ 83, 40 ], 2 << 1 ],
@@ -80,7 +80,10 @@ export default class KeyboardNode extends Node {
         this.updateMask(e);        
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_DOWN,
-            e.which,
+            {
+                mask: this.state.Mask,
+                key: e.which,
+            },
             this.signet
         ));
     
@@ -93,7 +96,10 @@ export default class KeyboardNode extends Node {
         this.updateMask(e);
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_UP,
-            e.which,
+            {
+                mask: this.state.Mask,
+                key: e.which,
+            },
             this.signet
         ));
     

@@ -12,7 +12,7 @@ export default class MouseNode extends Node {
         MOUSE_UP: "MouseNode.MouseUp",
         MOUSE_DOWN: "MouseNode.MouseDown",
     };
-    
+    //* The primary use of this function is for <Router>
     static AllSignalTypes(...filter) {
         return Object.values(MouseNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
@@ -44,7 +44,7 @@ export default class MouseNode extends Node {
         };
 
         //*  Default: Left/Right/Middle
-        if(!this.state.Map && !this.state.Flags) {
+        if(Object.keys(this.state.Map).length === 0 && Object.keys(this.state.Flags).length === 0) {
             this.registerButtons([
                 [ "LEFT", [ 0 ], 2 << 0 ],
                 [ "MIDDLE", [ 1 ], 2 << 1 ],
@@ -90,7 +90,10 @@ export default class MouseNode extends Node {
         this.updateMask(e);
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_MOVE,
-            this.getMousePosition(e),
+            {
+                mask: this.state.Mask,
+                ...this.getMousePosition(e)
+            },
             this.signet
         ));
     
@@ -104,6 +107,7 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_DOWN,
             {
                 button: e.button,
+                mask: this.state.Mask,
                 ...this.getMousePosition(e)
             },
             this.signet
@@ -119,6 +123,7 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_UP,
             {
                 button: e.button,
+                mask: this.state.Mask,
                 ...this.getMousePosition(e)
             },
             this.signet
@@ -134,6 +139,7 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_CLICK,
             {
                 button: e.button,
+                mask: this.state.Mask,
                 ...this.getMousePosition(e)
             },
             this.signet
