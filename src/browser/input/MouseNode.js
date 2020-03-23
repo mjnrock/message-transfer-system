@@ -17,8 +17,8 @@ export default class MouseNode extends Node {
         return Object.values(MouseNode.SignalTypes);
     }
 
-    constructor({ btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
-        super(GenerateUUID(), {
+    constructor({ name = null, btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
+        super(name || GenerateUUID(), {
             receive: receive,
             parent: parent,
             packager: packager

@@ -14,8 +14,8 @@ export default class KeyboardNode extends Node {
         return Object.values(KeyboardNode.SignalTypes);
     }
 
-    constructor({ keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
-        super(GenerateUUID(), {
+    constructor({ name = null, keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
+        super(name || GenerateUUID(), {
             receive: receive,
             parent: parent,
             packager: packager

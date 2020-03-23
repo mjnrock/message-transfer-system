@@ -18,8 +18,8 @@ export default class WebSocketNode extends Node {
         return Object.values(WebSocketNode.SignalTypes);
     }
 
-    constructor({ ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
-        super(GenerateUUID(), {
+    constructor({ name = null, ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
+        super(name || GenerateUUID(), {
             receive: receive,
             parent: parent,
             packager: packager

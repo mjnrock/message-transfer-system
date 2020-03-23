@@ -11,8 +11,8 @@ export default class GeoLocationNode extends Node {
         return Object.values(GeoLocationNode.SignalTypes);
     }
 
-    constructor({ parent = null, packager = null } = {}) {
-        super(GenerateUUID(), {
+    constructor({ name = null, parent = null, packager = null } = {}) {
+        super(name || GenerateUUID(), {
             parent: parent,
             packager: packager
         });
