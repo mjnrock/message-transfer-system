@@ -65,7 +65,7 @@ export default class Repeater extends Node {
     addMessage(type, payload, interval) {
         let id = setInterval(() => {
             if(Bitwise.has(this.state.BroadcastType, Repeater.BroadcastType.MESSAGE)) {
-                this.send(type, payload);
+                this.send(type, payload, { defaultConfig: false });
             }
             if(Bitwise.has(this.state.BroadcastType, Repeater.BroadcastType.SUBSCRIPTION)) {
                 this.emit(type, payload);

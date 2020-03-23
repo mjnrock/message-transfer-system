@@ -14,7 +14,7 @@ export default class KeyboardNode extends Node {
         return Object.values(KeyboardNode.SignalTypes);
     }
 
-    constructor(window, { keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
+    constructor({ keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
         super(GenerateUUID(), {
             receive: receive,
             parent: parent,
@@ -23,8 +23,6 @@ export default class KeyboardNode extends Node {
         
         window.onkeydown = this.onKeyDown.bind(this);
         window.onkeyup = this.onKeyUp.bind(this);
-
-        this.Window = window;
 
         this.state = {
             Map: keymap,
@@ -44,6 +42,10 @@ export default class KeyboardNode extends Node {
                 [ "ALT", [ 18 ], 2 << 5 ],
                 [ "CTRL", [ 17 ], 2 << 6 ],
             ]);
+        }
+        
+        if(!window) {
+            throw new Error("Window is not supported");
         }
     }
 

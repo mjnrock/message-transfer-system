@@ -17,7 +17,7 @@ export default class MouseNode extends Node {
         return Object.values(MouseNode.SignalTypes);
     }
 
-    constructor(window, { btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
+    constructor({ btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
         super(GenerateUUID(), {
             receive: receive,
             parent: parent,
@@ -30,8 +30,6 @@ export default class MouseNode extends Node {
         window.onclick = this.onClick.bind(this);
         window.ondblclick = this.onDblClick.bind(this);
         window.oncontextmenu = this.onContextMenu.bind(this);
-
-        this.Window = window;
 
         this.state = {
             Map: btnmap,
@@ -46,6 +44,10 @@ export default class MouseNode extends Node {
                 [ "MIDDLE", [ 1 ], 2 << 1 ],
                 [ "RIGHT", [ 2 ], 2 << 2 ],
             ]);
+        }
+        
+        if(!window) {
+            throw new Error("Window is not supported");
         }
     }
 

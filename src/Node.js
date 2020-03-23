@@ -13,6 +13,13 @@ export default class Node {
 
         this._state = {};
         this._emitStateChange = false;
+        this._emitOnSend = false;
+    }
+
+    toggleSimulcast() {
+        this._emitOnSend = !this._emitOnSend;
+
+        return this;
     }
 
     makePublic() {
@@ -70,25 +77,34 @@ export default class Node {
         return false;
     }
 
-    send(type, payload) {
-        this._parent.Router.route(this.packager(
+    send(type, payload, { defaultConfig = true } = {}) {
+        this.message(this.packager(
             type,
             payload,
             this.signet
-        ));
+        ), { defaultConfig });
     }
-    message(msg) {
+    message(msg, { defaultConfig = true } = {}) {
         if(Message.conforms(msg)) {
             this._parent.Router.route(msg);
+
+            if(defaultConfig === true && this._emitOnSend === true) {
+                this.emit(msg);
+            }
         }
     }
 
     emit(type, payload) {
-        let msg = this.packager(
-            type,
-            payload,
-            this.signet
-        );
+        let msg;
+        if(Message.conforms(type)) {
+            msg = type;
+        } else {
+            msg = this.packager(
+                type,
+                payload,
+                this.signet
+            );
+        }
 
         for(let sub of Object.values(this._subscriptions)) {
             if(typeof sub.receive === "function") {

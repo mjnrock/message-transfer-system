@@ -26,7 +26,11 @@ export default class Main extends Repeater {
      * On-demand module in scopes where <Window> exists
      * @param {<Window>} window 
      */
-    loadBrowserInput(window, { mouse = true, keys = true } = {}) {
+    loadBrowserInput({ mouse = true, keys = true } = {}) {
+        if(!window) {
+            throw new Error("Window is not supported");
+        }
+
         if(mouse) {
             let mouse = new MTS.Browser.Input.MouseNode(window);
             

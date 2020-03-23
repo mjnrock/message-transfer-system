@@ -105,24 +105,16 @@ export default class WebSocketNode extends Node {
     wsmessage(msg) {
         let packet = new Packet(msg, this.signet, this.id);
 
-        this.state.WebSocket.send(packet.toJson());
+        this.wspacket(packet);
     }
     wspacket(packet) {
-        if(Packet.conforms(packet)) {
-            this.state.WebSocket.send(packet.toJson());
+        try {
+            if(Packet.conforms(packet)) {
+                this.state.WebSocket.send(packet.toJson());
+            }
+        } catch(e) {
+            this.send(WebSocketNode.SignalTypes.ERROR, e);
         }
-    }
-
-    /**
-     * A helper function for use within the MTS.<Router> system to flag a message to be sent through the network
-     * @param {<Message>} message
-     * @returns <Message> { type: WebSocketNode.SignalTypes.MESSAGE, payload: @message }
-     */
-    static Wrap(message) {
-        return new Message(
-            WebSocketNode.SignalTypes.MESSAGE,
-            message
-        );
     }
 
     _onWsMessage(e) {
