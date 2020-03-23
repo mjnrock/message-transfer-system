@@ -1,17 +1,17 @@
-import { Bitwise, GenerateUUID } from "./../helper";
-import Manager from "./../Manager";
-import Message from "./../Message";
+import { Bitwise, GenerateUUID } from "../helper";
+import Node from "../Node";
+import Message from "../Message";
 
 //* @keymap and @keyflags should ALWAYS contain the same KEYS
-export default class KeyboardManager extends Manager {
+export default class KeyboardNode extends Node {
     static SignalTypes = {
-        KEY_MASK: "KeyboardManager.KeyMask",
-        KEY_UP: "KeyboardManager.KeyUp",
-        KEY_DOWN: "KeyboardManager.KeyDown",
+        KEY_MASK: "KeyboardNode.KeyMask",
+        KEY_UP: "KeyboardNode.KeyUp",
+        KEY_DOWN: "KeyboardNode.KeyDown",
     };
     //* The primary use of this function is for <Router>
     static AllSignalTypes() {
-        return Object.values(KeyboardManager.SignalTypes);
+        return Object.values(KeyboardNode.SignalTypes);
     }
 
     constructor(window, { keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
@@ -59,7 +59,7 @@ export default class KeyboardManager extends Manager {
         });
         
         this.message(new Message(
-            KeyboardManager.SignalTypes.KEY_MASK,
+            KeyboardNode.SignalTypes.KEY_MASK,
             keymask,
             this.signet
         ));
@@ -72,7 +72,7 @@ export default class KeyboardManager extends Manager {
 
         this.updateMask(e);        
         this.message(new Message(
-            KeyboardManager.SignalTypes.KEY_DOWN,
+            KeyboardNode.SignalTypes.KEY_DOWN,
             e.which,
             this.signet
         ));
@@ -85,7 +85,7 @@ export default class KeyboardManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            KeyboardManager.SignalTypes.KEY_UP,
+            KeyboardNode.SignalTypes.KEY_UP,
             e.which,
             this.signet
         ));

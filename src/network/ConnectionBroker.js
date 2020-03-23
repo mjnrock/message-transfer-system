@@ -1,4 +1,4 @@
-import WebSocketManager from "./WebSocketManager";
+import WebSocketNode from "./WebSocketNode";
 import Message from "./../Message";
 
 export default class ConnectionBroker {
@@ -20,7 +20,7 @@ export default class ConnectionBroker {
     }
 
     createWebSocket({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
-        let websocket = new WebSocketManager();
+        let websocket = new WebSocketNode();
 
         if(ws) {
             websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.state.isMaster });

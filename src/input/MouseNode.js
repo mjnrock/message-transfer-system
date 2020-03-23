@@ -1,20 +1,20 @@
-import { Bitwise, GenerateUUID } from "./../helper";
-import Manager from "./../Manager";
-import Message from "./../Message";
+import { Bitwise, GenerateUUID } from "../helper";
+import Node from "../Node";
+import Message from "../Message";
 
-export default class MouseManager extends Manager {
+export default class MouseNode extends Node {
     static SignalTypes = {
-        MOUSE_MASK: "MouseManager.MouseMask",
-        MOUSE_MOVE: "MouseManager.MouseMove",
-        MOUSE_CLICK: "MouseManager.MouseClick",
-        MOUSE_DOUBLE_CLICK: "MouseManager.MouseDoubleClick",
-        MOUSE_CONTEXT_MENU: "MouseManager.MouseContextMenu",
-        MOUSE_UP: "MouseManager.MouseUp",
-        MOUSE_DOWN: "MouseManager.MouseDown",
+        MOUSE_MASK: "MouseNode.MouseMask",
+        MOUSE_MOVE: "MouseNode.MouseMove",
+        MOUSE_CLICK: "MouseNode.MouseClick",
+        MOUSE_DOUBLE_CLICK: "MouseNode.MouseDoubleClick",
+        MOUSE_CONTEXT_MENU: "MouseNode.MouseContextMenu",
+        MOUSE_UP: "MouseNode.MouseUp",
+        MOUSE_DOWN: "MouseNode.MouseDown",
     };
     //* The primary use of this function is for <Router>
     static AllSignalTypes() {
-        return Object.values(MouseManager.SignalTypes);
+        return Object.values(MouseNode.SignalTypes);
     }
 
     constructor(window, { btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
@@ -61,7 +61,7 @@ export default class MouseManager extends Manager {
         });
 
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_MASK,
+            MouseNode.SignalTypes.MOUSE_MASK,
             this.state.Mask,
             this.signet
         ));
@@ -81,7 +81,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_MOVE,
+            MouseNode.SignalTypes.MOUSE_MOVE,
             this.getMousePosition(e),
             this.signet
         ));
@@ -93,7 +93,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_DOWN,
+            MouseNode.SignalTypes.MOUSE_DOWN,
             this.getMousePosition(e),
             this.signet
         ));
@@ -105,7 +105,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_UP,
+            MouseNode.SignalTypes.MOUSE_UP,
             this.getMousePosition(e),
             this.signet
         ));
@@ -117,7 +117,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_CLICK,
+            MouseNode.SignalTypes.MOUSE_CLICK,
             this.getMousePosition(e),
             this.signet
         ));
@@ -129,7 +129,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_DOUBLE_CLICK,
+            MouseNode.SignalTypes.MOUSE_DOUBLE_CLICK,
             this.getMousePosition(e),
             this.signet
         ));
@@ -141,7 +141,7 @@ export default class MouseManager extends Manager {
 
         this.updateMask(e);
         this.message(new Message(
-            MouseManager.SignalTypes.MOUSE_CONTEXT_MENU,
+            MouseNode.SignalTypes.MOUSE_CONTEXT_MENU,
             this.getMousePosition(e),
             this.signet
         ));

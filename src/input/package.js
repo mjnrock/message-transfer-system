@@ -1,7 +1,7 @@
-import KeyboardManager from "./KeyboardManager";
-import MouseManager from "./MouseManager";
+import KeyboardNode from "./KeyboardNode";
+import MouseNode from "./MouseNode";
 
 export default {
-    KeyboardManager,
-    MouseManager
+    KeyboardNode,
+    MouseNode
 };

@@ -1,23 +1,23 @@
 import WebSocket from "ws";
 
-import { GenerateUUID } from "./../helper";
-import Manager from "./../Manager";
-import Message from "./../Message";
+import { GenerateUUID } from "../helper";
+import Node from "../Node";
+import Message from "../Message";
 import Packet from "./Packet";
 
-export default class WebSocketManager extends Manager {
+export default class WebSocketNode extends Node {
     static SignalTypes = {
-        CLIENT_ID: `WebSocketManager.ClientId`,
-        ACKNOWLEDGE: `WebSocketManager.Acknowledge`,
-        OPEN: `WebSocketManager.Open`,
-        MESSAGE: `WebSocketManager.Message`,
-        MESSAGE_ERROR: `WebSocketManager.MessageError`,
-        CLOSE: `WebSocketManager.Close`,
-        ERROR: `WebSocketManager.Error`,
+        CLIENT_ID: `WebSocketNode.ClientId`,
+        ACKNOWLEDGE: `WebSocketNode.Acknowledge`,
+        OPEN: `WebSocketNode.Open`,
+        MESSAGE: `WebSocketNode.Message`,
+        MESSAGE_ERROR: `WebSocketNode.MessageError`,
+        CLOSE: `WebSocketNode.Close`,
+        ERROR: `WebSocketNode.Error`,
     };
     //* The primary use of this function is for <Router>
     static AllSignalTypes() {
-        return Object.values(WebSocketManager.SignalTypes);
+        return Object.values(WebSocketNode.SignalTypes);
     }
 
     constructor(ws = null, { receive = null, parent = null, packager = null, isMaster = false } = {}) {
@@ -65,7 +65,7 @@ export default class WebSocketManager extends Manager {
         if(this.state.isMaster) {
             //* Send the initialization message to the client containing the client's assigned ID (it is the same as @this.id)
             this.wsmessage(new Message(
-                WebSocketManager.SignalTypes.CLIENT_ID,
+                WebSocketNode.SignalTypes.CLIENT_ID,
                 this.id,
                 this.signet
             ));
@@ -82,7 +82,7 @@ export default class WebSocketManager extends Manager {
         if(this.state.WebSocket) {
             this.state.WebSocket.close();
 
-            this.send(WebSocketManager.SignalTypes.CLOSE, this.id);
+            this.send(WebSocketNode.SignalTypes.CLOSE, this.id);
         }
     }
 
@@ -93,7 +93,7 @@ export default class WebSocketManager extends Manager {
     *   4) By .wspacket(<Packet>)
     */
     receive(msg) {
-        if(Message.conforms(msg) && msg.type === WebSocketManager.SignalTypes.MESSAGE) {
+        if(Message.conforms(msg) && msg.type === WebSocketNode.SignalTypes.MESSAGE) {
             this.wsmessage(msg.payload);
         }
     }
@@ -116,11 +116,11 @@ export default class WebSocketManager extends Manager {
     /**
      * A helper function for use within the MTS.<Router> system to flag a message to be sent through the network
      * @param {<Message>} message
-     * @returns <Message> { type: WebSocketManager.SignalTypes.MESSAGE, payload: @message }
+     * @returns <Message> { type: WebSocketNode.SignalTypes.MESSAGE, payload: @message }
      */
     static Wrap(message) {
         return new Message(
-            WebSocketManager.SignalTypes.MESSAGE,
+            WebSocketNode.SignalTypes.MESSAGE,
             message
         );
     }
@@ -133,7 +133,7 @@ export default class WebSocketManager extends Manager {
                 //!DEBUGGING
                 console.log(`|${ this.id }|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
 
-                if(msg.type === WebSocketManager.SignalTypes.CLIENT_ID && !this.state.isMaster) {
+                if(msg.type === WebSocketNode.SignalTypes.CLIENT_ID && !this.state.isMaster) {
                     //!DEBUGGING
                     let oldId = this.id;
                     console.log(`[${ oldId }] reassigned to [${ msg.payload }]`);
@@ -148,15 +148,15 @@ export default class WebSocketManager extends Manager {
         }
     }
     _onWsMessageError(e) {
-        this.send(WebSocketManager.SignalTypes.MESSAGE_ERROR, e);
+        this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
     }
     _onWsOpen(e) {    
-        this.send(WebSocketManager.SignalTypes.OPEN, e);
+        this.send(WebSocketNode.SignalTypes.OPEN, e);
     }
     _onWsClose(e) {
-        this.send(WebSocketManager.SignalTypes.CLOSE, e);
+        this.send(WebSocketNode.SignalTypes.CLOSE, e);
     }
     _onWsError(e) {
-        this.send(WebSocketManager.SignalTypes.ERROR, e);
+        this.send(WebSocketNode.SignalTypes.ERROR, e);
     }
 };

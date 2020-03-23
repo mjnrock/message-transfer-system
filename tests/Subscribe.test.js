@@ -1,14 +1,14 @@
 import MTS from "./../src/package";
 
 (function() {
-    let Mgr1 = new MTS.Manager("mgr-1", {
+    let Node1 = new MTS.Node("node-1", {
         receive: (msg) => {
             console.log("11111111111111111111");
             console.log(msg);
             console.log("11111111111111111111");
         }
     });
-    let Mgr2 = new MTS.Manager("mgr-2", {
+    let Node2 = new MTS.Node("node-2", {
         receive: (msg) => {
             console.log("22222222222222222222");
             console.log(msg);
@@ -16,12 +16,12 @@ import MTS from "./../src/package";
         }
     });
 
-    Mgr1.subscribe(Mgr2);
-    Mgr1.subscribeTo(Mgr2);
-    Mgr2.subscribe(Mgr1);   // Should do nothing, and it seems to work correctly
+    Node1.subscribe(Node2);
+    Node1.subscribeTo(Node2);
+    Node2.subscribe(Node1);   // Should do nothing, and it seems to work correctly
 
-    Mgr1.packager = (type, payload) => new MTS.Message(type, payload, "CATS");  // Custom packager works, too
+    Node1.packager = (type, payload) => new MTS.Message(type, payload, "CATS");  // Custom packager works, too
 
-    Mgr1.emit("Cats", "Kitties!");
-    Mgr2.emit("Dogs", "Purpies!");
+    Node1.emit("Cats", "Kitties!");
+    Node2.emit("Dogs", "Purpies!");
 })();

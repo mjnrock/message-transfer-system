@@ -2,14 +2,14 @@ import MTS from "./package";
 import Repeater from "./Repeater";
 
 export default class Main extends Repeater {
-    constructor({ managers = [] } = {}) {
+    constructor({ nodes = [] } = {}) {
         super();
         this._parent = this;
 
         this.Registry = new MTS.Registry(this);
         this.Router = new MTS.Router(this);
 
-        this.Registry.register(this, ...managers);
+        this.Registry.register(this, ...nodes);
     }
 
 
@@ -28,7 +28,7 @@ export default class Main extends Repeater {
      */
     loadInput(window, { mouse = true, keys = true } = {}) {
         if(mouse) {
-            let mouse = new MTS.Input.MouseManager(window);
+            let mouse = new MTS.Input.MouseNode(window);
             
             this.Input = this.Input || {};
             this.Input[ "Mouse" ] = mouse;
@@ -37,7 +37,7 @@ export default class Main extends Repeater {
         }
 
         if(keys) {
-            let keys = new MTS.Input.KeyboardManager(window);
+            let keys = new MTS.Input.KeyboardNode(window);
             
             this.Input = this.Input || {};
             this.Input[ "Keys" ] = keys;

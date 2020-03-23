@@ -1,8 +1,8 @@
 import { Bitwise, GenerateUUID } from "./helper";
-import Manager from "./Manager";
+import Node from "./Node";
 import Message from "./Message";
 
-export default class Repeater extends Manager {
+export default class Repeater extends Node {
     static SignalType = {
         TICK: "Repeater.Tick",
         RENDER: "Repeater.Render",

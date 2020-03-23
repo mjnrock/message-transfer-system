@@ -1,5 +1,5 @@
 import Message from "./Message";
-import Manager from "./Manager";
+import Node from "./Node";
 
 export default class Router {
     constructor(parent) {
@@ -23,52 +23,52 @@ export default class Router {
         return routes;
     }
 
-    addRoute(managerName, msgTypes = []) {
-        if(managerName instanceof Manager) {
-            managerName = managerName.name;
+    addRoute(nodeName, msgTypes = []) {
+        if(nodeName instanceof Node) {
+            nodeName = nodeName.name;
         }
 
-        this.removeRoute(managerName);
+        this.removeRoute(nodeName);
 
         if(msgTypes === "*" || msgTypes === true) {
-            this._routes["*"].push(managerName);
+            this._routes["*"].push(nodeName);
         } else {
             for(let type of msgTypes) {
                 if(!Array.isArray(this._routes[ type ])) {
                     this._routes[ type ] = [];
                 }
     
-                if(!this._routes[ type ].includes(managerName)) {
-                    this._routes[ type ].push(managerName);
+                if(!this._routes[ type ].includes(nodeName)) {
+                    this._routes[ type ].push(nodeName);
                 }
             }
         }
 
         return this;
     }
-    removeRoute(managerName) {
-        if(managerName instanceof Manager) {
-            managerName = managerName.name;
+    removeRoute(nodeName) {
+        if(nodeName instanceof Node) {
+            nodeName = nodeName.name;
         }
 
         Object.entries(this._routes).forEach(([ type, mods ]) => {
-            this._routes[ type ] = mods.filter(m => m !== managerName);
+            this._routes[ type ] = mods.filter(m => m !== nodeName);
         });
 
         return this;
     }
 
-    //TODO Allow for "domain level" types (e.g. 'WebSocketManager.*') and create unique @managers list to avoid duplicate .receive(...)
+    //TODO Allow for "domain level" types (e.g. 'WebSocketNode.*') and create unique @nodes list to avoid duplicate .receive(...)
     route(msg) {
         if(Message.conforms(msg)) {
             if(msg._elevate) {
                 this._parent.Network.route(msg);
             } else {
-                let managers = this.get(msg.type, true).map(name => this._parent.Registry.get(name));
+                let nodes = this.get(msg.type, true).map(name => this._parent.Registry.get(name));
 
-                for(let mgr of managers) {
-                    if(mgr instanceof Manager && mgr.signet !== msg.source) {
-                        mgr.receive(msg);
+                for(let node of nodes) {
+                    if(node instanceof Node && node.signet !== msg.source) {
+                        node.receive(msg);
                     }
                 }
             }

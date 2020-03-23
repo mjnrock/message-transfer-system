@@ -1,7 +1,7 @@
-import Manager from "./Manager";
-import WebSocketManager from "./network/WebSocketManager";
-import KeyboardManager from "./input/KeyboardManager";
-import MouseManager from "./input/MouseManager";
+import Node from "./Node";
+import WebSocketNode from "./network/WebSocketNode";
+import KeyboardNode from "./input/KeyboardNode";
+import MouseNode from "./input/MouseNode";
 
 export default class Registry {
     constructor(parent) {
@@ -18,38 +18,38 @@ export default class Registry {
         return this._entries[ name ];
     }
 
-    register(...managers) {
-        for(let manager of managers) {
-            if(manager instanceof Manager) {
-                manager._parent = this._parent;
-                this._entries[ manager.name ] = manager;
+    register(...nodes) {
+        for(let node of nodes) {
+            if(node instanceof Node) {
+                node._parent = this._parent;
+                this._entries[ node.name ] = node;
 
                 //? Special routing instructions for convenience
-                if(manager instanceof WebSocketManager) {
-                    manager._parent.Router.addRoute(manager, WebSocketManager.AllSignalTypes());
-                } else if(manager instanceof KeyboardManager) {
-                    manager._parent.Router.addRoute(manager, KeyboardManager.AllSignalTypes());
-                } else if(manager instanceof MouseManager) {
-                    manager._parent.Router.addRoute(manager, MouseManager.AllSignalTypes());
+                if(node instanceof WebSocketNode) {
+                    node._parent.Router.addRoute(node, WebSocketNode.AllSignalTypes());
+                } else if(node instanceof KeyboardNode) {
+                    node._parent.Router.addRoute(node, KeyboardNode.AllSignalTypes());
+                } else if(node instanceof MouseNode) {
+                    node._parent.Router.addRoute(node, MouseNode.AllSignalTypes());
                 }
             }
         }
 
         return this;
     }
-    unregister(...managers) {
-        for(let manager of managers) {
-            if(manager instanceof Manager) {
-                manager._parent = null;
-                delete this._entries[ manager.name ];
+    unregister(...nodes) {
+        for(let node of nodes) {
+            if(node instanceof Node) {
+                node._parent = null;
+                delete this._entries[ node.name ];
 
                 //? Special routing instructions for convenience
-                if(manager instanceof WebSocketManager) {
-                    manager._parent.Router.removeRoute(manager, WebSocketManager.AllSignalTypes());
-                } else if(manager instanceof KeyboardManager) {
-                    manager._parent.Router.removeRoute(manager, KeyboardManager.AllSignalTypes());
-                } else if(manager instanceof MouseManager) {
-                    manager._parent.Router.removeRoute(manager, MouseManager.AllSignalTypes());
+                if(node instanceof WebSocketNode) {
+                    node._parent.Router.removeRoute(node, WebSocketNode.AllSignalTypes());
+                } else if(node instanceof KeyboardNode) {
+                    node._parent.Router.removeRoute(node, KeyboardNode.AllSignalTypes());
+                } else if(node instanceof MouseNode) {
+                    node._parent.Router.removeRoute(node, MouseNode.AllSignalTypes());
                 }
             }
         }

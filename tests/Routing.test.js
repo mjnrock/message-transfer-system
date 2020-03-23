@@ -1,14 +1,14 @@
 import MTS from "./../src/package";
 
 (function() {
-    let Mgr1 = new MTS.Manager("mgr-1", {
+    let Node1 = new MTS.Node("node-1", {
         receive: (msg) => {
             console.log("11111111111111111111");
             console.log(msg);
             console.log("11111111111111111111");
         }
     });
-    let Mgr2 = new MTS.Manager("mgr-2", {
+    let Node2 = new MTS.Node("node-2", {
         receive: (msg) => {
             console.log("22222222222222222222");
             console.log(msg);
@@ -17,17 +17,17 @@ import MTS from "./../src/package";
     });
     
     let Main = new MTS.Main([
-        Mgr1,
-        Mgr2
+        Node1,
+        Node2
     ]);
 
     Main.Router
-        .addRoute(Mgr1.name, true)
-        .addRoute(Mgr2.name, [ "Dog" ]);
+        .addRoute(Node1.name, true)
+        .addRoute(Node2.name, [ "Dog" ]);
 
-    Main.get("mgr-1").send("Cat", "bootsandcatsandbootsandcats");
-    Main.get("mgr-1").send("Dog", "purpies!");
-    Main.get("mgr-2").send("Dog", "!seiprup");
+    Main.get("node-1").send("Cat", "bootsandcatsandbootsandcats");
+    Main.get("node-1").send("Dog", "purpies!");
+    Main.get("node-2").send("Dog", "!seiprup");
 
     // Main.Router
     //     .route(new MTS.Message(

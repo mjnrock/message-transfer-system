@@ -1,7 +1,7 @@
 import MTSLib from "./../src/package";
 
 const Main = new MTSLib.Main();
-const Mgr1 = new MTSLib.Manager("Receiver", {
+const Node1 = new MTSLib.Node("Receiver", {
     receive: console.log
 });
 
@@ -11,10 +11,10 @@ Main.setBroadcastType([
 ]);
 Main.setBroadcastType(MTSLib.Repeater.BroadcastType.SUBSCRIPTION);
 console.log(Main.state);
-// Mgr1.subscribeTo(Main);
+// Node1.subscribeTo(Main);
 
-// Main.Router.addRoute(Mgr1, true);
-// Main.register(Mgr1);
+// Main.Router.addRoute(Node1, true);
+// Main.register(Node1);
 
 // let id = Main.addMessage(MTSLib.Repeater.SignalType.TICK, Math.random(), 750);
 

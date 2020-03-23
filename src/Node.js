@@ -1,7 +1,7 @@
 import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
-export default class Manager {
+export default class Node {
     constructor(name, { receive = null, parent = null, packager = null } = {}) {
         this.id = GenerateUUID();
         this.name = name;
@@ -101,15 +101,15 @@ export default class Manager {
         return this;
     }
 
-    subscribe(mgrOrFn) {
+    subscribe(nodeOrFn) {
         let id,
             sub;
 
-        if(mgrOrFn instanceof Manager) {
-            sub = mgrOrFn;
-            id = mgrOrFn.id;
-        } else if(typeof mgrOrFn === "function" || typeof mgrOrFn.receive === "function") {
-            sub = mgrOrFn;
+        if(nodeOrFn instanceof Node) {
+            sub = nodeOrFn;
+            id = nodeOrFn.id;
+        } else if(typeof nodeOrFn === "function" || typeof nodeOrFn.receive === "function") {
+            sub = nodeOrFn;
             id = GenerateUUID();
         }
 
@@ -122,15 +122,15 @@ export default class Manager {
         return false;
     }
 
-    subscribeTo(mgr) {
-        if(mgr instanceof Manager) {
-            return mgr.subscribe(this);
+    subscribeTo(node) {
+        if(node instanceof Node) {
+            return node.subscribe(this);
         }
 
         return false;
     }
     
-    unsubscribe(mgrFnOrId) {
+    unsubscribe(nodeFnOrId) {
         let hashCode = str => {
             let hash = 0, i, chr;
 
@@ -147,12 +147,12 @@ export default class Manager {
             return hash;
         };
 
-        if (mgrFnOrId instanceof Manager) {
-            delete this._subscriptions[ mgrFnOrId.id ];
-        } else if (typeof mgrFnOrId === "string" || mgrFnOrId instanceof String) {
-            delete this._subscriptions[ mgrFnOrId ];
-        } else if (typeof mgrFnOrId.receive === "function" || typeof mgrFnOrId === "function") {
-            let fn = mgrFnOrId.receive || mgrFnOrId,
+        if (nodeFnOrId instanceof Node) {
+            delete this._subscriptions[ nodeFnOrId.id ];
+        } else if (typeof nodeFnOrId === "string" || nodeFnOrId instanceof String) {
+            delete this._subscriptions[ nodeFnOrId ];
+        } else if (typeof nodeFnOrId.receive === "function" || typeof nodeFnOrId === "function") {
+            let fn = nodeFnOrId.receive || nodeFnOrId,
                 hash = hashCode(fn.toString());
 
             for (let [ key, sub ] of Object.entries(this._subscriptions)) {
@@ -171,9 +171,9 @@ export default class Manager {
         return this;
     }
 
-    unsubscribeTo(mgr) {
-        if(mgr instanceof Manager) {
-            return mgr.unsubscribe(this);
+    unsubscribeTo(node) {
+        if(node instanceof Node) {
+            return node.unsubscribe(this);
         }
 
         return false;
