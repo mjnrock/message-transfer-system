@@ -26,21 +26,23 @@ export default class Main extends Repeater {
      * On-demand module in scopes where <Window> exists
      * @param {<Window>} window 
      */
-    loadInput(window, { mouse = true, keys = true } = {}) {
+    loadBrowserInput(window, { mouse = true, keys = true } = {}) {
         if(mouse) {
-            let mouse = new MTS.Input.MouseNode(window);
+            let mouse = new MTS.Browser.Input.MouseNode(window);
             
-            this.Input = this.Input || {};
-            this.Input[ "Mouse" ] = mouse;
+            this.Browser = this.Browser || {};
+            this.Browser.Input = this.Browser.Input || {};
+            this.Browser.Input[ "Mouse" ] = mouse;
             
             this.register(this.Input.Mouse);
         }
 
         if(keys) {
-            let keys = new MTS.Input.KeyboardNode(window);
+            let keys = new MTS.Browser.Input.KeyboardNode(window);
             
-            this.Input = this.Input || {};
-            this.Input[ "Keys" ] = keys;
+            this.Browser = this.Browser || {};
+            this.Browser.Input = this.Browser.Input || {};
+            this.Browser.Input[ "Keys" ] = keys;
             
             this.register(this.Input.Keys);
         }

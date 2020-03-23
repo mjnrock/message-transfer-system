@@ -6,7 +6,7 @@ import Router from "./Router";
 
 import Main from "./Main";
 
-import Input from "./input/package";
+import Browser from "./browser/package";
 import Network from "./network/package";
 
 export default {
@@ -18,6 +18,6 @@ export default {
 
     Main,
     
-    Input,
+    Browser,
     Network
 };

@@ -1,7 +1,7 @@
 import Node from "./Node";
 import WebSocketNode from "./network/WebSocketNode";
-import KeyboardNode from "./input/KeyboardNode";
-import MouseNode from "./input/MouseNode";
+import KeyboardNode from "./browser/KeyboardNode";
+import MouseNode from "./browser/MouseNode";
 
 export default class Registry {
     constructor(parent) {
