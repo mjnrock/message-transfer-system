@@ -32,8 +32,8 @@ export default class MouseNode extends Node {
         window.oncontextmenu = this.onContextMenu.bind(this);
 
         this.state = {
-            Map: btnmap,
-            Flags: btnflags,
+            Map: btnmap || {},
+            Flags: btnflags || {},
             Mask: 0
         };
 
