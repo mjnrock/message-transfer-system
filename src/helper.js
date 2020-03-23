@@ -22,7 +22,7 @@ export const Bitwise = {
  * Primarily used for JSON.stringify(obj) in cases where the `prototype` holds all the meaningful data (e.g. Geolocation)
  * @param {Object} obj 
  */
-export function CloneAsObject(obj, toJson = false) {
+export function CloneAsObject(obj, { toJson = false, toPrettyJson = false } = {}) {
     if(obj === null || !(obj instanceof Object)) {
         return obj;
     }
@@ -33,7 +33,10 @@ export function CloneAsObject(obj, toJson = false) {
         temp[key] = CloneAsObject(obj[key]);
     }
 
-    if(toJson) {
+    if(toPrettyJson === true) {
+        return JSON.stringify(temp, null, 2);
+    }
+    if(toJson === true) {
         return JSON.stringify(temp);
     }
 
