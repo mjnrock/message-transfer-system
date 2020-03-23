@@ -15,14 +15,26 @@ app.set("trust proxy", true);
 // console.log(expressWs.getWss().clients);
 
 const MTS = (new MTSLib.Main()).loadNetwork(true);
+MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
-//TODO There is presently no cleanup for disconnected clients
+//TODO There is presently no cleanup for disconnected clients, like AT ALL
 app.ws("/", function (ws, req) {
-    MTS.Network.createWebSocket({ ws });
+    let id = MTS.Network.createWebSocket({ ws });
 
     // MTS.Router.addRoute(MTS.Network.getWebSocket(), "Ping");
-    MTS.Router.addRoute(MTS.Network.getWebSocket(), MTSLib.Network.WebSocketNode.AllSignalTypes());
-    MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", 1), 1000);
+    MTS.Router.addRoute(MTS.Network.getWebSocket(id), MTSLib.Network.WebSocketNode.AllSignalTypes());
+
+    console.log(MTS.Network.getWsAddressMap(false));
+    //* Example cleanup poblem: occurred after client refreshed page (i.e. old idea still registered, but WS now absent)
+    // {
+    //     undefined: { id: 'fb2e20b0-24ee-4123-a9ab-c6fcd583dea8' },
+    //     '::ffff:127.0.0.1': {
+    //         id: '1fc3d3c6-cf78-4103-b1a8-9723603c7517',
+    //         address: '::ffff:127.0.0.1',
+    //         family: 'IPv6',
+    //         port: 3000
+    //     }
+    // }
 });
 
 // //!DEBUGGING

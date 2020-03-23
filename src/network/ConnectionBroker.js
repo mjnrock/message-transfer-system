@@ -11,6 +11,21 @@ export default class ConnectionBroker {
         };
     }
 
+    getWsAddressMap(idAsKey = true) {
+        let map = {};
+
+        for(let wsn of Object.values(this.state.WebSocket)) {
+            if(idAsKey) {
+                map[ wsn.id ] = wsn.getAddress();
+            } else {
+                let address = wsn.getAddress();
+
+                map[ address.address ] = address;
+            }
+        }
+
+        return map;
+    }
     getWebSocket(indexOrUuid = 0) {
         if(typeof indexOrUuid === "number") {
             return Object.values(this.state.WebSocket)[ indexOrUuid ];
@@ -30,6 +45,8 @@ export default class ConnectionBroker {
 
         this._parent.register(websocket);
         this.state.WebSocket[ websocket.id ] = websocket;
+
+        return websocket.id;
 
         // //!DEBUGGING
         // console.log(Object.keys(this.state.WebSocket));

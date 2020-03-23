@@ -38,6 +38,14 @@ export default class WebSocketNode extends Node {
     getSocket() {
         return this.state.WebSocket;
     }
+    getAddress() {
+        let obj = this.getSocket()._socket.address();
+
+        return {
+            id: this.id,
+            ...obj
+        };
+    }
     isReady() {
         return this.state.WebSocket && this.state.WebSocket.readyState === 1;
     }
