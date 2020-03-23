@@ -1,6 +1,3 @@
-import WebSocket from "ws";
-global.WebSocket = WebSocket;
-
 import Message from "./Message";
 import Node from "./Node";
 import Repeater from "./Repeater";
