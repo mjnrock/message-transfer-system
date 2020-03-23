@@ -1,6 +1,6 @@
-import { Bitwise, GenerateUUID } from "../helper";
-import Node from "../Node";
-import Message from "../Message";
+import { Bitwise, GenerateUUID } from "./../../helper";
+import Node from "./../../Node";
+import Message from "./../../Message";
 
 export default class MouseNode extends Node {
     static SignalTypes = {

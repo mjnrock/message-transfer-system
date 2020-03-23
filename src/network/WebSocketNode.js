@@ -1,8 +1,8 @@
 import WebSocket from "ws";
 
-import { GenerateUUID } from "../helper";
-import Node from "../Node";
-import Message from "../Message";
+import { GenerateUUID } from "./../helper";
+import Node from "./../Node";
+import Message from "./../Message";
 import Packet from "./Packet";
 
 export default class WebSocketNode extends Node {
@@ -37,6 +37,9 @@ export default class WebSocketNode extends Node {
         }
     }
 
+    getSocket() {
+        return this.state.WebSocket;
+    }
     isReady() {
         return this.state.WebSocket && this.state.WebSocket.readyState === 1;
     }

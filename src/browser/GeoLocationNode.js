@@ -1,5 +1,5 @@
 import Node from "./../Node";
-import { GenerateUUID } from "../helper";
+import { GenerateUUID } from "./../helper";
 
 export default class GeoLocationNode extends Node {
     static SignalTypes = {

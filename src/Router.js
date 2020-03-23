@@ -33,6 +33,10 @@ export default class Router {
         if(msgTypes === "*" || msgTypes === true) {
             this._routes["*"].push(nodeName);
         } else {
+            if(!Array.isArray(msgTypes)) {
+                msgTypes = [ msgTypes ];
+            }
+            
             for(let type of msgTypes) {
                 if(!Array.isArray(this._routes[ type ])) {
                     this._routes[ type ] = [];

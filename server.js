@@ -19,6 +19,10 @@ const MTS = (new MTSLib.Main()).loadNetwork(true);
 //TODO There is presently no cleanup for disconnected clients
 app.ws("/", function (ws, req) {
     MTS.Network.createWebSocket({ ws });
+
+    // MTS.Router.addRoute(MTS.Network.getWebSocket(), "Ping");
+    MTS.Router.addRoute(MTS.Network.getWebSocket(), MTSLib.Network.WebSocketNode.AllSignalTypes());
+    MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", 1), 1000);
 });
 
 // //!DEBUGGING

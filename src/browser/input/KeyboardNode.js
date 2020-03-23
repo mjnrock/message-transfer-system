@@ -1,6 +1,6 @@
-import { Bitwise, GenerateUUID } from "../helper";
-import Node from "../Node";
-import Message from "../Message";
+import { Bitwise, GenerateUUID } from "./../../helper";
+import Node from "./../../Node";
+import Message from "./../../Message";
 
 //* @keymap and @keyflags should ALWAYS contain the same KEYS
 export default class KeyboardNode extends Node {
