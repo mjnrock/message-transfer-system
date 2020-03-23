@@ -1,3 +1,5 @@
+import Helper from "./helper";
+
 import Message from "./Message";
 import Node from "./Node";
 import Repeater from "./Repeater";
@@ -10,6 +12,8 @@ import Browser from "./browser/package";
 import Network from "./network/package";
 
 export default {
+    Helper,
+    
     Message,
     Node,
     Repeater,
