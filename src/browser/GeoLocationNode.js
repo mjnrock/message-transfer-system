@@ -6,9 +6,15 @@ export default class GeoLocationNode extends Node {
         POSITION: "GeoLocationNode.Position",
         ERROR: "GeoLocationNode.Error",
     };
-    //* The primary use of this function is for <Router>
-    static AllSignalTypes() {
-        return Object.values(GeoLocationNode.SignalTypes);
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(GeoLocationNode.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     constructor({ name = null, receive = null, parent = null, packager = null } = {}) {

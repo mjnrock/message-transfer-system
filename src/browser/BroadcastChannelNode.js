@@ -8,9 +8,15 @@ export default class BroadcastChannelNode extends Node {
         MESSAGE_ERROR: "BroadcastChannelNode.MessageError",
         ERROR: "BroadcastChannelNode.Error",
     };
-    //* The primary use of this function is for <Router>
-    static AllSignalTypes() {
-        return Object.values(BroadcastChannelNode.SignalTypes);
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(BroadcastChannelNode.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     constructor({ name = null, receive = null, parent = null, packager = null } = {}) {

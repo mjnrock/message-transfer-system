@@ -13,9 +13,15 @@ export default class WebSocketNode extends Node {
         CLOSE: `WebSocketNode.Close`,
         ERROR: `WebSocketNode.Error`,
     };
-    //* The primary use of this function is for <Router>
-    static AllSignalTypes() {
-        return Object.values(WebSocketNode.SignalTypes);
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(WebSocketNode.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     constructor({ name = null, ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {

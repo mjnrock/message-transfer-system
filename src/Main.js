@@ -38,7 +38,7 @@ export default class Main extends Repeater {
             this.Browser.Input = this.Browser.Input || {};
             this.Browser.Input[ "Mouse" ] = mouse;
             
-            this.register(this.Input.Mouse);
+            this.register(this.Browser.Input.Mouse);
         }
 
         if(keys) {
@@ -48,7 +48,7 @@ export default class Main extends Repeater {
             this.Browser.Input = this.Browser.Input || {};
             this.Browser.Input[ "Keys" ] = keys;
             
-            this.register(this.Input.Keys);
+            this.register(this.Browser.Input.Keys);
         }
 
         return this;

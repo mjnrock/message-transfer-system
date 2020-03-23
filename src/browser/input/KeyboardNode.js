@@ -2,16 +2,21 @@ import { Bitwise, GenerateUUID } from "./../../helper";
 import Node from "./../../Node";
 import Message from "./../../Message";
 
-//* @keymap and @keyflags should ALWAYS contain the same KEYS
 export default class KeyboardNode extends Node {
     static SignalTypes = {
         KEY_MASK: "KeyboardNode.KeyMask",
         KEY_UP: "KeyboardNode.KeyUp",
         KEY_DOWN: "KeyboardNode.KeyDown",
     };
-    //* The primary use of this function is for <Router>
-    static AllSignalTypes() {
-        return Object.values(KeyboardNode.SignalTypes);
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(KeyboardNode.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     constructor({ name = null, keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
@@ -25,8 +30,8 @@ export default class KeyboardNode extends Node {
         window.onkeyup = this.onKeyUp.bind(this);
 
         this.state = {
-            Map: keymap,
-            Flags: keyflags,
+            Map: keymap || {},
+            Flags: keyflags || {},
             Mask: 0
         };
 
@@ -62,7 +67,7 @@ export default class KeyboardNode extends Node {
         
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_MASK,
-            keymask,
+            this.state.Mask,
             this.signet
         ));
 
@@ -107,7 +112,7 @@ export default class KeyboardNode extends Node {
         this.state.Map[ name ] = Array.isArray(keyCodes) ? keyCodes : [ keyCodes ];
         this.state.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
 
         return this;
     }
@@ -130,7 +135,7 @@ export default class KeyboardNode extends Node {
         delete this.state.Map[ name ];
         delete this.state.Flags[ name ];
 
-        delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ];
+        delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ];
 
         return this;
     }

@@ -12,9 +12,15 @@ export default class MouseNode extends Node {
         MOUSE_UP: "MouseNode.MouseUp",
         MOUSE_DOWN: "MouseNode.MouseDown",
     };
-    //* The primary use of this function is for <Router>
-    static AllSignalTypes() {
-        return Object.values(MouseNode.SignalTypes);
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(MouseNode.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     constructor({ name = null, btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
@@ -96,7 +102,10 @@ export default class MouseNode extends Node {
         this.updateMask(e);
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_DOWN,
-            this.getMousePosition(e),
+            {
+                button: e.button,
+                ...this.getMousePosition(e)
+            },
             this.signet
         ));
     
@@ -108,7 +117,10 @@ export default class MouseNode extends Node {
         this.updateMask(e);
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_UP,
-            this.getMousePosition(e),
+            {
+                button: e.button,
+                ...this.getMousePosition(e)
+            },
             this.signet
         ));
     
@@ -120,7 +132,10 @@ export default class MouseNode extends Node {
         this.updateMask(e);
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_CLICK,
-            this.getMousePosition(e),
+            {
+                button: e.button,
+                ...this.getMousePosition(e)
+            },
             this.signet
         ));
     
@@ -161,7 +176,7 @@ export default class MouseNode extends Node {
         this.state.Map[ name ] = Array.isArray(btnCodes) ? btnCodes : [ btnCodes ];
         this.state.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
 
         return this;
     }
@@ -184,7 +199,7 @@ export default class MouseNode extends Node {
         delete this.state.Map[ name ];
         delete this.state.Flags[ name ];
 
-        delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + s.slice(1) }` ];
+        delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ];
 
         return this;
     }
