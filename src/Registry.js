@@ -22,10 +22,13 @@ export default class Registry {
     }
 
     register(...nodes) {
+        let successfulNodes = [];
         for(let node of nodes) {
             if(node instanceof Node && !this.has(node.name)) {
                 node._parent = this._parent;
                 this._entries[ node.name ] = node;
+
+                successfulNodes.push(node);
 
                 //? Special routing instructions for convenience
                 if(node instanceof WebSocketNode) {
@@ -38,7 +41,7 @@ export default class Registry {
             }
         }
 
-        return this;
+        return successfulNodes;
     }
     unregister(...nodes) {
         for(let node of nodes) {
