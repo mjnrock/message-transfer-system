@@ -1,5 +1,3 @@
-import WebSocket from "ws";
-
 import { GenerateUUID } from "./../helper";
 import Node from "./../Node";
 import Message from "./../Message";
@@ -57,7 +55,7 @@ export default class WebSocketNode extends Node {
         }
         
         if(!this.state.WebSocket) {
-            this.state.WebSocket = new WebSocket(`${ protocol }://${ uri }`);
+            this.state.WebSocket = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
         }
 
         this.state.WebSocket.onopen = this._onWsOpen.bind(this);

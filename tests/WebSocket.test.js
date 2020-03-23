@@ -1,3 +1,6 @@
+import WebSocket from "ws";
+global.WebSocket = WebSocket;
+
 import MTSLib from "./../src/package";
 
 //  Artificial Client #1
