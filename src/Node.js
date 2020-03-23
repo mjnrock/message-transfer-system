@@ -16,19 +16,21 @@ export default class Node {
         this._emitOnSend = false;
     }
 
+    /**
+     * Should the Node ALSO invoke `this.emit(...)` whenever `this.send(...)` is invoked.
+     */
     toggleSimulcast() {
         this._emitOnSend = !this._emitOnSend;
 
         return this;
     }
 
-    makePublic() {
-        this._emitStateChange = true;
-
-        return this;
-    }
-    makePrivate() {
-        this._emitStateChange = false;
+    /**
+     * Should the Node `this.emit(...)` whenever its `this.state` is changed.
+     * NOTE: This is intended for immutable state monitoring ONLY.  It will only function in cases where the literal `this.state = newState` is assigned directly.
+     */
+    toggleStateEmission() {
+        this._emitStateChange = !this._emitStateChange;
 
         return this;
     }
