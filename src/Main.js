@@ -2,8 +2,8 @@ import MTS from "./package";
 import Repeater from "./Repeater";
 
 export default class Main extends Repeater {
-    constructor({ nodes = [] } = {}) {
-        super();
+    constructor({ nodes = [], receive = null } = {}) {
+        super({ receive });
         this._parent = this;
 
         this.Registry = new MTS.Registry(this);

@@ -13,8 +13,9 @@ export default class BroadcastChannelNode extends Node {
         return Object.values(BroadcastChannelNode.SignalTypes);
     }
 
-    constructor({ name = null, parent = null, packager = null } = {}) {
+    constructor({ name = null, receive = null, parent = null, packager = null } = {}) {
         super(name || GenerateUUID(), {
+            receive: receive,
             parent: parent,
             packager: packager
         });

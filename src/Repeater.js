@@ -13,8 +13,9 @@ export default class Repeater extends Node {
         SUBSCRIPTION: 2 << 1
     };
 
-    constructor({ name = null, broadcastType = Repeater.BroadcastType.MESSAGE, parent = null, packager = null } = {}) {
+    constructor({ name = null, broadcastType = Repeater.BroadcastType.MESSAGE, receive = null, parent = null, packager = null } = {}) {
         super(name || GenerateUUID(), {
+            receive: receive,
             parent: parent,
             packager: packager
         });
