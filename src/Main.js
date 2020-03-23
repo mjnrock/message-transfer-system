@@ -62,4 +62,7 @@ export default class Main extends Repeater {
     get register() {
         return this.Registry.register.bind(this.Registry);
     }
+    get unregister() {
+        return this.Registry.unregister.bind(this.Registry);
+    }
 }

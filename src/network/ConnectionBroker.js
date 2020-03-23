@@ -35,7 +35,12 @@ export default class ConnectionBroker {
     }
 
     createWebSocket({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
-        let websocket = new WebSocketNode();
+        let websocket = new WebSocketNode({
+            onClose: (wsn, e) => {                
+                delete this.state.WebSocket[ wsn.id ];
+                wsn._parent.unregister(websocket);
+            }
+        });
 
         if(ws) {
             websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.state.isMaster });

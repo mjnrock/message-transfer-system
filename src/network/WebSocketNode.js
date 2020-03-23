@@ -18,7 +18,7 @@ export default class WebSocketNode extends Node {
         return Object.values(WebSocketNode.SignalTypes);
     }
 
-    constructor(ws = null, { receive = null, parent = null, packager = null, isMaster = false } = {}) {
+    constructor({ ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
         super(GenerateUUID(), {
             receive: receive,
             parent: parent,
@@ -28,6 +28,10 @@ export default class WebSocketNode extends Node {
         this.state = {
             isMaster: isMaster,
             WebSocket: ws,
+            Hooks: {
+                onOpen: onOpen,
+                onClose: onClose
+            }
         };
         
         if(ws) {
@@ -64,9 +68,9 @@ export default class WebSocketNode extends Node {
         
         if(!this.state.WebSocket) {
             this.state.WebSocket = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
+            this.state.WebSocket.onopen = this._onWsOpen.bind(this);
         }
 
-        this.state.WebSocket.onopen = this._onWsOpen.bind(this);
         this.state.WebSocket.onclose = this._onWsClose.bind(this);
         this.state.WebSocket.onerror = this._onWsError.bind(this);
         this.state.WebSocket.onmessage = this._onWsMessage.bind(this);
@@ -151,11 +155,20 @@ export default class WebSocketNode extends Node {
     _onWsMessageError(e) {
         this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
     }
-    _onWsOpen(e) {    
+    _onWsOpen(e) {
+        console.log("OPEN");
         this.send(WebSocketNode.SignalTypes.OPEN, e);
+
+        if(typeof this.state.Hooks.onOpen === "function") {
+            this.state.Hooks.onOpen(this, e);
+        }
     }
     _onWsClose(e) {
         this.send(WebSocketNode.SignalTypes.CLOSE, e);
+
+        if(typeof this.state.Hooks.onClose === "function") {
+            this.state.Hooks.onClose(this, e);
+        }
     }
     _onWsError(e) {
         this.send(WebSocketNode.SignalTypes.ERROR, e);
