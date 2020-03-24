@@ -199,6 +199,6 @@ export default class WebSocketNode extends Node {
         1012: [ 1012, "SERVICE RESTART", "Server/service is restarting" ],
         1013: [ 1013, "TRY AGAIN LATER", "Temporary server condition forced blocking client's request" ],
         1014: [ 1014, "BAD GATEWAY", "Server acting as gateway received an invalid response" ],
-        1015: [ 1015, "TLS HANDSHAKE FAIL", "Transport Layer Security handshake failure" ],
+        1015: [ 1015, "TLS HANDSHAKE FAILURE", "Transport Layer Security handshake failure" ],
     };
 };
