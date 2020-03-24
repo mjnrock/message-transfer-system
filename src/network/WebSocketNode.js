@@ -162,7 +162,6 @@ export default class WebSocketNode extends Node {
         this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e.message);
     }
     _onWsOpen(e) {
-        console.log("OPEN");
         this.send(WebSocketNode.SignalTypes.OPEN, e);
 
         if(typeof this.state.Hooks.onOpen === "function") {
@@ -192,14 +191,14 @@ export default class WebSocketNode extends Node {
         1003: [ 1003, "CLOSE_UNSUPPORTED", "Endpoint received an unsupported frame (e.g. binary-only endpoint received text frame)" ],
         1005: [ 1005, "CLOSED_NO_STATUS", "Expected close status, received none" ],
         1006: [ 1006, "CLOSE_ABNORMAL", "No close code frame has been receieved" ],
-        1007: [ 1007, "Unsupported payload", "Endpoint received inconsistent message (e.g. malformed UTF-8)" ],
-        1008: [ 1008, "Policy violation", "Generic code used for situations other than 1003 and 1009" ],
+        1007: [ 1007, "UNSUPPORTED PAYLOAD", "Endpoint received inconsistent message (e.g. malformed UTF-8)" ],
+        1008: [ 1008, "POLICY VIOLATION", "Generic code used for situations other than 1003 and 1009" ],
         1009: [ 1009, "CLOSE_TOO_LARGE", "Endpoint won't process large frame" ],
-        1010: [ 1010, "Mandatory extension", "Client wanted an extension which server did not negotiate" ],
-        1011: [ 1011, "Server error", "Internal server error while operating" ],
-        1012: [ 1012, "Service restart", "Server/service is restarting" ],
-        1013: [ 1013, "Try again later", "Temporary server condition forced blocking client's request" ],
-        1014: [ 1014, "Bad gateway", "Server acting as gateway received an invalid response" ],
-        1015: [ 1015, "TLS handshake fail", "Transport Layer Security handshake failure" ],
+        1010: [ 1010, "MANDATORY EXTENSION", "Client wanted an extension which server did not negotiate" ],
+        1011: [ 1011, "SERVER ERROR", "Internal server error while operating" ],
+        1012: [ 1012, "SERVICE RESTART", "Server/service is restarting" ],
+        1013: [ 1013, "TRY AGAIN LATER", "Temporary server condition forced blocking client's request" ],
+        1014: [ 1014, "BAD GATEWAY", "Server acting as gateway received an invalid response" ],
+        1015: [ 1015, "TLS HANDSHAKE FAIL", "Transport Layer Security handshake failure" ],
     };
 };
