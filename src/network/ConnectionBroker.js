@@ -57,7 +57,7 @@ export default class ConnectionBroker {
 
         this._parent.register(websocket);
         this.state.WebSocket[ websocket.id ] = websocket;
-        this_parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
+        this._parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
 
         return websocket.id;
 
