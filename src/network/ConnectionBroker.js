@@ -26,11 +26,18 @@ export default class ConnectionBroker {
 
         return map;
     }
-    getWebSocket(indexOrUuid = 0) {
+    getWebSocketNode(indexOrUuid = 0) {
         if(typeof indexOrUuid === "number") {
             return Object.values(this.state.WebSocket)[ indexOrUuid ];
         } else {
             return this.state.WebSocket[ indexOrUuid ];
+        }
+    }
+    getSocket(indexOrUuid = 0) {
+        let wsn = this.getWebSocketNode(indexOrUuid);
+
+        if(wsn instanceof WebSocketNode) {
+            return wsn.getSocket();
         }
     }
 
@@ -50,6 +57,7 @@ export default class ConnectionBroker {
 
         this._parent.register(websocket);
         this.state.WebSocket[ websocket.id ] = websocket;
+        this_parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
 
         return websocket.id;
 
@@ -65,10 +73,12 @@ export default class ConnectionBroker {
             if(destination === -1) {    // All
                 for(let websocket of Object.values(this.state.WebSocket)) {
                     if(websocket.isReady()) {
+                        msg.source = websocket.signet;
                         websocket.wsmessage(msg);
                     }
                 }
             } else if(this.state.WebSocket[ destination ] && this.state.WebSocket[ destination ].isReady()) {    // Targeted
+                msg.source = websocket.signet;
                 this.state.WebSocket[ destination ].wsmessage(msg);
             }
         }

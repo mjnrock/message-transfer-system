@@ -15,16 +15,11 @@ app.set("trust proxy", true);
 // console.log(expressWs.getWss().clients);
 
 const MTS = (new MTSLib.Main()).loadNetwork(true);
-MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
+MTS.Router.addRoute(MTS, true);
+// MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
 app.ws("/", function (ws, req) {
     let id = MTS.Network.createWebSocket({ ws });
-
-    //!DEBUGGING Add this new WSN as a route
-    MTS.Router.addRoute(MTS.Network.getWebSocket(id), MTSLib.Network.WebSocketNode.AllSignalTypes());
-
-    // console.log(MTS.Network.getWsAddressMap());
-    // console.log(Object.keys(MTS.Registry._entries));
 });
 
 // //!DEBUGGING

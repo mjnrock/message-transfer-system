@@ -8,7 +8,7 @@ export default class Node {
 
         this._parent = parent;
         this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
-        this._receive = receive;
+        this._receive = receive || (() => true);
         this._subscriptions = {};
 
         this._state = {};

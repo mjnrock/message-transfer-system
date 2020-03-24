@@ -159,7 +159,7 @@ export default class WebSocketNode extends Node {
         }
     }
     _onWsMessageError(e) {
-        this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
+        this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e.message);
     }
     _onWsOpen(e) {
         console.log("OPEN");

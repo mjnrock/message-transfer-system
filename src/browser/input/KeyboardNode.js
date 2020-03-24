@@ -2,13 +2,20 @@ import { Bitwise, GenerateUUID } from "./../../helper";
 import Node from "./../../Node";
 import Message from "./../../Message";
 
+//! ------------------------------------------
+//! Use the TESORO version atm, it is newer!
+//! ------------------------------------------
+
 export default class KeyboardNode extends Node {
     static SignalTypes = {
         KEY_MASK: "KeyboardNode.KeyMask",
         KEY_UP: "KeyboardNode.KeyUp",
         KEY_DOWN: "KeyboardNode.KeyDown",
+        
+        //* WIP, not currently implemented
+        KEY_SEQUENCE: "KeyboardNode.KeySequence",   // Record all key UPs within a time threshold | Fire if threshold is exceeded, reset if UP happens
     };
-    //* The primary use of this function is for <Router>
+    
     static AllSignalTypes(...filter) {
         return Object.values(KeyboardNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
@@ -32,7 +39,12 @@ export default class KeyboardNode extends Node {
         this.state = {
             Map: keymap || {},
             Flags: keyflags || {},
-            Mask: 0
+            Mask: 0,
+            Sequence: {
+                Keys: [],
+                Start: 0,
+                Threshold: 300  // ms
+            }
         };
 
         //*  Default: WASD/Arrows and Modifier keys
