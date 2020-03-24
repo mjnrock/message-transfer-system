@@ -170,13 +170,36 @@ export default class WebSocketNode extends Node {
         }
     }
     _onWsClose(e) {
-        this.send(WebSocketNode.SignalTypes.CLOSE, e);
+        let payload = e;
+        if(Array.isArray(WebSocketNode.CloseCode[ e.code ])) {
+            payload = WebSocketNode.CloseCode[ e.code ];
+        }
+        
+        this.send(WebSocketNode.SignalTypes.CLOSE, payload);
 
         if(typeof this.state.Hooks.onClose === "function") {
-            this.state.Hooks.onClose(this, e);
+            this.state.Hooks.onClose(this, payload);
         }
     }
     _onWsError(e) {
         this.send(WebSocketNode.SignalTypes.ERROR, e);
     }
+
+    static CloseCode = {
+        1000: [ 1000, "CLOSE_NORMAL", "Successful operation / regular socket shutdown" ],
+        1001: [ 1001, "CLOSE_GOING_AWAY", "Client is leaving (browser tab closing)" ],
+        1002: [ 1002, "CLOSE_PROTOCOL_ERROR", "Endpoint received a malformed frame" ],
+        1003: [ 1003, "CLOSE_UNSUPPORTED", "Endpoint received an unsupported frame (e.g. binary-only endpoint received text frame)" ],
+        1005: [ 1005, "CLOSED_NO_STATUS", "Expected close status, received none" ],
+        1006: [ 1006, "CLOSE_ABNORMAL", "No close code frame has been receieved" ],
+        1007: [ 1007, "Unsupported payload", "Endpoint received inconsistent message (e.g. malformed UTF-8)" ],
+        1008: [ 1008, "Policy violation", "Generic code used for situations other than 1003 and 1009" ],
+        1009: [ 1009, "CLOSE_TOO_LARGE", "Endpoint won't process large frame" ],
+        1010: [ 1010, "Mandatory extension", "Client wanted an extension which server did not negotiate" ],
+        1011: [ 1011, "Server error", "Internal server error while operating" ],
+        1012: [ 1012, "Service restart", "Server/service is restarting" ],
+        1013: [ 1013, "Try again later", "Temporary server condition forced blocking client's request" ],
+        1014: [ 1014, "Bad gateway", "Server acting as gateway received an invalid response" ],
+        1015: [ 1015, "TLS handshake fail", "Transport Layer Security handshake failure" ],
+    };
 };
