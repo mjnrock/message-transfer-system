@@ -16,7 +16,7 @@ export default class ConnectionBroker extends Node {
     }
 
     /**
-     * Broadcast the message to all connections.  The sole purpose of this .receive is to act as a network-level sender for messages.
+     * Broadcast the message to all connections.  The sole purpose of this `.receive(msg)` is to act as a network-level relayer for messages.
      * @param {Message} msg 
      */
     receive(msg) {
@@ -44,9 +44,11 @@ export default class ConnectionBroker extends Node {
     getWebSocketNode(indexOrUuid = 0) {
         if(typeof indexOrUuid === "number") {
             return Object.values(this.state.WebSocket)[ indexOrUuid ];
-        } else {
+        } else if(typeof indexOrUuid === "string" || indexOrUuid instanceof String) {
             return this.state.WebSocket[ indexOrUuid ];
         }
+
+        return false;
     }
     getSocket(indexOrUuid = 0) {
         let wsn = this.getWebSocketNode(indexOrUuid);
@@ -54,6 +56,8 @@ export default class ConnectionBroker extends Node {
         if(wsn instanceof WebSocketNode) {
             return wsn.getSocket();
         }
+
+        return false;
     }
 
     createWebSocket({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
@@ -75,9 +79,6 @@ export default class ConnectionBroker extends Node {
         this._parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
 
         return websocket.id;
-
-        // //!DEBUGGING
-        // console.log(Object.keys(this.state.WebSocket));
     }
 
     route(msg) {

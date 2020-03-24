@@ -2,7 +2,7 @@ import MTS from "./package";
 import Repeater from "./Repeater";
 
 export default class Main extends Repeater {
-    constructor({ nodes = [], receive = null } = {}) {
+    constructor({ nodes = [], receive = null, routes = true } = {}) {   // Receive ALL messages by default
         super({ receive });
         this._parent = this;
 
@@ -10,6 +10,7 @@ export default class Main extends Repeater {
         this.Router = new MTS.Router(this);
 
         this.Registry.register(this, ...nodes);
+        this.Router.addRoute(this, routes);
     }
 
 
