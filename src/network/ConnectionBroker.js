@@ -1,14 +1,29 @@
 import WebSocketNode from "./WebSocketNode";
+import Node from "./../Node";
 import Message from "./../Message";
+import { GenerateUUID } from "../helper";
 
-export default class ConnectionBroker {
-    constructor(parent, { isMaster = false } = {}) {
-        this._parent = parent;
+export default class ConnectionBroker extends Node {
+    constructor(parent, { name = null, isMaster = false } = {}) {
+        super(name || GenerateUUID(), {
+            parent: parent
+        });
 
         this.state = {
             isMaster: isMaster,
             WebSocket: {}
         };
+    }
+
+    /**
+     * Broadcast the message to all connections.  The sole purpose of this .receive is to act as a network-level sender for messages.
+     * @param {Message} msg 
+     */
+    receive(msg) {
+        if(Message.conforms(msg)) {
+            msg.elevate(-1);  // Will always send to ALL connections
+            this.message(msg);
+        }
     }
 
     getWsAddressMap(idAsKey = true) {

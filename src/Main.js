@@ -17,8 +17,14 @@ export default class Main extends Repeater {
      * On-demand module for network communication
      * @param {boolean} isMaster 
      */
-    loadNetwork(isMaster = false) {
+    loadNetwork(isMaster = false, { routes = [] } = {}) {
         this.Network = new MTS.Network.ConnectionBroker(this, { isMaster });
+        
+        this.register(this.Network);
+
+        if(routes.length) {
+            this.Router.addRoute(this.Network, routes);
+        }
 
         return this;
     }
