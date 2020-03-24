@@ -18,7 +18,7 @@ const MTS = (new MTSLib.Main()).loadNetwork(true);
 // MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
 app.ws("/", function (ws, req) {
-    let id = MTS.Network.createWebSocket({ ws });
+    let id = MTS.Network.webSocketNode({ ws });
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));

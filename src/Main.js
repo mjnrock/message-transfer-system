@@ -2,7 +2,13 @@ import MTS from "./package";
 import Repeater from "./Repeater";
 
 export default class Main extends Repeater {
-    constructor({ nodes = [], receive = null, routes = true } = {}) {   // Receive ALL messages by default
+    /**
+     * This class extends the Repeater class, which extends Node.  As such, it has timer/interval functionality exposed natively.  See Repeater for more details.
+     * @param {Node[]} nodes DEFAULT: [] | A list of Nodes to register after initialization
+     * @param {fn} receive DEFAULT: null | The receiver function for this Node | @receive = null evaluates to `() => true`
+     * @param {true|Message.type[]} routes DEFAULT: true | An array of routes for this Node to `.receive(msg)`
+     */
+    constructor({ nodes = [], receive = null, routes = true } = {}) {
         super({ receive });
         this._parent = this;
 
@@ -16,7 +22,8 @@ export default class Main extends Repeater {
 
     /**
      * On-demand module for network communication
-     * @param {boolean} isMaster 
+     * @param {boolean} isMaster DEFAULT: false | Establish this broker as a Master or Slave
+     * @param {true|Message.type[]} routes An array of routes for the ConnectionBroker to REPEAT/BROADCAST OVER THE NETWORK to ALL connections
      */
     loadNetwork(isMaster = false, { routes = [] } = {}) {
         this.Network = new MTS.Network.ConnectionBroker(this, { isMaster });
@@ -31,7 +38,7 @@ export default class Main extends Repeater {
     }
     /**
      * On-demand module in scopes where <Window> exists
-     * @param {<Window>} window 
+     * @param {obj} opts Exposes MTS.Browser.Input Nodes to activate
      */
     loadBrowserInput({ mouse = true, keys = true } = {}) {
         if(!window) {

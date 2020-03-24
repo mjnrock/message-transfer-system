@@ -60,7 +60,7 @@ export default class ConnectionBroker extends Node {
         return false;
     }
 
-    createWebSocket({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
+    webSocketNode({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
         let websocket = new WebSocketNode({
             onClose: (wsn, e) => {                
                 delete this.state.WebSocket[ wsn.id ];
