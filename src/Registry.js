@@ -10,15 +10,27 @@ export default class Registry {
         this._entries = {};
     }
 
+    static SanitizeId(id) {
+        if(id.substring(0, 2) === "C:" || id.substring(0, 2) === "S:") {
+            return id.substring(2);
+        }
+
+        return id;
+    }
+
     lookup(name) {
         return Object.values(this._entries).filter(ent => ent.name === name);
     }
     
     has(id) {
-        return !!this._entries[ id ];
+        let sid = Registry.SanitizeId(id);
+
+        return !!this._entries[ sid ];
     }
-    get(id) {
-        return this._entries[ id ];
+    get(id) {        
+        let sid = Registry.SanitizeId(id);
+
+        return this._entries[ sid ];
     }
 
     register(...nodes) {
