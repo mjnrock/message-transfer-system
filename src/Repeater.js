@@ -38,7 +38,7 @@ export default class Repeater extends Node {
         }
     }
 
-    add(...args) {
+    addInterval(...args) {
         if(typeof args[ 0 ] === "function" && typeof args[ 1 ] === "number") {
             return this.addCallback(...args);
         } else if(Message.conforms(args[ 0 ]) && typeof args[ 1 ] === "number") {
@@ -47,7 +47,7 @@ export default class Repeater extends Node {
             return this.addMessage(...args);
         }
     }
-    clear(id) {
+    clearInterval(id) {
         if(typeof id === "number") {
             clearInterval(id);
             this.state.Intervals.remove(id);
