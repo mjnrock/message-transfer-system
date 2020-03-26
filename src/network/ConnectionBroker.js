@@ -20,7 +20,7 @@ export default class ConnectionBroker extends Node {
      * @param {Message} msg 
      */
     receive(msg) {
-        if(Message.conforms(msg)) {
+        if(Message.conforms(msg) && this._parent.Registry.has(msg.source)) {    // Only relay messages that have a Registry entry
             msg.elevate(-1);  // Will always send to ALL connections
             this.message(msg);
         }

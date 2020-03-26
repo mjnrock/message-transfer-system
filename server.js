@@ -14,11 +14,32 @@ app.set("trust proxy", true);
 // console.log(expressWs.getWss());
 // console.log(expressWs.getWss().clients);
 
-const MTS = (new MTSLib.Main()).loadNetwork(true);
+const MTS = (new MTSLib.Main({
+    receive: function(msg) {
+        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
+            let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
+
+            this.message(message);
+
+            // this.send(
+            //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
+            //     msg.payload
+            // );
+        }
+    }
+})).loadNetwork(true, {
+    // routes: [
+    //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
+    // ]
+});
 // MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
+
+console.warn(`MTS: ${ MTS.id }`);
 
 app.ws("/", function (ws, req) {
     let id = MTS.Network.webSocketNode({ ws });
+    
+console.warn(`WS: ${ id }`);
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));
