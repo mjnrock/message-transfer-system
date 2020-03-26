@@ -149,10 +149,10 @@ export default class WebSocketNode extends Node {
                     let oldId = this.id;
                     console.log(`[${ oldId }] reassigned to [${ msg.payload }]`);
 
-                    this._parent.unregister(this);
-                    
+                    const parent = this._parent;
+                    parent.unregister(this);                    
                     this.id = msg.payload;
-                    this._parent.register(this);
+                    parent.register(this);
                 } else {
                     this.message(msg);
                 }
