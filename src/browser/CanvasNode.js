@@ -1,5 +1,5 @@
-import { GenerateUUID } from "./helper";
-import Node from "./Node";
+import { GenerateUUID } from "./../helper";
+import Node from "./../Node";
 
 export default class CanvasNode extends Node {
     static SignalTypes = {
