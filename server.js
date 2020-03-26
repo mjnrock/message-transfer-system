@@ -17,7 +17,7 @@ app.set("trust proxy", true);
 const MTS = (new MTSLib.Main({
     receive: function(msg) {
         // console.log(msg);
-        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
+        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE && !MTS.Registry.has(msg.source)) {
             // let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
 
             // this.message(message);

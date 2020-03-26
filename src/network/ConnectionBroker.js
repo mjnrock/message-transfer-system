@@ -20,10 +20,7 @@ export default class ConnectionBroker extends Node {
      * @param {Message} msg 
      */
     receive(msg) {
-        console.log(110, this._parent.Registry._entries);
-        console.log(111, msg.source);
         if(Message.conforms(msg) && this._parent.Registry.has(msg.source)) {    // Only relay messages that have a Registry entry
-            console.log(222, msg);
             msg.elevate(-1);  // Will always send to ALL connections
             this.message(msg);
         }
@@ -84,18 +81,22 @@ export default class ConnectionBroker extends Node {
         return websocket.id;
     }
 
+    broadcast(msg) {
+        for(let websocket of Object.values(this.internal.WebSocket)) {
+            if(websocket.isReady()) {
+                msg.source = websocket.signet;
+                websocket.wsmessage(msg);
+            }
+        }
+    }
+
     route(msg) {
         if(Message.conforms(msg) && msg._elevate) {
             let destination = msg._elevate;
             delete msg._elevate;
 
             if(destination === -1) {    // All
-                for(let websocket of Object.values(this.internal.WebSocket)) {
-                    if(websocket.isReady()) {
-                        msg.source = websocket.signet;
-                        websocket.wsmessage(msg);
-                    }
-                }
+                this.broadcast(msg);
             } else if(this.internal.WebSocket[ destination ] && this.internal.WebSocket[ destination ].isReady()) {    // Targeted
                 msg.source = websocket.signet;
                 this.internal.WebSocket[ destination ].wsmessage(msg);
