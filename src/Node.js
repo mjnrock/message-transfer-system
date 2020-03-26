@@ -14,10 +14,6 @@ export default class Node {
         this._state = {};
         this._emitStateChange = false;
         this._emitOnSend = false;
-        
-        if(typeof this._receive === "function") {
-            this._receive.bind(this);
-        }
     }
 
     /**
