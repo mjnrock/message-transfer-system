@@ -20,7 +20,7 @@ export default class Repeater extends Node {
             packager: packager
         });
 
-        this.state = {
+        this.internal = {
             BroadcastType: 0,
             Intervals: new Set()
         };
@@ -30,11 +30,11 @@ export default class Repeater extends Node {
 
     setBroadcastType(bts) {
         if(Array.isArray(bts)) {
-            this.state.BroadcastType = bts.reduce((a, v) => {
+            this.internal.BroadcastType = bts.reduce((a, v) => {
                 return Bitwise.add(a, v);
             }, 0);
         } else if(typeof bts === "number") {
-            this.state.BroadcastType = bts;
+            this.internal.BroadcastType = bts;
         }
     }
 
@@ -50,7 +50,7 @@ export default class Repeater extends Node {
     clearInterval(id) {
         if(typeof id === "number") {
             clearInterval(id);
-            this.state.Intervals.remove(id);
+            this.internal.Intervals.remove(id);
         }
     }
 
@@ -59,21 +59,21 @@ export default class Repeater extends Node {
             callback(this._parent, this);
         }, interval);
 
-        this.state.Intervals.add(id);
+        this.internal.Intervals.add(id);
 
         return id;
     }
     addMessage(type, payload, interval) {
         let id = setInterval(() => {
-            if(Bitwise.has(this.state.BroadcastType, Repeater.BroadcastType.MESSAGE)) {
+            if(Bitwise.has(this.internal.BroadcastType, Repeater.BroadcastType.MESSAGE)) {
                 this.send(type, payload, { defaultConfig: false });
             }
-            if(Bitwise.has(this.state.BroadcastType, Repeater.BroadcastType.SUBSCRIPTION)) {
+            if(Bitwise.has(this.internal.BroadcastType, Repeater.BroadcastType.SUBSCRIPTION)) {
                 this.emit(type, payload);
             }
         }, interval);
 
-        this.state.Intervals.add(id);
+        this.internal.Intervals.add(id);
         
         return id;
     }

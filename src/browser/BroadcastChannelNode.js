@@ -26,14 +26,14 @@ export default class BroadcastChannelNode extends Node {
             packager: packager
         });
 
-        this.state = {
+        this.internal = {
             Name: null,
             Channel: null
         };
     }
 
     getName() {
-        return this.state.Name || false;
+        return this.internal.Name || false;
     }
 
     connect(name) {
@@ -42,17 +42,17 @@ export default class BroadcastChannelNode extends Node {
         bc.onmessage = this._onBcMessage.bind(this);
         bc.onmessageerror = this._onBcMessageError.bind(this);
 
-        this.state.Name = name;
-        this.state.Channel = bc;
+        this.internal.Name = name;
+        this.internal.Channel = bc;
 
         return this;
     }
     disconnect() {
-        if(this.state.Channel instanceof BroadcastChannel) {
-            this.state.Channel.close();
+        if(this.internal.Channel instanceof BroadcastChannel) {
+            this.internal.Channel.close();
 
-            this.state.Name = null;
-            this.state.Channel = null;
+            this.internal.Name = null;
+            this.internal.Channel = null;
         }
 
         return this;
@@ -71,7 +71,7 @@ export default class BroadcastChannelNode extends Node {
     bcmessage(msg) {
         try {
             if(Message.conforms(msg)) {
-                this.state.Channel.postMessage(msg);
+                this.internal.Channel.postMessage(msg);
             }
         } catch(e) {
             this.send(BroadcastChannelNode.SignalTypes.ERROR, e);

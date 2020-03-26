@@ -42,7 +42,7 @@ export default class MouseNode extends Node {
         window.ondblclick = this.onDblClick.bind(this);
         window.oncontextmenu = this.onContextMenu.bind(this);
 
-        this.state = {
+        this.internal = {
             Map: btnmap || {},
             Flags: btnflags || {},
             Mask: 0,
@@ -52,7 +52,7 @@ export default class MouseNode extends Node {
         };
 
         //*  Default: Left/Right/Middle
-        if(Object.keys(this.state.Map).length === 0 && Object.keys(this.state.Flags).length === 0) {
+        if(Object.keys(this.internal.Map).length === 0 && Object.keys(this.internal.Flags).length === 0) {
             this.registerButtons([
                 [ "LEFT", [ 0 ], 2 << 0 ],
                 [ "MIDDLE", [ 1 ], 2 << 1 ],
@@ -66,7 +66,7 @@ export default class MouseNode extends Node {
     }
 
     toggleComplexActions() {
-        this.state.emitComplexActions = !this.state.emitComplexActions;
+        this.internal.emitComplexActions = !this.internal.emitComplexActions;
 
         return this;
     }
@@ -83,32 +83,32 @@ export default class MouseNode extends Node {
             timeout: setTimeout(() => this._firePath(button), timeout)
         };
         
-        this.state.Path[ button ] = obj;
+        this.internal.Path[ button ] = obj;
 
         return obj;
     }
     _addPath(button, x, y, timeout = 2000) {
-        this.state.Path[ button ].points.push([ x, y ]);
+        this.internal.Path[ button ].points.push([ x, y ]);
         
-        clearTimeout(this.state.Path[ button ].timeout);
-        this.state.Path[ button ].timeout = setTimeout(() => this._firePath(button), timeout);
+        clearTimeout(this.internal.Path[ button ].timeout);
+        this.internal.Path[ button ].timeout = setTimeout(() => this._firePath(button), timeout);
     }
     _firePath(button) {
-        let path = this.state.Path[ button ];
+        let path = this.internal.Path[ button ];
 
         if(path) {
             this.send(
                 MouseNode.SignalTypes.MOUSE_PATH,
                 {
                     button: path.button,
-                    mask: this.state.Mask,
+                    mask: this.internal.Mask,
                     points: path.points
                 }
             );
 
             clearTimeout(path.timeout);
 
-            delete this.state.Path[ button ];
+            delete this.internal.Path[ button ];
         }
     }
 
@@ -126,10 +126,10 @@ export default class MouseNode extends Node {
             timeout: setTimeout(() => this._fireSelection(button), timeout)
         };
         
-        this.state.Selection[ button ] = obj;
+        this.internal.Selection[ button ] = obj;
     }
     _fireSelection(button) {
-        let selection = this.state.Selection[ button ];
+        let selection = this.internal.Selection[ button ];
 
         if(selection) {
             if(selection.points.end.length) {
@@ -144,7 +144,7 @@ export default class MouseNode extends Node {
                         MouseNode.SignalTypes.MOUSE_SELECTION,
                         {
                             button: selection.button,
-                            mask: this.state.Mask,
+                            mask: this.internal.Mask,
                             start: selection.points.start,
                             end: selection.points.end,
                             size: size,
@@ -155,24 +155,24 @@ export default class MouseNode extends Node {
 
             clearTimeout(selection.timeout);
 
-            delete this.state.Selection[ button ];
+            delete this.internal.Selection[ button ];
         }
     }
 
     updateMask(e) {
-        Object.keys(this.state.Map).forEach(btnCode => {
-            if(this.state.Map[ btnCode ].includes(e.button)) {
+        Object.keys(this.internal.Map).forEach(btnCode => {
+            if(this.internal.Map[ btnCode ].includes(e.button)) {
                 if(e.type === "mouseup") {
-                    this.state.Mask = Bitwise.remove(this.state.Mask, this.state.Flags[ btnCode ]);
+                    this.internal.Mask = Bitwise.remove(this.internal.Mask, this.internal.Flags[ btnCode ]);
                 } else if(e.type === "mousedown") {
-                    this.state.Mask = Bitwise.add(this.state.Mask, this.state.Flags[ btnCode ]);
+                    this.internal.Mask = Bitwise.add(this.internal.Mask, this.internal.Flags[ btnCode ]);
                 }
             }
         });
 
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_MASK,
-            this.state.Mask,
+            this.internal.Mask,
             this.signet
         ));
 
@@ -195,14 +195,14 @@ export default class MouseNode extends Node {
         this.message(new Message(
             MouseNode.SignalTypes.MOUSE_MOVE,
             {
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 ...pos
             },
             this.signet
         ));
 
-        if(this.state.emitComplexActions === true) {
-            for(let path of Object.values(this.state.Path)) {
+        if(this.internal.emitComplexActions === true) {
+            for(let path of Object.values(this.internal.Path)) {
                 this._addPath(
                     path.button,
                     pos.x,
@@ -223,21 +223,21 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_DOWN,
             {
                 button: e.button,
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 ...pos
             },
             this.signet
         ));
 
-        if(this.state.emitComplexActions === true) {
-            if(!this.state.Selection[ e.button ]) {
+        if(this.internal.emitComplexActions === true) {
+            if(!this.internal.Selection[ e.button ]) {
                 this._startSelection(
                     e.button,
                     pos.x,
                     pos.y
                 );
             }
-            if(!this.state.Path[ e.button ]) {
+            if(!this.internal.Path[ e.button ]) {
                 this._startPath(
                     e.button,
                     pos.x,
@@ -258,20 +258,20 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_UP,
             {
                 button: e.button,
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 ...pos
             },
             this.signet
         ));
 
-        if(this.state.emitComplexActions === true) {
-            if(this.state.Selection[ e.button ]) {
-                this.state.Selection[ e.button ].points.end = [ pos.x, pos.y ];
+        if(this.internal.emitComplexActions === true) {
+            if(this.internal.Selection[ e.button ]) {
+                this.internal.Selection[ e.button ].points.end = [ pos.x, pos.y ];
                 this._fireSelection(
                     e.button
                 );
             }
-            if(this.state.Path[ e.button ]) {
+            if(this.internal.Path[ e.button ]) {
                 this._firePath(
                     e.button
                 );
@@ -288,7 +288,7 @@ export default class MouseNode extends Node {
             MouseNode.SignalTypes.MOUSE_CLICK,
             {
                 button: e.button,
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 ...this.getMousePosition(e)
             },
             this.signet
@@ -328,10 +328,10 @@ export default class MouseNode extends Node {
      * @param {number} flag 
      */
     registerButton(name, btnCodes, flag) {
-        this.state.Map[ name ] = Array.isArray(btnCodes) ? btnCodes : [ btnCodes ];
-        this.state.Flags[ name ] = flag;
+        this.internal.Map[ name ] = Array.isArray(btnCodes) ? btnCodes : [ btnCodes ];
+        this.internal.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.internal.Mask, this.internal.Flags[ name ]);   //* Adds a function "hasCamelCasedButton() => true|false"
 
         return this;
     }
@@ -351,8 +351,8 @@ export default class MouseNode extends Node {
      * @param {string} name 
      */
     unregisterButton(name) {
-        delete this.state.Map[ name ];
-        delete this.state.Flags[ name ];
+        delete this.internal.Map[ name ];
+        delete this.internal.Flags[ name ];
 
         delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ];
 

@@ -36,7 +36,7 @@ export default class KeyboardNode extends Node {
         window.onkeydown = this.onKeyDown.bind(this);
         window.onkeyup = this.onKeyUp.bind(this);
 
-        this.state = {
+        this.internal = {
             Map: keymap || {},
             Flags: keyflags || {},
             Mask: 0,
@@ -48,7 +48,7 @@ export default class KeyboardNode extends Node {
         };
 
         //*  Default: WASD/Arrows and Modifier keys
-        if(Object.keys(this.state.Map).length === 0 && Object.keys(this.state.Flags).length === 0) {
+        if(Object.keys(this.internal.Map).length === 0 && Object.keys(this.internal.Flags).length === 0) {
             this.registerKeys([
                 [ "UP", [ 87, 38 ], 2 << 0 ],
                 [ "DOWN", [ 83, 40 ], 2 << 1 ],
@@ -67,19 +67,19 @@ export default class KeyboardNode extends Node {
     }
 
     updateMask(e) {
-        Object.keys(this.state.Map).forEach(keyCode => {
-            if(this.state.Map[ keyCode ].includes(e.which)) {
+        Object.keys(this.internal.Map).forEach(keyCode => {
+            if(this.internal.Map[ keyCode ].includes(e.which)) {
                 if(e.type === "keyup") {
-                    this.state.Mask = Bitwise.remove(this.state.Mask, this.state.Flags[ keyCode ]);
+                    this.internal.Mask = Bitwise.remove(this.internal.Mask, this.internal.Flags[ keyCode ]);
                 } else if(e.type === "keydown") {
-                    this.state.Mask = Bitwise.add(this.state.Mask, this.state.Flags[ keyCode ]);
+                    this.internal.Mask = Bitwise.add(this.internal.Mask, this.internal.Flags[ keyCode ]);
                 }
             }
         });
         
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_MASK,
-            this.state.Mask,
+            this.internal.Mask,
             this.signet
         ));
 
@@ -93,7 +93,7 @@ export default class KeyboardNode extends Node {
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_DOWN,
             {
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 key: e.which,
             },
             this.signet
@@ -109,7 +109,7 @@ export default class KeyboardNode extends Node {
         this.message(new Message(
             KeyboardNode.SignalTypes.KEY_UP,
             {
-                mask: this.state.Mask,
+                mask: this.internal.Mask,
                 key: e.which,
             },
             this.signet
@@ -127,10 +127,10 @@ export default class KeyboardNode extends Node {
      * @param {number} flag 
      */
     registerKey(name, keyCodes, flag) {
-        this.state.Map[ name ] = Array.isArray(keyCodes) ? keyCodes : [ keyCodes ];
-        this.state.Flags[ name ] = flag;
+        this.internal.Map[ name ] = Array.isArray(keyCodes) ? keyCodes : [ keyCodes ];
+        this.internal.Flags[ name ] = flag;
 
-        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.state.Mask, this.state.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
+        this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ] = () => Bitwise.has(this.internal.Mask, this.internal.Flags[ name ]);   //* Adds a function "hasCamelCasedKey() => true|false"
 
         return this;
     }
@@ -150,8 +150,8 @@ export default class KeyboardNode extends Node {
      * @param {string} name 
      */
     unregisterKey(name) {
-        delete this.state.Map[ name ];
-        delete this.state.Flags[ name ];
+        delete this.internal.Map[ name ];
+        delete this.internal.Flags[ name ];
 
         delete this[ `has${ (name.toLowerCase()).charAt(0).toUpperCase() + name.slice(1) }` ];
 

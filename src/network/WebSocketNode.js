@@ -31,7 +31,7 @@ export default class WebSocketNode extends Node {
             packager: packager
         });
 
-        this.state = {
+        this.internal = {
             isMaster: isMaster,
             WebSocket: ws,
             Hooks: {
@@ -46,7 +46,7 @@ export default class WebSocketNode extends Node {
     }
 
     getSocket() {
-        return this.state.WebSocket;
+        return this.internal.WebSocket;
     }
     getAddress() {
         let obj = this.getSocket()._socket.address();
@@ -57,31 +57,31 @@ export default class WebSocketNode extends Node {
         };
     }
     isReady() {
-        return this.state.WebSocket && this.state.WebSocket.readyState === 1;
+        return this.internal.WebSocket && this.internal.WebSocket.readyState === 1;
     }
 
     get signet() {
-        return this.state.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
+        return this.internal.isMaster ? `S:${ this.id }` : `C:${ this.id }`;
     }
 
     create({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = false } = {}) {
         if(ws) {
-            this.state.WebSocket = ws;
+            this.internal.WebSocket = ws;
         }
         if(isMaster) {
-            this.state.isMaster = true;
+            this.internal.isMaster = true;
         }
         
-        if(!this.state.WebSocket) {
-            this.state.WebSocket = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
-            this.state.WebSocket.onopen = this._onWsOpen.bind(this);
+        if(!this.internal.WebSocket) {
+            this.internal.WebSocket = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
+            this.internal.WebSocket.onopen = this._onWsOpen.bind(this);
         }
 
-        this.state.WebSocket.onclose = this._onWsClose.bind(this);
-        this.state.WebSocket.onerror = this._onWsError.bind(this);
-        this.state.WebSocket.onmessage = this._onWsMessage.bind(this);
+        this.internal.WebSocket.onclose = this._onWsClose.bind(this);
+        this.internal.WebSocket.onerror = this._onWsError.bind(this);
+        this.internal.WebSocket.onmessage = this._onWsMessage.bind(this);
 
-        if(this.state.isMaster) {
+        if(this.internal.isMaster) {
             //* Send the initialization message to the client containing the client's assigned ID (it is the same as @this.id)
             this.wsmessage(new Message(
                 WebSocketNode.SignalTypes.CLIENT_ID,
@@ -91,15 +91,15 @@ export default class WebSocketNode extends Node {
         }
 
         //!DEBUGGING
-        if(this.state.WebSocket) {
-            console.log(`[${ this.signet }] running as [${ this.state.isMaster ? "Master" : "Slave" }]`);
+        if(this.internal.WebSocket) {
+            console.log(`[${ this.signet }] running as [${ this.internal.isMaster ? "Master" : "Slave" }]`);
         }
 
         return this;
     }
     destroy() {
-        if(this.state.WebSocket) {
-            this.state.WebSocket.close();
+        if(this.internal.WebSocket) {
+            this.internal.WebSocket.close();
 
             this.send(WebSocketNode.SignalTypes.CLOSE, this.id);
         }
@@ -129,7 +129,7 @@ export default class WebSocketNode extends Node {
     wspacket(packet) {
         try {
             if(Packet.conforms(packet)) {
-                this.state.WebSocket.send(packet.toJson());
+                this.internal.WebSocket.send(packet.toJson());
             }
         } catch(e) {
             this.send(WebSocketNode.SignalTypes.ERROR, e);
@@ -144,7 +144,7 @@ export default class WebSocketNode extends Node {
                 //!DEBUGGING
                 console.log(`|${ this.id }|${ msg.timestamp }|: Received [${ msg.type }] from [${ msg.source }]`);
 
-                if(msg.type === WebSocketNode.SignalTypes.CLIENT_ID && !this.state.isMaster) {
+                if(msg.type === WebSocketNode.SignalTypes.CLIENT_ID && !this.internal.isMaster) {
                     //!DEBUGGING
                     let oldId = this.id;
                     console.log(`[${ oldId }] reassigned to [${ msg.payload }]`);
@@ -164,8 +164,8 @@ export default class WebSocketNode extends Node {
     _onWsOpen(e) {
         this.send(WebSocketNode.SignalTypes.OPEN, e);
 
-        if(typeof this.state.Hooks.onOpen === "function") {
-            this.state.Hooks.onOpen(this, e);
+        if(typeof this.internal.Hooks.onOpen === "function") {
+            this.internal.Hooks.onOpen(this, e);
         }
     }
     _onWsClose(e) {
@@ -176,8 +176,8 @@ export default class WebSocketNode extends Node {
         
         this.send(WebSocketNode.SignalTypes.CLOSE, payload);
 
-        if(typeof this.state.Hooks.onClose === "function") {
-            this.state.Hooks.onClose(this, payload);
+        if(typeof this.internal.Hooks.onClose === "function") {
+            this.internal.Hooks.onClose(this, payload);
         }
     }
     _onWsError(e) {

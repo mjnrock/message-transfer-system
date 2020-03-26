@@ -10,6 +10,7 @@ export default class Node {
         this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
         this._receive = receive || (() => true);
         this._subscriptions = {};
+        this._internal = {};
 
         this._state = {};
         this._emitStateChange = false;
@@ -33,6 +34,10 @@ export default class Node {
         this._emitStateChange = !this._emitStateChange;
 
         return this;
+    }
+
+    get internal() {
+        return this._internal;
     }
 
     get state() {

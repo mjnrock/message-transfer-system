@@ -9,7 +9,7 @@ export default class ConnectionBroker extends Node {
             parent: parent
         });
 
-        this.state = {
+        this.internal = {
             isMaster: isMaster,
             WebSocket: {}
         };
@@ -29,7 +29,7 @@ export default class ConnectionBroker extends Node {
     getWsAddressMap(idAsKey = true) {
         let map = {};
 
-        for(let wsn of Object.values(this.state.WebSocket)) {
+        for(let wsn of Object.values(this.internal.WebSocket)) {
             if(idAsKey) {
                 map[ wsn.id ] = wsn.getAddress();
             } else {
@@ -43,9 +43,9 @@ export default class ConnectionBroker extends Node {
     }
     getWebSocketNode(indexOrUuid = 0) {
         if(typeof indexOrUuid === "number") {
-            return Object.values(this.state.WebSocket)[ indexOrUuid ];
+            return Object.values(this.internal.WebSocket)[ indexOrUuid ];
         } else if(typeof indexOrUuid === "string" || indexOrUuid instanceof String) {
-            return this.state.WebSocket[ indexOrUuid ];
+            return this.internal.WebSocket[ indexOrUuid ];
         }
 
         return false;
@@ -63,19 +63,19 @@ export default class ConnectionBroker extends Node {
     webSocketNode({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
         let websocket = new WebSocketNode({
             onClose: (wsn, e) => {                
-                delete this.state.WebSocket[ wsn.id ];
+                delete this.internal.WebSocket[ wsn.id ];
                 wsn._parent.unregister(websocket);
             }
         });
 
         if(ws) {
-            websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.state.isMaster });
+            websocket.create({ ws, isMaster: isMaster !== null ? isMaster : this.internal.isMaster });
         } else {            
-            websocket.create({ uri, protocol, isMaster: isMaster !== null ? isMaster : this.state.isMaster });
+            websocket.create({ uri, protocol, isMaster: isMaster !== null ? isMaster : this.internal.isMaster });
         }
 
         this._parent.register(websocket);
-        this.state.WebSocket[ websocket.id ] = websocket;
+        this.internal.WebSocket[ websocket.id ] = websocket;
         this._parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
 
         return websocket.id;
@@ -87,15 +87,15 @@ export default class ConnectionBroker extends Node {
             delete msg._elevate;
 
             if(destination === -1) {    // All
-                for(let websocket of Object.values(this.state.WebSocket)) {
+                for(let websocket of Object.values(this.internal.WebSocket)) {
                     if(websocket.isReady()) {
                         msg.source = websocket.signet;
                         websocket.wsmessage(msg);
                     }
                 }
-            } else if(this.state.WebSocket[ destination ] && this.state.WebSocket[ destination ].isReady()) {    // Targeted
+            } else if(this.internal.WebSocket[ destination ] && this.internal.WebSocket[ destination ].isReady()) {    // Targeted
                 msg.source = websocket.signet;
-                this.state.WebSocket[ destination ].wsmessage(msg);
+                this.internal.WebSocket[ destination ].wsmessage(msg);
             }
         }
     }

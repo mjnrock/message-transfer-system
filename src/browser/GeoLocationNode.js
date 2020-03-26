@@ -23,10 +23,6 @@ export default class GeoLocationNode extends Node {
             parent: parent,
             packager: packager
         });
-
-        this.state = {
-            Watcher: null
-        };
         
         if(!navigator.geolocation) {
             throw new Error("Geolocation is not supported");

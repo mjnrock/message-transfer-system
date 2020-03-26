@@ -39,11 +39,26 @@ export default class CanvasNode extends Node {
             packager: packager
         });
 
-        this.state = {
+        this.internal = {
             Canvas: canvas,
             Context: ctx || canvas ? canvas.getContext("2d") : null,
             Images: {},
             Draw: draw
+        };
+    }
+
+    toggleSmoothLines() {
+        this.ctx.lineCap = "round";
+
+        return this;
+    }
+
+    relPos(absX, absY) {
+        let { left, top } = this.canvas.getBoundingClientRect();
+
+        return {
+            x: absX - left,
+            y: absY - top
         };
     }
 
@@ -57,21 +72,21 @@ export default class CanvasNode extends Node {
         }
     }
     draw(...args) {
-        if(typeof this.state.Draw === "function") {
-            this.state.Draw.call(this, ...args);
+        if(typeof this.internal.Draw === "function") {
+            this.internal.Draw.call(this, ...args);
         }
 
         return this;
     }
     setDraw(draw) {
-        this.state.Draw = draw;
+        this.internal.Draw = draw;
 
         return this;
     }
 
     setCanvas(canvas, ctx = "2d") {
-        this.state.Canvas = canvas;
-        this.state.Context = canvas.getContext(ctx);
+        this.internal.Canvas = canvas;
+        this.internal.Context = canvas.getContext(ctx);
 
         return this;
     }
@@ -96,17 +111,17 @@ export default class CanvasNode extends Node {
     
 
     get canvas() {
-        return this.state.Canvas;
+        return this.internal.Canvas;
     }
     get ctx() {
-        return this.state.Context;
+        return this.internal.Context;
     }
 
     loadImage(name, uri) {        
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.addEventListener("load", () => {
-                this.state.Images[ name ] = img;
+                this.internal.Images[ name ] = img;
                 resolve(img);
             });
             img.addEventListener("error", err => reject(err));
@@ -120,45 +135,45 @@ export default class CanvasNode extends Node {
     }
 
     get() {
-        return this.state.Canvas;
+        return this.internal.Canvas;
     }
     getCenterPoint() {
         return [
-            this.state.Canvas.width / 2,
-            this.state.Canvas.height / 2
+            this.internal.Canvas.width / 2,
+            this.internal.Canvas.height / 2
         ];
     }
 
     resize(width, height) {
-        this.state.Canvas.width = width;
-        this.state.Canvas.height = height;
+        this.internal.Canvas.width = width;
+        this.internal.Canvas.height = height;
 
         return this;
     }
 
     //* Erasure methods
     clear() {
-        this.state.Context.clearRect(0, 0, this.state.Canvas.width, this.state.Canvas.height);
+        this.ctx.clearRect(0, 0, this.internal.Canvas.width, this.internal.Canvas.height);
 
         return this;
     }
     erase(x, y, w, h) {
-        this.state.Context.clearRect(x, y, w, h);
+        this.ctx.clearRect(x, y, w, h);
 
         return this;
     }
     eraseNgon(n, x, y, r, { rotation = 0 } = {}) {
-        let pColor = this.state.Context.strokeStyle;
-        let pBgColor = this.state.Context.fillStyle;
+        let pColor = this.ctx.strokeStyle;
+        let pBgColor = this.ctx.fillStyle;
 
-        this.state.Context.globalCompositeOperation = "destination-out";
-        this.state.Context.fillStyle = "#fff";
+        this.ctx.globalCompositeOperation = "destination-out";
+        this.ctx.fillStyle = "#fff";
         this.ngon(n, x, y, r, { rotation, isFilled: true });
 
         // Reset the composite and revert color
-        this.state.Context.globalCompositeOperation = "source-over";
-        this.state.Context.strokeStyle = pColor;
-        this.state.Context.fillStyle = pBgColor;
+        this.ctx.globalCompositeOperation = "source-over";
+        this.ctx.strokeStyle = pColor;
+        this.ctx.fillStyle = pBgColor;
     }
 
     
@@ -166,11 +181,11 @@ export default class CanvasNode extends Node {
     prop(...props) {
         if(Array.isArray(props[ 0 ])) {
             props.forEach(([ prop, value ]) => {
-                this.state.Context[ prop ] = value;
+                this.ctx[ prop ] = value;
             });
         } else if(typeof props[ 0 ] === "object") {
             Object.entries(props[ 0 ]).forEach(([ prop, value ]) => {
-                this.state.Context[ prop ] = value;
+                this.ctx[ prop ] = value;
             });
         }
 
@@ -181,16 +196,16 @@ export default class CanvasNode extends Node {
     //* Shape methods
     circle(x, y, r, { isFilled = false } = {}) {
         if(isFilled) {
-            this.state.Context.beginPath();
-            this.state.Context.arc(x, y, r, 0, 2 * Math.PI);
-            this.state.Context.closePath();
-            this.state.Context.fill();
-            this.state.Context.stroke();
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, r, 0, 2 * Math.PI);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.stroke();
         } else {
-            this.state.Context.beginPath();
-            this.state.Context.arc(x, y, r, 0, 2 * Math.PI);
-            this.state.Context.closePath();
-            this.state.Context.stroke();
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, r, 0, 2 * Math.PI);
+            this.ctx.closePath();
+            this.ctx.stroke();
         }
 
         return this;
@@ -201,26 +216,26 @@ export default class CanvasNode extends Node {
     }
 
     line(x0, y0, x1, y1) {
-        this.state.Context.beginPath();
-        this.state.Context.moveTo(x0, y0);
-        this.state.Context.lineTo(x1, y1);
-        this.state.Context.closePath();
-        this.state.Context.stroke();
+        this.ctx.beginPath();
+        this.ctx.moveTo(x0, y0);
+        this.ctx.lineTo(x1, y1);
+        this.ctx.closePath();
+        this.ctx.stroke();
 
         return this;
     }
 
     rect(x, y, w, h, { isFilled = false } = {}) {
-        this.state.Context.beginPath();
+        this.ctx.beginPath();
         if(isFilled) {
-            this.state.Context.fillRect(x, y, w, h);
-            this.state.Context.closePath();
-            this.state.Context.fill();
-            this.state.Context.stroke();
+            this.ctx.fillRect(x, y, w, h);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.stroke();
         } else {
-            this.state.Context.rect(x, y, w, h);
-            this.state.Context.closePath();
-            this.state.Context.stroke();
+            this.ctx.rect(x, y, w, h);
+            this.ctx.closePath();
+            this.ctx.stroke();
         }
 
         return this;
@@ -249,22 +264,22 @@ export default class CanvasNode extends Node {
             corners.push(this._getNgonCorner(x, y, r, i, n, rotation));
         }
 
-        this.state.Context.beginPath();
-        this.state.Context.moveTo(...corners[ 0 ]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(...corners[ 0 ]);
         corners.forEach((c, i) => {
             if(i < corners.length - 1) {
-                this.state.Context.lineTo(...corners[i + 1]);
+                this.ctx.lineTo(...corners[i + 1]);
             }
         });
-        this.state.Context.lineTo(...corners[ 0 ]);
-        this.state.Context.closePath();
+        this.ctx.lineTo(...corners[ 0 ]);
+        this.ctx.closePath();
 
         if(isFilled) {
-            // this.state.Context.closePath();
-            this.state.Context.fill();
-            this.state.Context.stroke();
+            // this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.stroke();
         } else {
-            this.state.Context.stroke();
+            this.ctx.stroke();
         }
 
         return this;
@@ -275,27 +290,27 @@ export default class CanvasNode extends Node {
             yn = y;
 
         if(align) {
-            this.state.Context.textAlign = align;
-            this.state.Context.textBaseline = "middle";
+            this.ctx.textAlign = align;
+            this.ctx.textBaseline = "middle";
         }
 
-        let pColor = this.state.Context.fillStyle;
-        this.state.Context.fillStyle = color;
-        this.state.Context.font = font;
-        this.state.Context.fillText(txt, xn, yn);
-        this.state.Context.fillStyle = pColor;
+        let pColor = this.ctx.fillStyle;
+        this.ctx.fillStyle = color;
+        this.ctx.font = font;
+        this.ctx.fillText(txt, xn, yn);
+        this.ctx.fillStyle = pColor;
 
         return this;
     }
 
     image(name, ...args) {
-        this.state.Context.drawImage(this.state.Images[ name ], ...args);
+        this.ctx.drawImage(this.internal.Images[ name ], ...args);
 
         return this;
     }
 
     tile(name, size, sx, sy, dx, dy) {
-        this.state.Context.drawImage(this.state.Images[ name ], sx, sy, size, size, dx, dy, size, size);
+        this.ctx.drawImage(this.internal.Images[ name ], sx, sy, size, size, dx, dy, size, size);
 
         return this;
     }
