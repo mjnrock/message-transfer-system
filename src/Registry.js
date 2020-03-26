@@ -10,23 +10,23 @@ export default class Registry {
         this._entries = {};
     }
 
-    lookup(id) {
-        return Object.values(this._entries).filter(ent => ent.id === id);
+    lookup(name) {
+        return Object.values(this._entries).filter(ent => ent.name === name);
     }
     
-    has(name) {
-        return !!this._entries[ name ];
+    has(id) {
+        return !!this._entries[ id ];
     }
-    get(name) {
-        return this._entries[ name ];
+    get(id) {
+        return this._entries[ id ];
     }
 
     register(...nodes) {
         let successfulNodes = [];
         for(let node of nodes) {
-            if(node instanceof Node && !this.has(node.name)) {
+            if(node instanceof Node && !this.has(node.id)) {
                 node._parent = this._parent;
-                this._entries[ node.name ] = node;
+                this._entries[ node.id ] = node;
 
                 successfulNodes.push(node);
 
@@ -45,9 +45,9 @@ export default class Registry {
     }
     unregister(...nodes) {
         for(let node of nodes) {
-            if(node instanceof Node && this.has(node.name)) {
+            if(node instanceof Node && this.has(node.id)) {
                 node._parent = null;
-                delete this._entries[ node.name ];
+                delete this._entries[ node.id ];
 
                 //? Special routing instructions for convenience
                 if(node instanceof WebSocketNode) {

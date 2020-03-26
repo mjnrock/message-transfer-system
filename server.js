@@ -16,21 +16,22 @@ app.set("trust proxy", true);
 
 const MTS = (new MTSLib.Main({
     receive: function(msg) {
+        // console.log(msg);
         if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
-            let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
+            // let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
 
-            this.message(message);
+            // this.message(message);
 
-            // this.send(
-            //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
-            //     msg.payload
-            // );
+            this.send(
+                MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
+                msg.payload
+            );
         }
     }
 })).loadNetwork(true, {
-    // routes: [
-    //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
-    // ]
+    routes: [
+        MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
+    ]
 });
 // MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
@@ -39,7 +40,7 @@ console.warn(`MTS: ${ MTS.id }`);
 app.ws("/", function (ws, req) {
     let id = MTS.Network.webSocketNode({ ws });
     
-console.warn(`WS: ${ id }`);
+    console.warn(`WS: ${ id }`);
 });
 
 app.listen(port, () => console.log(`Server listening on port ${ port }!`));

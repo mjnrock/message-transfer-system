@@ -23,15 +23,15 @@ export default class Router {
         return routes;
     }
 
-    addRoute(nodeName, msgTypes = []) {
-        if(nodeName instanceof Node) {
-            nodeName = nodeName.name;
+    addRoute(nodeOrId, msgTypes = []) {
+        if(nodeOrId instanceof Node) {
+            nodeOrId = nodeOrId.id;
         }
 
-        this.removeRoute(nodeName);
+        this.removeRoute(nodeOrId);
 
         if(msgTypes === "*" || msgTypes === true) {
-            this._routes["*"].push(nodeName);
+            this._routes["*"].push(nodeOrId);
         } else {
             if(!Array.isArray(msgTypes)) {
                 msgTypes = [ msgTypes ];
@@ -42,21 +42,21 @@ export default class Router {
                     this._routes[ type ] = [];
                 }
     
-                if(!this._routes[ type ].includes(nodeName)) {
-                    this._routes[ type ].push(nodeName);
+                if(!this._routes[ type ].includes(nodeOrId)) {
+                    this._routes[ type ].push(nodeOrId);
                 }
             }
         }
 
         return this;
     }
-    removeRoute(nodeName) {
-        if(nodeName instanceof Node) {
-            nodeName = nodeName.name;
+    removeRoute(nodeOrId) {
+        if(nodeOrId instanceof Node) {
+            nodeOrId = nodeOrId.id;
         }
 
         Object.entries(this._routes).forEach(([ type, mods ]) => {
-            this._routes[ type ] = mods.filter(m => m !== nodeName);
+            this._routes[ type ] = mods.filter(m => m !== nodeOrId);
         });
 
         return this;
@@ -68,7 +68,7 @@ export default class Router {
             if(msg._elevate) {
                 this._parent.Network.route(msg);
             } else {
-                let nodes = this.get(msg.type, true).map(name => this._parent.Registry.get(name));
+                let nodes = this.get(msg.type, true).map(id => this._parent.Registry.get(id));
 
                 for(let node of nodes) {
                     if(node instanceof Node && node.signet !== msg.source) {
