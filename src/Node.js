@@ -39,6 +39,9 @@ export default class Node {
     get internal() {
         return this._internal;
     }
+    set internal(value) {
+        this._internal = value;
+    }
 
     get state() {
         return this._state;
