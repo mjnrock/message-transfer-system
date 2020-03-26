@@ -16,16 +16,8 @@ app.set("trust proxy", true);
 
 const MTS = (new MTSLib.Main({
     receive: function(msg) {
-        // console.log(msg);
         if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
-            let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
-
-            this.message(message);
-
-            // this.send(
-            //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
-            //     msg.payload
-            // );
+            this.message((new MTSLib.Message(msg.type, msg.payload)).elevate());
         }
     }
 })).loadNetwork(true);
