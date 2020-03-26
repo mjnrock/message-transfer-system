@@ -1,5 +1,4 @@
 import { GenerateUUID } from "./helper";
-import Main from "./Main";
 import Message from "./Message";
 
 export default class Node {
@@ -15,13 +14,6 @@ export default class Node {
         this._state = {};
         this._emitStateChange = false;
         this._emitOnSend = false;
-
-        if(parent instanceof Main) {
-            parent.register(this);
-        }
-        if(typeof this._receive === "function") {
-            this._receive.bind(this);
-        }
     }
 
     /**
