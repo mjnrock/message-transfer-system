@@ -1,9 +1,13 @@
 export default class Message {
-    constructor(type, payload, source) {
+    constructor(type, payload, source, { destination = null } = {}) {
         this.type = type;
         this.payload = payload;
         this.source = source;
         this.timestamp = Date.now();
+
+        if(destination !== null && destination !== void 0) {
+            this.elevate(destination)
+        }
 
         return this;
     }

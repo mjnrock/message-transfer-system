@@ -17,10 +17,10 @@ app.set("trust proxy", true);
 const MTS = (new MTSLib.Main({
     receive: function(msg) {
         // console.log(msg);
-        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE && !MTS.Registry.has(msg.source)) {
-            // let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
+        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
+            let message = (new MTSLib.Message(msg.type, msg.payload)).elevate();
 
-            // this.message(message);
+            this.message(message);
 
             // this.send(
             //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
@@ -28,11 +28,7 @@ const MTS = (new MTSLib.Main({
             // );
         }
     }
-})).loadNetwork(true, {
-    routes: [
-        MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
-    ]
-});
+})).loadNetwork(true);
 // MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
 console.warn(`MTS: ${ MTS.id }`);
