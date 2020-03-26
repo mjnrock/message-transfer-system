@@ -22,10 +22,10 @@ const MTS = (new MTSLib.Main({
 
             // this.message(message);
 
-            this.send(
-                MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
-                msg.payload
-            );
+            // this.send(
+            //     MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE,
+            //     msg.payload
+            // );
         }
     }
 })).loadNetwork(true, {
