@@ -7,7 +7,15 @@ export default class TouchNode extends Node {
         TOUCH_MOVE: "TouchNode.TouchMove",
         TOUCH_START: "TouchNode.TouchStart",
         TOUCH_END: "TouchNode.TouchEnd",
-        TOUCH_CANCEL: "TouchNode.TouchCancel"
+        TOUCH_CANCEL: "TouchNode.TouchCancel",
+
+        //* WIP, not yet implemented
+        SWIPE_UP: "TouchNode.SwipeUp",          // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
+        SWIPE_DOWN: "TouchNode.SwipeDown",      // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
+        SWIPE_LEFT: "TouchNode.SwipeLeft",      // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
+        SWIPE_RIGHT: "TouchNode.SwipeRight",    // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
+        PINCH: "TouchNode.Pinch",
+        ZOOM: "TouchNode.Zoom",
     };
     
     static AllSignalTypes(...filter) {
@@ -27,10 +35,12 @@ export default class TouchNode extends Node {
             packager: packager
         });
         
-        window.ontouchstart = this.onTouchStart.bind(this);
-        window.ontouchend = this.onTouchEnd.bind(this);
-        window.ontouchmove = this.onTouchMove.bind(this);
-        window.ontouchcancel = this.onTouchCancel.bind(this);
+        window.addEventListener("load", () => {
+            window.addEventListener("touchstart", this.onTouchStart.bind(this));
+            window.addEventListener("touchend", this.onTouchEnd.bind(this));
+            window.addEventListener("touchmove", this.onTouchMove.bind(this));
+            window.addEventListener("touchcancel", this.onTouchCancel.bind(this));
+        }, false);
 
         this.internal = {
             Touches: {}
@@ -41,10 +51,93 @@ export default class TouchNode extends Node {
         }
     }
 
-    getTouchPosition(e) {
+    getTouches(e) {
+        let touches = {},
+            target = {},
+            changed = {};
+
+        Array.from(e.touches).forEach((touch, i) => {
+            touches[ i ] = {
+                id: touch.identifier,
+                x: touch.clientX,   // no offsets accounted for
+                y: touch.clientY,
+                radius: {
+                    x: touch.radiusX,
+                    y: touch.radiusY,
+                    theta: touch.rotationAngle,
+                    force: touch.force,
+                },
+                // x: touch.pageX,  // with offsets accounted for
+                // y: touch.pageY,
+                timestamp: Date.now(),
+                // target: {
+                //     type: touch.target.tagName.toLowerCase(),
+                //     position: touch.target.getBoundingClientRect(),
+                //     id: touch.target.id,
+                //     class: touch.target.className,
+                //     ref: touch.target,
+                // },
+            }
+        });
+        Array.from(e.changedTouches).forEach((touch, i) => {
+            changed[ i ] = {
+                id: touch.identifier,
+                x: touch.clientX,
+                y: touch.clientY,
+                radius: {
+                    x: touch.radiusX,
+                    y: touch.radiusY,
+                    theta: touch.rotationAngle,
+                    force: touch.force,
+                },
+                // x: touch.pageX,
+                // y: touch.pageY,
+                timestamp: Date.now(),
+                // target: {
+                //     type: touch.target.tagName.toLowerCase(),
+                //     position: touch.target.getBoundingClientRect(),
+                //     id: touch.target.id,
+                //     class: touch.target.className,
+                //     ref: touch.target,
+                // },
+            }
+        });
+        Array.from(e.targetTouches).forEach((touch, i) => {
+            target[ i ] = {
+                id: touch.identifier,
+                x: touch.clientX,
+                y: touch.clientY,
+                radius: {
+                    x: touch.radiusX,
+                    y: touch.radiusY,
+                    theta: touch.rotationAngle,
+                    force: touch.force,
+                },
+                // x: touch.pageX,
+                // y: touch.pageY,
+                timestamp: Date.now(),
+                // target: {
+                //     type: touch.target.tagName.toLowerCase(),
+                //     position: touch.target.getBoundingClientRect(),
+                //     id: touch.target.id,
+                //     class: touch.target.className,
+                //     ref: touch.target,
+                // },
+            }
+        });
+
         return {
-            x: e.x,
-            y: e.y
+            keys: {
+                ctrl: e.ctrlKey,
+                shift: e.shiftKey,
+                alt: e.altKey,
+                meta: e.metaKey,
+            },
+            rotation: e.rotation,
+            scale: e.scale,
+            touches,
+            target,
+            changed
         };
     }
 
@@ -53,7 +146,7 @@ export default class TouchNode extends Node {
 
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_MOVE,
-            e,
+            this.getTouches(e),
             this.signet
         ));
     
@@ -64,7 +157,7 @@ export default class TouchNode extends Node {
 
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_START,
-            e,
+            this.getTouches(e),
             this.signet
         ));
     
@@ -75,7 +168,7 @@ export default class TouchNode extends Node {
 
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_END,
-            e,
+            this.getTouches(e),
             this.signet
         ));
     
@@ -87,7 +180,7 @@ export default class TouchNode extends Node {
 
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_CANCEL,
-            e,
+            this.getTouches(e),
             this.signet
         ));
     
