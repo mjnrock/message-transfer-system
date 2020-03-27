@@ -13,6 +13,11 @@ export default class MouseNode extends Node {
         MOUSE_UP: "MouseNode.MouseUp",
         MOUSE_DOWN: "MouseNode.MouseDown",
 
+        SWIPE_UP: "MouseNode.SwipeUp",
+        SWIPE_DOWN: "MouseNode.SwipeDown",
+        SWIPE_LEFT: "MouseNode.SwipeLeft",
+        SWIPE_RIGHT: "MouseNode.SwipeRight",
+
         //* Complex Actions
         MOUSE_SELECTION: "MouseNode.MouseSelection",
         MOUSE_PATH: "MouseNode.MousePath",
@@ -48,6 +53,7 @@ export default class MouseNode extends Node {
             Mask: 0,
             Selection: {},
             Path: {},
+            Swipe: {},
             emitComplexActions: false
         };
 
@@ -71,6 +77,70 @@ export default class MouseNode extends Node {
         return this;
     }
 
+    _startSwipe(button, x, y, timeout = 750, threshold = 75) {
+        let id = GenerateUUID();
+
+        let obj = {
+            id: id,
+            button: button,
+            start: [ x, y ],
+            timestamp: Date.now(),
+            threshold: {
+                position: threshold,
+                time: timeout
+            },
+            timeout: setTimeout(() => this._clearSwipe(button), timeout)
+        };
+        
+        this.internal.Swipe[ button ] = obj;
+    }
+    _endSwipe(button, x, y) {
+        let swipe = this.internal.Swipe[ button ];
+
+        if(swipe && (Date.now() - swipe.timestamp <= swipe.threshold.time)) {
+            let [ sx, sy ] = swipe.start,
+                dx = x - sx,
+                dy = y - sy,
+                dir = null;
+
+            if(Math.abs(dx) > swipe.threshold.position || Math.abs(dy) > swipe.threshold.position) {
+                if(Math.abs(dx) > Math.abs(dy)) {
+                    if(dx > 0) {
+                        dir = "RIGHT";
+                    } else {
+                        dir = "LEFT";
+                    }
+                } else {
+                    if(dy > 0) {
+                        dir = "DOWN";
+                    } else {
+                        dir = "UP";
+                    }
+                }
+                
+                this.send(
+                    MouseNode.SignalTypes[ `SWIPE_${ dir.toUpperCase() }`],
+                    {
+                        button: swipe.button,
+                        mask: this.internal.Mask,
+                        points: {
+                            start: swipe.start,
+                            end: [ x, y ]
+                        }
+                    }
+                );                
+            }
+
+            this._clearSwipe(button);
+        }
+    }
+    _clearSwipe(button) {
+        if(this.internal.Swipe[ button ]) {
+            clearTimeout(this.internal.Swipe[ button ].timeout);
+            delete this.internal.Swipe[ button ];
+        }
+    }
+
     _startPath(button, x, y, timeout = 2000) {
         let id = GenerateUUID();
 
@@ -80,20 +150,18 @@ export default class MouseNode extends Node {
             points: [
                 [ x, y ]
             ],
-            timeout: setTimeout(() => this._firePath(button), timeout)
+            timeout: setTimeout(() => this._endPath(button), timeout)
         };
         
         this.internal.Path[ button ] = obj;
-
-        return obj;
     }
     _addPath(button, x, y, timeout = 2000) {
         this.internal.Path[ button ].points.push([ x, y ]);
         
         clearTimeout(this.internal.Path[ button ].timeout);
-        this.internal.Path[ button ].timeout = setTimeout(() => this._firePath(button), timeout);
+        this.internal.Path[ button ].timeout = setTimeout(() => this._endPath(button), timeout);
     }
-    _firePath(button) {
+    _endPath(button) {
         let path = this.internal.Path[ button ];
 
         if(path) {
@@ -123,12 +191,12 @@ export default class MouseNode extends Node {
                 end: []
             },
             threshold: threshold,
-            timeout: setTimeout(() => this._fireSelection(button), timeout)
+            timeout: setTimeout(() => this._endSelection(button), timeout)
         };
         
         this.internal.Selection[ button ] = obj;
     }
-    _fireSelection(button) {
+    _endSelection(button) {
         let selection = this.internal.Selection[ button ];
 
         if(selection) {
@@ -228,6 +296,14 @@ export default class MouseNode extends Node {
             },
             this.signet
         ));
+        
+        if(!this.internal.Swipe[ e.button ]) {
+            this._startSwipe(
+                e.button,
+                pos.x,
+                pos.y
+            );
+        }
 
         if(this.internal.emitComplexActions === true) {
             if(!this.internal.Selection[ e.button ]) {
@@ -263,16 +339,24 @@ export default class MouseNode extends Node {
             },
             this.signet
         ));
+        
+        if(this.internal.Swipe[ e.button ]) {
+            this._endSwipe(
+                e.button,
+                pos.x,
+                pos.y
+            );
+        }
 
         if(this.internal.emitComplexActions === true) {
             if(this.internal.Selection[ e.button ]) {
                 this.internal.Selection[ e.button ].points.end = [ pos.x, pos.y ];
-                this._fireSelection(
+                this._endSelection(
                     e.button
                 );
             }
             if(this.internal.Path[ e.button ]) {
-                this._firePath(
+                this._endPath(
                     e.button
                 );
             }

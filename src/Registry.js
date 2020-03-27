@@ -33,6 +33,17 @@ export default class Registry {
         return this._entries[ sid ];
     }
 
+    changeId(oldId, newId) {
+        let entry = this._entries[ oldId ];
+
+        if(entry) {
+            delete this._entries[ oldId ];
+            this._entries[ newId ] = entry;
+        }
+
+        return this;
+    }
+
     register(...nodes) {
         let successfulNodes = [];
         for(let node of nodes) {

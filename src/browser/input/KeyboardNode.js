@@ -2,17 +2,11 @@ import { Bitwise, GenerateUUID } from "./../../helper";
 import Node from "./../../Node";
 import Message from "./../../Message";
 
-//! ------------------------------------------
-//! Use the TESORO version atm, it is newer!
-//! ------------------------------------------
-
 export default class KeyboardNode extends Node {
     static SignalTypes = {
         KEY_MASK: "KeyboardNode.KeyMask",
         KEY_UP: "KeyboardNode.KeyUp",
         KEY_DOWN: "KeyboardNode.KeyDown",
-        
-        //* WIP, not currently implemented
         KEY_SEQUENCE: "KeyboardNode.KeySequence",   // Record all key UPs within a time threshold | Fire if threshold is exceeded, reset if UP happens
     };
     
@@ -40,11 +34,7 @@ export default class KeyboardNode extends Node {
             Map: keymap || {},
             Flags: keyflags || {},
             Mask: 0,
-            Sequence: {
-                Keys: [],
-                Start: 0,
-                Threshold: 300  // ms
-            }
+            Sequence: null
         };
 
         //*  Default: WASD/Arrows and Modifier keys
@@ -64,6 +54,54 @@ export default class KeyboardNode extends Node {
         if(!window) {
             throw new Error("Window is not supported");
         }
+    }
+
+    _startSequence(key, timeout = 750, minLength = 3, maxLength = 10) {
+        let id = GenerateUUID();
+
+        let obj = {
+            id: id,
+            keys: [ {
+                key: key,
+                timestamp: Date.now()
+            } ],
+            length: {
+                min: minLength,
+                max: maxLength
+            },
+            timeout: setTimeout(() => this._endSequence(), timeout)
+        };
+        
+        this.internal.Sequence = obj;
+    }
+    _addSequence(key) {
+        if(this.internal.Sequence) {
+            this.internal.Sequence.keys.push({
+                key: key,
+                timestamp: Date.now()
+            });
+
+            if(this.internal.Sequence.keys.length === this.internal.Sequence.length.max) {
+                this._endSequence();
+            }
+        }
+    }
+    _endSequence() {        
+        let sequence = this.internal.Sequence;
+
+        if(sequence && (sequence.keys.length >= sequence.length.min && sequence.keys.length <= sequence.length.max)) {
+            this.send(
+                KeyboardNode.SignalTypes.KEY_SEQUENCE,
+                {
+                    keys: sequence.keys,
+                    length: sequence.keys.length,
+                    timespan: sequence.keys[ sequence.keys.length - 1 ].timestamp - sequence.keys[ 0 ].timestamp
+                }
+            );
+        }
+
+        clearTimeout(sequence.timeout);
+        this.internal.Sequence = null;
     }
 
     updateMask(e) {
@@ -114,6 +152,12 @@ export default class KeyboardNode extends Node {
             },
             this.signet
         ));
+
+        if(this.internal.Sequence) {
+            this._addSequence(e.which);
+        } else {
+            this._startSequence(e.which);
+        }
     
         return this;
     }
