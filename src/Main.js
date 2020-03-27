@@ -41,13 +41,13 @@ export default class Main extends Repeater {
      * On-demand module in scopes where <Window> exists
      * @param {obj} opts Exposes MTS.Browser.Input Nodes to activate
      */
-    loadBrowserInput({ mouse = true, mouseComplex = false, keys = true } = {}) {
+    loadBrowserInput({ mouse = false, mouseComplex = false, touch = false, keys = false } = {}) {
         if(!window) {
             throw new Error("Window is not supported");
         }
 
         if(mouse || mouseComplex) {
-            let mouse = new MTS.Browser.Input.MouseNode(window);
+            let mouse = new MTS.Browser.Input.MouseNode();
 
             if(mouseComplex === true) {
                 mouse.toggleComplexActions();
@@ -60,8 +60,18 @@ export default class Main extends Repeater {
             this.register(this.Browser.Input.Mouse);
         }
 
+        if(touch) {
+            let touch = new MTS.Browser.Input.TouchNode();
+            
+            this.Browser = this.Browser || {};
+            this.Browser.Input = this.Browser.Input || {};
+            this.Browser.Input[ "Touch" ] = touch;
+            
+            this.register(this.Browser.Input.Touch);
+        }
+
         if(keys) {
-            let keys = new MTS.Browser.Input.KeyboardNode(window);
+            let keys = new MTS.Browser.Input.KeyboardNode();
             
             this.Browser = this.Browser || {};
             this.Browser.Input = this.Browser.Input || {};
