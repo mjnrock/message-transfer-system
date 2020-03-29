@@ -1,6 +1,6 @@
 {
     "name": "@lespantsfancy/message-transfer-system",
-    "version": "0.1.38",
+    "version": "0.1.39",
     "description": "",
     "main": "lib/index.js",
     "directories": {
