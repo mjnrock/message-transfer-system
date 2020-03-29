@@ -54,15 +54,15 @@ export default class Node {
     get state() {
         return this._state;
     }
-    set state(value) {
+    set state(value) {        
+        this._state = value;
+
         if(this._emitStateChange === true) {
             this.emit(`state::${ this.signet }`, {
                 previous: this._state,
                 current: value
             });
         }
-        
-        this._state = value;
     }
 
     get signet() {
