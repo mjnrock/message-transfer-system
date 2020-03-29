@@ -8,6 +8,8 @@ export default class TouchNode extends Node {
         TOUCH_START: "TouchNode.TouchStart",
         TOUCH_END: "TouchNode.TouchEnd",
         TOUCH_CANCEL: "TouchNode.TouchCancel",
+        TOUCH_CLICK: "TouchNode.TouchClick",
+        TOUCH_DOUBLE_CLICK: "TouchNode.TouchDoubleClick",
 
         //* WIP, not yet implemented
         SWIPE_UP: "TouchNode.SwipeUp",          // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
@@ -43,6 +45,8 @@ export default class TouchNode extends Node {
         }, false);
 
         this.internal = {
+            Click: [],
+            DoubleClick: [],
             Touches: {}
         };
         
@@ -155,6 +159,35 @@ export default class TouchNode extends Node {
     onTouchStart(e) {
         e.preventDefault();
 
+        if(e.touches.length === 1) {
+            this.internal.Click = [
+                e.touches[ 0 ].clientX,
+                e.touches[ 0 ].clientY,
+            ];
+
+            if(!this.internal.DoubleClick.length) {
+                this.internal.DoubleClick = [
+                    e.touches[ 0 ].pageX,
+                    e.touches[ 0 ].pageY,
+                    Date.now()
+                ];
+
+                setTimeout(() => {
+                    this.internal.DoubleClick = [];
+                }, 350);
+            } else {
+                this.internal.DoubleClick = [
+                    ...this.internal.DoubleClick,
+                    e.touches[ 0 ].pageX,
+                    e.touches[ 0 ].pageY,
+                    Date.now()
+                ];
+            }
+        } else {
+            this.internal.Click = [];
+            this.internal.DoubleClick = [];
+        }
+
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_START,
             this.getTouches(e),
@@ -165,6 +198,59 @@ export default class TouchNode extends Node {
     }
     onTouchEnd(e) {
         e.preventDefault();
+
+        if(this.internal.Click.length) {
+            this.message(new Message(
+                TouchNode.SignalTypes.TOUCH_CLICK,
+                {
+                    keys: {
+                        ctrl: e.ctrlKey,
+                        shift: e.shiftKey,
+                        alt: e.altKey,
+                        meta: e.metaKey,
+                    },
+                    x: this.internal.Click[ 0 ],
+                    y: this.internal.Click[ 1 ]
+                },
+                this.signet
+            ));
+
+            this.internal.Click = [];
+        }
+
+        if(this.internal.DoubleClick.length > 3) {
+            let [ sx, sy, start, fx, fy, end ] = this.internal.DoubleClick,
+                dx = Math.abs(sx - fx),
+                dy = Math.abs(sy - fy);
+
+            if((end - start <= 350) && (dx <= 50) && (dy <= 50)) {
+                this.message(new Message(
+                    TouchNode.SignalTypes.TOUCH_DOUBLE_CLICK,
+                    {
+                        keys: {
+                            ctrl: e.ctrlKey,
+                            shift: e.shiftKey,
+                            alt: e.altKey,
+                            meta: e.metaKey,
+                        },
+                        x: sx,
+                        y: sy,
+                        detail: {
+                            sx: sx,
+                            sy: sy,
+                            fx: fx,
+                            fy: fy,
+                            start: start,
+                            end: end,
+                            time: end - start
+                        }
+                    },
+                    this.signet
+                ));
+            }
+            
+            this.internal.DoubleClick = [];
+        }
 
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_END,

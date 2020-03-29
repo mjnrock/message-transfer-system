@@ -1,7 +1,7 @@
 import { GenerateUUID } from "./../helper";
-import Node from "./../Node";
+import Repeater from "./../Repeater";
 
-export default class CanvasNode extends Node {
+export default class CanvasNode extends Repeater {
     static SignalTypes = {
         CLEAR: "CanvasNode.Clear",
         ERASE: "CanvasNode.Erase",

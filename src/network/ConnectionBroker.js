@@ -98,7 +98,7 @@ export default class ConnectionBroker extends Node {
             if(destination === -1) {    // All
                 this.broadcast(msg);
             } else if(this.internal.WebSocket[ destination ] && this.internal.WebSocket[ destination ].isReady()) {    // Targeted
-                msg.source = websocket.signet;
+                msg.source = this.internal.WebSocket[ destination ].signet;
                 this.internal.WebSocket[ destination ].wsmessage(msg);
             }
         }

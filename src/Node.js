@@ -20,8 +20,12 @@ export default class Node {
     /**
      * Should the Node ALSO invoke `this.emit(...)` whenever `this.send(...)` is invoked.
      */
-    toggleSimulcast() {
-        this._emitOnSend = !this._emitOnSend;
+    toggleSimulcast(value) {
+        if(value === true || value === false) {
+            this._emitOnSend = value;
+        } else {
+            this._emitOnSend = !this._emitOnSend;
+        }
 
         return this;
     }
@@ -30,8 +34,12 @@ export default class Node {
      * Should the Node `this.emit(...)` whenever its `this.state` is changed.
      * NOTE: This is intended for immutable state monitoring ONLY.  It will only function in cases where the literal `this.state = newState` is assigned directly.
      */
-    toggleStateEmission() {
-        this._emitStateChange = !this._emitStateChange;
+    toggleStateEmission(value) {
+        if(value === true || value === false) {
+            this._emitStateChange = value;
+        } else {
+            this._emitStateChange = !this._emitStateChange;
+        }
 
         return this;
     }
@@ -175,8 +183,12 @@ export default class Node {
 
         if (nodeFnOrId instanceof Node) {
             delete this._subscriptions[ nodeFnOrId.id ];
+
+            return true;
         } else if (typeof nodeFnOrId === "string" || nodeFnOrId instanceof String) {
             delete this._subscriptions[ nodeFnOrId ];
+
+            return true;
         } else if (typeof nodeFnOrId.receive === "function" || typeof nodeFnOrId === "function") {
             let fn = nodeFnOrId.receive || nodeFnOrId,
                 hash = hashCode(fn.toString());
@@ -188,13 +200,13 @@ export default class Node {
                     if (hashCode(ifn.toString()) === hash) {
                         delete this._subscriptions[key];
 
-                        return this;
+                        return true;
                     }
                 }
             }
         }
 
-        return this;
+        return false;
     }
 
     unsubscribeTo(node) {
