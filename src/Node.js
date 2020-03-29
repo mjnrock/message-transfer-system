@@ -95,15 +95,19 @@ export default class Node {
         return false;
     }
 
-    send(type, payload, { defaultConfig = true } = {}) {
+    send(type, payload, { elevate = null, defaultConfig = true } = {}) {
         this.message(this.packager(
             type,
             payload,
             this.signet
-        ), { defaultConfig });
+        ), { elevate, defaultConfig });
     }
-    message(msg, { defaultConfig = true } = {}) {
+    message(msg, { elevate = null, defaultConfig = true } = {}) {
         if(Message.conforms(msg)) {
+            if(elevate !== null && elevate !== void 0) {
+                msg.elevate(elevate);
+            }
+
             this._parent.Router.route(msg);
 
             if(defaultConfig === true && this._emitOnSend === true) {
