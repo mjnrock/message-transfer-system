@@ -60,9 +60,13 @@ export default class ConnectionBroker extends Node {
         return false;
     }
 
-    webSocketNode({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null } = {}) {
+    webSocketNode({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = null, onClose = null } = {}) {
         let websocket = new WebSocketNode({
-            onClose: (wsn, e) => {                
+            onClose: (wsn, e) => {
+                if(typeof onClose === "function") {
+                    onClose(wsn);
+                }
+
                 delete this.internal.WebSocket[ wsn.id ];
                 wsn._parent.unregister(websocket);
             }
