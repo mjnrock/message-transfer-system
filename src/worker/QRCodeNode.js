@@ -1,6 +1,8 @@
 import QRCode from "qrcode";
+
+import { GenerateUUID } from "./../helper";
 import Node from "./../Node";
-import CanvasNode from "../browser/CanvasNode";
+import CanvasNode from "./../browser/CanvasNode";
 
 export default class QRCodeNode extends Node {
     static SignalTypes = {

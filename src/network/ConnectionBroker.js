@@ -1,7 +1,7 @@
 import WebSocketNode from "./WebSocketNode";
 import Node from "./../Node";
 import Message from "./../Message";
-import { GenerateUUID } from "../helper";
+import { GenerateUUID } from "./../helper";
 
 export default class ConnectionBroker extends Node {
     constructor(parent, { name = null, isMaster = false } = {}) {

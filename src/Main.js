@@ -1,4 +1,8 @@
-import MTS from "./package";
+import Network from "./network/package";
+import Browser from "./browser/package";
+
+import Registry from "./Registry";
+import Router from "./Router";
 import Repeater from "./Repeater";
 
 export default class Main extends Repeater {
@@ -12,8 +16,8 @@ export default class Main extends Repeater {
         super({ receive });
         this._parent = this;
 
-        this.Registry = new MTS.Registry(this);
-        this.Router = new MTS.Router(this);
+        this.Registry = new Registry(this);
+        this.Router = new Router(this);
 
         this.Registry.register(this, ...nodes);
         this.Router.addRoute(this, routes);
@@ -26,7 +30,7 @@ export default class Main extends Repeater {
      * @param {true|Message.type[]} routes An array of routes for the ConnectionBroker to REPEAT/BROADCAST OVER THE NETWORK to ALL connections
      */
     loadNetwork(isMaster = false, { routes = [] } = {}) {
-        this.Network = new MTS.Network.ConnectionBroker(this, { isMaster });
+        this.Network = new Network.ConnectionBroker(this, { isMaster });
         
         console.log(`CB: ${ this.Network.id }`);
         this.register(this.Network);
@@ -47,7 +51,7 @@ export default class Main extends Repeater {
         }
 
         if(mouse || mouseComplex) {
-            let mouse = new MTS.Browser.Input.MouseNode();
+            let mouse = new Browser.Input.MouseNode();
 
             if(mouseComplex === true) {
                 mouse.toggleComplexActions();
@@ -61,7 +65,7 @@ export default class Main extends Repeater {
         }
 
         if(touch) {
-            let touch = new MTS.Browser.Input.TouchNode();
+            let touch = new Browser.Input.TouchNode();
             
             this.Browser = this.Browser || {};
             this.Browser.Input = this.Browser.Input || {};
@@ -71,7 +75,7 @@ export default class Main extends Repeater {
         }
 
         if(keys) {
-            let keys = new MTS.Browser.Input.KeyboardNode();
+            let keys = new Browser.Input.KeyboardNode();
             
             this.Browser = this.Browser || {};
             this.Browser.Input = this.Browser.Input || {};

@@ -1,6 +1,6 @@
-import { GenerateUUID } from "../../helper";
-import Node from "../../Node";
-import Message from "../../Message";
+import { GenerateUUID } from "./../../helper";
+import Node from "./../../Node";
+import Message from "./../../Message";
 
 export default class TouchNode extends Node {
     static SignalTypes = {
@@ -10,12 +10,14 @@ export default class TouchNode extends Node {
         TOUCH_CANCEL: "TouchNode.TouchCancel",
         TOUCH_CLICK: "TouchNode.TouchClick",
         TOUCH_DOUBLE_CLICK: "TouchNode.TouchDoubleClick",
+        
+        SWIPE_UP: "TouchNode.SwipeUp",
+        SWIPE_DOWN: "TouchNode.SwipeDown",
+        SWIPE_LEFT: "TouchNode.SwipeLeft",
+        SWIPE_RIGHT: "TouchNode.SwipeRight",
+        SWIPE_MULTI: "TouchNode.SwipeMulti",
 
         //* WIP, not yet implemented
-        SWIPE_UP: "TouchNode.SwipeUp",          // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
-        SWIPE_DOWN: "TouchNode.SwipeDown",      // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
-        SWIPE_LEFT: "TouchNode.SwipeLeft",      // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
-        SWIPE_RIGHT: "TouchNode.SwipeRight",    // Needs to have number of touches (e.g. 1-finger, 2-finger, etc.)
         PINCH: "TouchNode.Pinch",
         ZOOM: "TouchNode.Zoom",
     };
@@ -65,6 +67,14 @@ export default class TouchNode extends Node {
                 id: touch.identifier,
                 x: touch.clientX,   // no offsets accounted for
                 y: touch.clientY,
+                pos: {
+                    sx: touch.screenX,
+                    sy: touch.screenY,
+                    px: touch.pageX,
+                    py: touch.pageY,
+                    cx: touch.clientX,
+                    cy: touch.clientY,
+                },
                 radius: {
                     x: touch.radiusX,
                     y: touch.radiusY,
@@ -88,6 +98,14 @@ export default class TouchNode extends Node {
                 id: touch.identifier,
                 x: touch.clientX,
                 y: touch.clientY,
+                pos: {
+                    sx: touch.screenX,
+                    sy: touch.screenY,
+                    px: touch.pageX,
+                    py: touch.pageY,
+                    cx: touch.clientX,
+                    cy: touch.clientY,
+                },
                 radius: {
                     x: touch.radiusX,
                     y: touch.radiusY,
@@ -111,6 +129,14 @@ export default class TouchNode extends Node {
                 id: touch.identifier,
                 x: touch.clientX,
                 y: touch.clientY,
+                pos: {
+                    sx: touch.screenX,
+                    sy: touch.screenY,
+                    px: touch.pageX,
+                    py: touch.pageY,
+                    cx: touch.clientX,
+                    cy: touch.clientY,
+                },
                 radius: {
                     x: touch.radiusX,
                     y: touch.radiusY,
@@ -148,9 +174,11 @@ export default class TouchNode extends Node {
     onTouchMove(e) {
         e.preventDefault();
 
+        let touches = this.getTouches(e);
+
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_MOVE,
-            this.getTouches(e),
+            touches,
             this.signet
         ));
     
@@ -188,9 +216,15 @@ export default class TouchNode extends Node {
             this.internal.DoubleClick = [];
         }
 
+        let touches = this.getTouches(e);
+
+        for(let touch of Object.values(touches.changed)) {
+            this.internal.Touches[ touch.id ] = [ touch.x, touch.y ];
+        }
+
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_START,
-            this.getTouches(e),
+            touches,
             this.signet
         ));
     
@@ -252,9 +286,63 @@ export default class TouchNode extends Node {
             this.internal.DoubleClick = [];
         }
 
+        let touches = this.getTouches(e),
+            swipes = [];
+
+        for(let touch of Object.values(touches.changed)) {
+            if(this.internal.Touches[ touch.id ]) {
+                let [ sx, sy ] = this.internal.Touches[ touch.id ],
+                    [ fx, fy ] = [ touch.x, touch.y ],
+                    dx = fx - sx,
+                    dy = fy - sy,
+                    dir = null;
+
+                if(Math.abs(dx) >= 50 || Math.abs(dy) >= 50) {
+                    if(Math.abs(dx) > Math.abs(dy)) {
+                        if(dx > 0) {
+                            dir = "RIGHT";
+                        } else {
+                            dir = "LEFT";
+                        }
+                    } else {
+                        if(dy > 0) {
+                            dir = "DOWN";
+                        } else {
+                            dir = "UP";
+                        }
+                    }
+                
+                    let arr = [
+                        TouchNode.SignalTypes[ `SWIPE_${ dir.toUpperCase() }`],
+                        {
+                            id: touch.id,
+                            points: {
+                                start: [ sx, sy ],
+                                end: [ fx, fy ],
+                                delta: [ dx, dy ]
+                            }
+                        }
+                    ]
+                    this.send(...arr); 
+
+                    swipes.push(arr);
+                }
+
+                delete this.internal.Touches[ touch.id ];
+            }
+        }
+
+        if(swipes.length > 1) {
+            this.message(new Message(
+                TouchNode.SignalTypes.SWIPE_MULTI,
+                swipes,
+                this.signet
+            ));
+        }
+
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_END,
-            this.getTouches(e),
+            touches,
             this.signet
         ));
     
@@ -264,9 +352,11 @@ export default class TouchNode extends Node {
     onTouchCancel(e) {
         e.preventDefault();
 
+        let touches = this.getTouches(e);
+
         this.message(new Message(
             TouchNode.SignalTypes.TOUCH_CANCEL,
-            this.getTouches(e),
+            touches,
             this.signet
         ));
     
