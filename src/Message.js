@@ -12,7 +12,7 @@ export default class Message {
         return this;
     }
 
-    elevate(destination = -1) {
+    elevate(destination = true) {
         this._elevate = destination;
 
         return this;

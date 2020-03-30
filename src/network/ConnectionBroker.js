@@ -21,7 +21,7 @@ export default class ConnectionBroker extends Node {
      */
     receive(msg) {
         if(Message.conforms(msg)) {    // Only relay messages that have a Registry entry
-            msg.elevate(-1);  // Will always send to ALL connections
+            msg.elevate(true);  // Will always send to ALL connections
             this.message(msg);
         }
     }
@@ -99,7 +99,7 @@ export default class ConnectionBroker extends Node {
             let destination = msg._elevate;
             delete msg._elevate;
 
-            if(destination === -1) {    // All
+            if(destination === true) {    // All
                 this.broadcast(msg);
             } else if(this.internal.WebSocket[ destination ] && this.internal.WebSocket[ destination ].isReady()) {    // Targeted
                 msg.source = this.internal.WebSocket[ destination ].signet;
