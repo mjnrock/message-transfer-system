@@ -2,6 +2,8 @@ import { GenerateUUID } from "./../../helper";
 import Node from "./../../Node";
 import Message from "./../../Message";
 
+const LOG = input => document.getElementById("gubed").innerHTML = JSON.stringify(input, null, 2);
+
 export default class TouchNode extends Node {
     static SignalTypes = {
         TOUCH_MOVE: "TouchNode.TouchMove",
@@ -10,7 +12,8 @@ export default class TouchNode extends Node {
         TOUCH_CANCEL: "TouchNode.TouchCancel",
         TOUCH_CLICK: "TouchNode.TouchClick",
         TOUCH_DOUBLE_CLICK: "TouchNode.TouchDoubleClick",
-        TOUCH_TAPS: "TouchNode.TouchTaps",
+        TOUCH_MULTI: "TouchNode.TouchMulti",
+        TOUCH_DETAIL: "TouchNode.TouchDetail",
 
         SWIPE_UP: "TouchNode.SwipeUp",
         SWIPE_DOWN: "TouchNode.SwipeDown",
@@ -50,7 +53,12 @@ export default class TouchNode extends Node {
         this.internal = {
             Click: [],
             DoubleClick: [],
-            Touches: {}
+            Touches: {},
+            Taps: {
+                touches: {},
+                timestamp: null,
+                timeout: null
+            }
         };
         
         if(!window) {
@@ -217,10 +225,18 @@ export default class TouchNode extends Node {
             this.internal.DoubleClick = [];
         }
 
-        let touches = this.getTouches(e);
+        let touches = this.getTouches(e),
+            now = Date.now();
 
         for(let touch of Object.values(touches.changed)) {
-            this.internal.Touches[ touch.id ] = [ touch.x, touch.y ];
+            this.internal.Touches[ touch.id ] = [ touch.x, touch.y, now ];
+            this.internal.Taps.touches[ touch.id ] = {
+                id: touch.id,
+                x: touch.x,
+                y: touch.y,
+                timestamp: now
+            };
+            // this.internal.Taps.touches[ touch.id ] = touch;
         }
 
         this.message(new Message(
@@ -289,8 +305,7 @@ export default class TouchNode extends Node {
 
         let touches = this.getTouches(e),
             swipes = [],
-            eventTypes = {},
-            taps = [];
+            eventTypes = {};
 
         for(let touch of Object.values(touches.changed)) {
             if(this.internal.Touches[ touch.id ]) {
@@ -299,15 +314,6 @@ export default class TouchNode extends Node {
                     dx = fx - sx,
                     dy = fy - sy,
                     dir = null;
-
-                taps.push({
-                    id: touch.id,
-                    points: {
-                        start: [ sx, sy ],
-                        end: [ fx, fy ],
-                        delta: [ dx, dy ]
-                    }
-                });
 
                 if(Math.abs(dx) >= 50 || Math.abs(dy) >= 50) {
                     if(Math.abs(dx) > Math.abs(dy)) {
@@ -351,15 +357,11 @@ export default class TouchNode extends Node {
 
         //TODO Taps needs a time delay window (like 50/100 ms maybe): the taps have to be like, EXACTLY at the same time for this to register multiple taps.
         //* This is REALLY sensitive to timing.  It DOES work, it's just difficult to actually get multiple taps to line up--they seriously need to be like EXACTLY simultaneously
-        if(taps.length) {
-            this.message(new Message(
-                TouchNode.SignalTypes.TOUCH_TAPS,
-                {
-                    touches: taps.length,
-                    taps: taps
-                },
-                this.signet
-            ));
+        if(Object.keys(this.internal.Taps.touches).length > 1) {
+            this.internal.Taps.timestamp = Date.now();
+            this._endTaps();
+        } else {
+            this._clearTaps();
         }
 
         if(swipes.length > 1) {
@@ -381,6 +383,35 @@ export default class TouchNode extends Node {
         ));
     
         return this;
+    }
+
+    _clearTaps() {
+        clearTimeout(this.internal.Taps.timeout);
+
+        this.internal.Taps = {
+            touches: {},
+            timestamp: null,
+            timeout: null
+        };
+    }
+    _endTaps() {
+        let threshold = 50;    // ms
+
+        if(Date.now() - this.internal.Taps.timestamp < threshold) {
+            clearTimeout(this.internal.Taps.timeout);
+            this.internal.Taps.timeout = setTimeout(() => this._endTaps(), threshold);
+        } else {
+            this.message(new Message(
+                TouchNode.SignalTypes.TOUCH_MULTI,
+                {
+                    count: Object.keys(this.internal.Taps.touches).length,
+                    touches: Object.values(this.internal.Taps.touches)
+                },
+                this.signet
+            ));
+
+            this._clearTaps();
+        }
     }
 
     onTouchCancel(e) {
