@@ -10,7 +10,8 @@ export default class TouchNode extends Node {
         TOUCH_CANCEL: "TouchNode.TouchCancel",
         TOUCH_CLICK: "TouchNode.TouchClick",
         TOUCH_DOUBLE_CLICK: "TouchNode.TouchDoubleClick",
-        
+        TOUCH_TAPS: "TouchNode.TouchTaps",
+
         SWIPE_UP: "TouchNode.SwipeUp",
         SWIPE_DOWN: "TouchNode.SwipeDown",
         SWIPE_LEFT: "TouchNode.SwipeLeft",
@@ -287,7 +288,9 @@ export default class TouchNode extends Node {
         }
 
         let touches = this.getTouches(e),
-            swipes = [];
+            swipes = [],
+            eventTypes = {},
+            taps = [];
 
         for(let touch of Object.values(touches.changed)) {
             if(this.internal.Touches[ touch.id ]) {
@@ -296,6 +299,15 @@ export default class TouchNode extends Node {
                     dx = fx - sx,
                     dy = fy - sy,
                     dir = null;
+
+                taps.push({
+                    id: touch.id,
+                    points: {
+                        start: [ sx, sy ],
+                        end: [ fx, fy ],
+                        delta: [ dx, dy ]
+                    }
+                });
 
                 if(Math.abs(dx) >= 50 || Math.abs(dy) >= 50) {
                     if(Math.abs(dx) > Math.abs(dy)) {
@@ -312,8 +324,9 @@ export default class TouchNode extends Node {
                         }
                     }
                 
+                    let eventName = `SWIPE_${ dir.toUpperCase() }`;
                     let arr = [
-                        TouchNode.SignalTypes[ `SWIPE_${ dir.toUpperCase() }`],
+                        TouchNode.SignalTypes[ eventName ],
                         {
                             id: touch.id,
                             points: {
@@ -326,16 +339,37 @@ export default class TouchNode extends Node {
                     this.send(...arr); 
 
                     swipes.push(arr);
+                    if(!(eventName in eventTypes)) {
+                        eventTypes[ eventName ] = 0;
+                    }
+                    eventTypes[ eventName ] += 1;
                 }
 
                 delete this.internal.Touches[ touch.id ];
             }
         }
 
+        //TODO Taps needs a time delay window (like 50/100 ms maybe): the taps have to be like, EXACTLY at the same time for this to register multiple taps.
+        //* This is REALLY sensitive to timing.  It DOES work, it's just difficult to actually get multiple taps to line up--they seriously need to be like EXACTLY simultaneously
+        if(taps.length) {
+            this.message(new Message(
+                TouchNode.SignalTypes.TOUCH_TAPS,
+                {
+                    touches: taps.length,
+                    taps: taps
+                },
+                this.signet
+            ));
+        }
+
         if(swipes.length > 1) {
             this.message(new Message(
                 TouchNode.SignalTypes.SWIPE_MULTI,
-                swipes,
+                {
+                    touches: swipes.length,
+                    counts: eventTypes,
+                    swipes: swipes
+                },
                 this.signet
             ));
         }
