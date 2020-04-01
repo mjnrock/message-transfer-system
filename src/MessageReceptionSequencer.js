@@ -4,16 +4,21 @@ import Node from "./Node";
 export default class MessageReceptionSequencer {
     static Parent = null;   // Statically exposed, as only one of these should exist per runtime | Allows for a <Node> to be universally set as the scope
 
-    constructor(msg, { scope = null, useParent = false } = {}) {
+    /**
+     * If given a @node, .state/.prop will affect the Node, instead.
+     * If given @useParent, `this._node` will be set to the static `MessageReceptionSequencer.Parent` variable
+     * @param {Message} msg 
+     */
+    constructor(msg, { node = null, useParent = false } = {}) {
         this._message = msg;
 
         if(useParent) {
-            this._scope = MessageReceptionSequencer.Parent;
+            this._node = MessageReceptionSequencer.Parent;
         } else {
-            this._scope = scope;    // A <Node> to use for state/prop modifications if `this.state(...)` or `this.prop(...)` is called
+            this._node = node;    // A <Node> to use for state/prop modifications if `this.state(...)` or `this.prop(...)` is called
         }
         
-        this._state = {};    // The state used as a fallback when `this.Scope` is not a <Node>
+        this._state = {};    // The state used as a fallback when `this._node` is not a <Node>
         this._results = {};  // The holder of all `this.run(...)` results
 
         if(Message.conforms(msg)) {
@@ -32,7 +37,7 @@ export default class MessageReceptionSequencer {
             {
                 state: this._state,
                 results: this._results,
-                scope: this._scope,
+                scope: this._node,
                 parent: MessageReceptionSequencer.Parent,
                 isActive: !this.check()
             }
@@ -230,7 +235,7 @@ export default class MessageReceptionSequencer {
             return this;
         }
 
-        let node = this._scope;
+        let node = this._node;
         if(typeof propsObj === "object" && Object.keys(propsObj).length) {
             if(node instanceof Node && useScope) {
                 Object.entries(propsObj).forEach(([ key, value]) => {
@@ -258,7 +263,7 @@ export default class MessageReceptionSequencer {
             return this;
         }
 
-        let node = this._scope;
+        let node = this._node;
 
         if(stateObj) {
             if(node instanceof Node && useScope) {
@@ -286,8 +291,8 @@ export default class MessageReceptionSequencer {
             return this;
         }
 
-        if(this._scope instanceof Node) {
-            this._scope.send(type, payload, { elevate, defaultConfig });
+        if(this._node instanceof Node) {
+            this._node.send(type, payload, { elevate, defaultConfig });
 
             return this;
         } else if(MessageReceptionSequencer.Parent instanceof Node) {
@@ -308,8 +313,8 @@ export default class MessageReceptionSequencer {
             return this;
         }
 
-        if(this._scope instanceof Node) {
-            this._scope.message(msg, { elevate, defaultConfig });
+        if(this._node instanceof Node) {
+            this._node.message(msg, { elevate, defaultConfig });
 
             return this;
         } else if(MessageReceptionSequencer.Parent instanceof Node) {
@@ -363,7 +368,7 @@ export default class MessageReceptionSequencer {
         return this._message;
     }
     getScope() {
-        return this._scope;
+        return this._node;
     }
     getParent() {
         return MessageReceptionSequencer.Parent;
