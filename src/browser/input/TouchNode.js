@@ -2,8 +2,6 @@ import { GenerateUUID } from "./../../helper";
 import Node from "./../../Node";
 import Message from "./../../Message";
 
-const LOG = input => document.getElementById("gubed").innerHTML = JSON.stringify(input, null, 2);
-
 export default class TouchNode extends Node {
     static SignalTypes = {
         TOUCH_MOVE: "TouchNode.TouchMove",

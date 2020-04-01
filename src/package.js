@@ -13,6 +13,8 @@ import Browser from "./browser/package";
 import Network from "./network/package";
 import Worker from "./worker/package";
 
+import Modules from "./modules/package";
+
 export default {
     Helper,
     
@@ -30,4 +32,6 @@ export default {
     Browser,
     Network,
     Worker,
+    
+    Modules,
 };

@@ -1,6 +1,6 @@
-import KeyboardNode from "./KeyboardNode";
-import MouseNode from "./MouseNode";
-import TouchNode from "./TouchNode";
+import KeyboardNode from "./../browser/input/KeyboardNode";
+import MouseNode from "./../browser/input/MouseNode";
+import TouchNode from "./../browser/input/TouchNode";
 
 function attachNamespace(node, leaf = {}) {
     node.Browser = node.Browser || {};
