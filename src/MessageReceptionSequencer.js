@@ -226,9 +226,9 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * An object whose key:value pairs will be stored in `this.Scope.state` if activated, or in `this.State` as a fallback
+     * An object whose key:value pairs will be stored in `this._node.state` if activated, or in `this._state` as a fallback
      * @param {obj} propsObj 
-     * @param {bool} useScope DEFAULT: true | If false, will update `this.State` instead of `this.Scope.state`
+     * @param {bool} useScope DEFAULT: true | If false, will update `this._state` instead of `this._node.state`
      */
     prop(propsObj = {}, useScope = true) {
         if(this.check()) {
@@ -254,9 +254,9 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * An object that will overwrite `this.Scope.state` if activated, or `this.State` as a fallback
+     * An object that will overwrite `this._node.state` if activated, or `this._state` as a fallback
      * @param {obj} stateObj 
-     * @param {bool} useScope DEFAULT: true | If false, will update `this.State` instead of `this.Scope.state`
+     * @param {bool} useScope DEFAULT: true | If false, will update `this._state` instead of `this._node.state`
      */
     state(stateObj, useScope = true) {
         if(this.check()) {
@@ -281,7 +281,7 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * A `Node.send` elevation for `this.Scope` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * A `Node.send` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
      * @param {string|number} type 
      * @param {any} payload 
      * @param {true|string} elevate DEFAULT: null | 
@@ -304,7 +304,7 @@ export default class MessageReceptionSequencer {
         return this._forceShortCircuit();
     }
     /**
-     * A `Node.message` elevation for `this.Scope` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * A `Node.message` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
      * @param {Message} msg
      * @param {true|string} elevate DEFAULT: null | 
      */
@@ -319,6 +319,29 @@ export default class MessageReceptionSequencer {
             return this;
         } else if(MessageReceptionSequencer.Parent instanceof Node) {
             MessageReceptionSequencer.Parent.message(msg, { elevate, defaultConfig });
+
+            return this;
+        }
+
+        return this._forceShortCircuit();
+    }
+
+    /**
+     * A `Node.emit` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * @param {string|number} type 
+     * @param {any} payload 
+     */
+    emit(type, payload) {        
+        if(this.check()) {
+            return this;
+        }
+
+        if(this._node instanceof Node) {
+            this._node.emit(type, payload);
+
+            return this;
+        } else if(MessageReceptionSequencer.Parent instanceof Node) {
+            MessageReceptionSequencer.Parent.emit(type, payload);
 
             return this;
         }
