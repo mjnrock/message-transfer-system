@@ -66,18 +66,20 @@ export default class Router {
     route(msg) {
         if(Message.conforms(msg)) {
             if(msg._elevate) {
-                let local = this._parent.Registry.get(msg._elevate);
-                // let local = this._parent.Registry.get(msg._elevate),
-                //     lookups = this._parent.Registry.lookup(msg._elevate);
+                if(typeof msg._elevate === "string" || msg._elevate instanceof String) {
+                    let local = this._parent.Registry.get(msg._elevate);
+                    // let local = this._parent.Registry.get(msg._elevate),
+                    //     lookups = this._parent.Registry.lookup(msg._elevate);
 
-                if(local instanceof Node) {     // Prioritize direct Registry entries first
-                    local.receive(msg);
-                // } else if(lookups.length) {     // Secondarily direct to any Nodes with a given name
-                //     for(let node of lookups) {
-                //         if(node instanceof Node && node.signet !== msg.source) {
-                //             node.receive(msg);
-                //         }
-                //     }
+                    if(local instanceof Node) {     // Prioritize direct Registry entries first
+                        local.receive(msg);
+                    // } else if(lookups.length) {     // Secondarily direct to any Nodes with a given name
+                    //     for(let node of lookups) {
+                    //         if(node instanceof Node && node.signet !== msg.source) {
+                    //             node.receive(msg);
+                    //         }
+                    //     }
+                    } 
                 } else {        // Default to a network send
                     this._parent.Network.route(msg);
                 }
