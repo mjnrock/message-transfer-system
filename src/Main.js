@@ -12,8 +12,8 @@ export default class Main extends Repeater {
      * @param {fn} receive DEFAULT: null | The receiver function for this Node | @receive = null evaluates to `() => true`
      * @param {true|Message.type[]} routes DEFAULT: true | An array of routes for this Node to `.receive(msg)`
      */
-    constructor({ nodes = [], receive = null, routes = true } = {}) {
-        super({ receive });
+    constructor({ nodes = [], receive = null, routes = true, name = null } = {}) {
+        super({ name, receive });
         this._parent = this;
 
         this.Registry = new Registry(this);

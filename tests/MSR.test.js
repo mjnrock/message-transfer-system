@@ -1,6 +1,7 @@
 import MTSLib from "./../src/package";
 
 const Main = new MTSLib.Main({
+    name: "Main",
     receive: msg => MTSLib.MSRP(msg, Main)
         .if("Test", "Zebra")
             .run(() => console.log("THIS SHOULD RUN 1"), "test-1")
@@ -19,14 +20,15 @@ const Main = new MTSLib.Main({
             }, false)
         .debug()
 });
-const Node1 = new MTSLib.Node();
-// const Node1 = new MTSLib.Node({
-//     receive: console.log
-// });
+// const Node1 = new MTSLib.Node();
+const Node1 = new MTSLib.Node({
+    name: "Node1",
+    receive: console.log
+});
 
 Main.register(Node1);
-// Main.Router.addRoute(Node1, true);
+Main.Router.addRoute(Node1, true);
 
-// Node1.send("Test", "Hello");
-Node1.send("Cat", "Hay");
+Main.send("Test", "Hello");
+// Node1.send("Cat", "Hay");
 // Node1.send("Zebra", "Moo");

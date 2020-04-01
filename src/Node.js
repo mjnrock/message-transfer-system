@@ -2,7 +2,7 @@ import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
 export default class Node {
-    constructor(name, { receive = null, parent = null, packager = null } = {}) {
+    constructor({ name = null, receive = null, parent = null, packager = null } = {}) {
         this.id = GenerateUUID();
         this.name = name;
 

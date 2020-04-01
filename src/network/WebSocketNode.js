@@ -25,7 +25,8 @@ export default class WebSocketNode extends Node {
     }
 
     constructor({ name = null, ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
-        super(name || GenerateUUID(), {
+        super({
+            name: name || GenerateUUID(),
             receive: receive,
             parent: parent,
             packager: packager

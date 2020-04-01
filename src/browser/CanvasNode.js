@@ -33,7 +33,8 @@ export default class CanvasNode extends Repeater {
     }
 
     constructor({ canvas = null, ctx = null, draw = null, name = null, receive = null, parent = null, packager = null } = {}) {
-        super(name || GenerateUUID(), {
+        super({
+            name: name || GenerateUUID(),
             receive: receive,
             parent: parent,
             packager: packager

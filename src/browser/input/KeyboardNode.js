@@ -21,7 +21,8 @@ export default class KeyboardNode extends Node {
     }
 
     constructor({ name = null, keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
-        super(name || GenerateUUID(), {
+        super({
+            name: name || GenerateUUID(),
             receive: receive,
             parent: parent,
             packager: packager
