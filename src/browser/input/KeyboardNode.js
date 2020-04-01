@@ -20,11 +20,11 @@ export default class KeyboardNode extends Node {
         });
     }
 
-    constructor({ name = null, keymap = null, keyflags = null, receive = null, parent = null, packager = null} = {}) {
+    constructor({ name = null, keymap = null, keyflags = null, receive = null, mnode = null, packager = null} = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            parent: parent,
+            mnode: mnode,
             packager: packager
         });
         

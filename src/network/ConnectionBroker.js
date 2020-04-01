@@ -4,9 +4,9 @@ import Message from "./../Message";
 import { GenerateUUID } from "./../helper";
 
 export default class ConnectionBroker extends Node {
-    constructor(parent, { name = null, isMaster = false } = {}) {
+    constructor(mnode, { name = null, isMaster = false } = {}) {
         super(name || GenerateUUID(), {
-            parent: parent
+            mnode: mnode
         });
 
         this.internal = {
@@ -68,7 +68,7 @@ export default class ConnectionBroker extends Node {
                 }
 
                 delete this.internal.WebSocket[ wsn.id ];
-                wsn._parent.unregister(websocket);
+                wsn._mnode.unregister(websocket);
             }
         });
 
@@ -78,9 +78,9 @@ export default class ConnectionBroker extends Node {
             websocket.create({ uri, protocol, isMaster: isMaster !== null ? isMaster : this.internal.isMaster });
         }
 
-        this._parent.register(websocket);
+        this._mnode.register(websocket);
         this.internal.WebSocket[ websocket.id ] = websocket;
-        this._parent.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
+        this._mnode.Router.addRoute(websocket, WebSocketNode.AllSignalTypes());
 
         return websocket.id;
     }

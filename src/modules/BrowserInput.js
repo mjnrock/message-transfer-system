@@ -9,7 +9,7 @@ function attachNamespace(node, leaf = {}) {
     for(let name in leaf) {
         node.Browser.Input[ name ] = leaf[ name ];
 
-        node._parent.register(leaf[ name ]);
+        node._mnode.register(leaf[ name ]);
     }
 
     return node;

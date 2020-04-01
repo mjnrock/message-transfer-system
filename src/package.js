@@ -7,7 +7,7 @@ import Registry from "./Registry";
 import Router from "./Router";
 import MessageReceptionSequencer from "./MessageReceptionSequencer";
 
-import Main from "./Main";
+import MasterNode from "./MasterNode";
 
 import Browser from "./browser/package";
 import Network from "./network/package";
@@ -27,7 +27,7 @@ export default {
     MessageReceptionSequencer,
     MSRP: MessageReceptionSequencer.Process,    // Elevated, as this is intended to be the primary access mode for all Message reception
 
-    Main,
+    MasterNode,
     
     Browser,
     Network,

@@ -13,11 +13,11 @@ export default class Repeater extends Node {
         SUBSCRIPTION: 2 << 1
     };
 
-    constructor({ name = null, broadcastType = Repeater.BroadcastType.MESSAGE, receive = null, parent = null, packager = null } = {}) {
+    constructor({ name = null, broadcastType = Repeater.BroadcastType.MESSAGE, receive = null, mnode = null, packager = null } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            parent: parent,
+            mnode: mnode,
             packager: packager
         });
 
@@ -57,7 +57,7 @@ export default class Repeater extends Node {
 
     addCallback(callback, interval) {
         let id = setInterval(() => {
-            callback(this._parent, this);
+            callback(this._mnode, this);
         }, interval);
 
         this.internal.Intervals.add(id);

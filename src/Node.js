@@ -2,11 +2,11 @@ import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
 export default class Node {
-    constructor({ name = null, receive = null, parent = null, packager = null } = {}) {
+    constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
         this.id = GenerateUUID();
         this.name = name;
 
-        this._parent = parent;
+        this._mnode = mnode;
         this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
         this._receive = receive || (() => true);
         this._subscriptions = {};
@@ -108,7 +108,7 @@ export default class Node {
                 msg.elevate(elevate);
             }
 
-            this._parent.Router.route(msg);
+            this._mnode.Router.route(msg);
 
             if(defaultConfig === true && this._emitOnSend === true) {
                 this.emit(msg);

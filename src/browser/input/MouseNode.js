@@ -33,11 +33,11 @@ export default class MouseNode extends Node {
         });
     }
 
-    constructor({ name = null, btnmap = null, btnflags = null, receive = null, parent = null, packager = null} = {}) {
+    constructor({ name = null, btnmap = null, btnflags = null, receive = null, mnode = null, packager = null} = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            parent: parent,
+            mnode: mnode,
             packager: packager
         });
         

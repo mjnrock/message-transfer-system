@@ -2,18 +2,18 @@ import Message from "./Message";
 import Node from "./Node";
 
 export default class MessageReceptionSequencer {
-    static Parent = null;   // Statically exposed, as only one of these should exist per runtime | Allows for a <Node> to be universally set as the scope
+    static MasterNode = null;   // Statically exposed, as only one of these should exist per runtime | Allows for a <Node> to be universally set as the scope
 
     /**
      * If given a @node, .state/.prop will affect the Node, instead.
-     * If given @useParent, `this._node` will be set to the static `MessageReceptionSequencer.Parent` variable
+     * If given @useMasterNode, `this._node` will be set to the static `MessageReceptionSequencer.MasterNode` variable
      * @param {Message} msg 
      */
-    constructor(msg, { node = null, useParent = false } = {}) {
+    constructor(msg, { node = null, useMasterNode = false } = {}) {
         this._message = msg;
 
-        if(useParent) {
-            this._node = MessageReceptionSequencer.Parent;
+        if(useMasterNode) {
+            this._node = MessageReceptionSequencer.MasterNode;
         } else {
             this._node = node;    // A <Node> to use for state/prop modifications if `this.state(...)` or `this.prop(...)` is called
         }
@@ -38,7 +38,7 @@ export default class MessageReceptionSequencer {
                 state: this._state,
                 results: this._results,
                 scope: this._node,
-                parent: MessageReceptionSequencer.Parent,
+                mnode: MessageReceptionSequencer.MasterNode,
                 isActive: !this.check()
             }
         ];
@@ -281,7 +281,7 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * A `Node.send` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * A `Node.send` elevation for `this._node` first, or `MessageReceptionSequencer.MasterNode` as a fallback.  Both absent will short-circuit the MSR.
      * @param {string|number} type 
      * @param {any} payload 
      * @param {true|string} elevate DEFAULT: null | 
@@ -295,8 +295,8 @@ export default class MessageReceptionSequencer {
             this._node.send(type, payload, { elevate, defaultConfig });
 
             return this;
-        } else if(MessageReceptionSequencer.Parent instanceof Node) {
-            MessageReceptionSequencer.Parent.send(type, payload, { elevate, defaultConfig });
+        } else if(MessageReceptionSequencer.MasterNode instanceof Node) {
+            MessageReceptionSequencer.MasterNode.send(type, payload, { elevate, defaultConfig });
 
             return this;
         }
@@ -304,7 +304,7 @@ export default class MessageReceptionSequencer {
         return this._forceShortCircuit();
     }
     /**
-     * A `Node.message` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * A `Node.message` elevation for `this._node` first, or `MessageReceptionSequencer.MasterNode` as a fallback.  Both absent will short-circuit the MSR.
      * @param {Message} msg
      * @param {true|string} elevate DEFAULT: null | 
      */
@@ -317,8 +317,8 @@ export default class MessageReceptionSequencer {
             this._node.message(msg, { elevate, defaultConfig });
 
             return this;
-        } else if(MessageReceptionSequencer.Parent instanceof Node) {
-            MessageReceptionSequencer.Parent.message(msg, { elevate, defaultConfig });
+        } else if(MessageReceptionSequencer.MasterNode instanceof Node) {
+            MessageReceptionSequencer.MasterNode.message(msg, { elevate, defaultConfig });
 
             return this;
         }
@@ -327,7 +327,7 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * A `Node.emit` elevation for `this._node` first, or `MessageReceptionSequencer.Parent` as a fallback.  Both absent will short-circuit the MSR.
+     * A `Node.emit` elevation for `this._node` first, or `MessageReceptionSequencer.MasterNode` as a fallback.  Both absent will short-circuit the MSR.
      * @param {string|number} type 
      * @param {any} payload 
      */
@@ -340,8 +340,8 @@ export default class MessageReceptionSequencer {
             this._node.emit(type, payload);
 
             return this;
-        } else if(MessageReceptionSequencer.Parent instanceof Node) {
-            MessageReceptionSequencer.Parent.emit(type, payload);
+        } else if(MessageReceptionSequencer.MasterNode instanceof Node) {
+            MessageReceptionSequencer.MasterNode.emit(type, payload);
 
             return this;
         }
@@ -393,8 +393,8 @@ export default class MessageReceptionSequencer {
     getScope() {
         return this._node;
     }
-    getParent() {
-        return MessageReceptionSequencer.Parent;
+    getMasterNode() {
+        return MessageReceptionSequencer.MasterNode;
     }
 
     static Process(msg, opts) {

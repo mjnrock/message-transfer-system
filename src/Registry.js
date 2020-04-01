@@ -4,8 +4,8 @@ import KeyboardNode from "./browser/input/KeyboardNode";
 import MouseNode from "./browser/input/MouseNode";
 
 export default class Registry {
-    constructor(parent) {
-        this._parent = parent;
+    constructor(mnode) {
+        this._mnode = mnode;
 
         this._entries = {};
     }
@@ -48,18 +48,18 @@ export default class Registry {
         let successfulNodes = [];
         for(let node of nodes) {
             if(node instanceof Node && !this.has(node.id)) {
-                node._parent = this._parent;
+                node._mnode = this._mnode;
                 this._entries[ node.id ] = node;
 
                 successfulNodes.push(node);
 
                 //? Special routing instructions for convenience
                 if(node instanceof WebSocketNode) {
-                    node._parent.Router.addRoute(node, WebSocketNode.AllSignalTypes());
+                    node._mnode.Router.addRoute(node, WebSocketNode.AllSignalTypes());
                 } else if(node instanceof KeyboardNode) {
-                    node._parent.Router.addRoute(node, KeyboardNode.AllSignalTypes());
+                    node._mnode.Router.addRoute(node, KeyboardNode.AllSignalTypes());
                 } else if(node instanceof MouseNode) {
-                    node._parent.Router.addRoute(node, MouseNode.AllSignalTypes());
+                    node._mnode.Router.addRoute(node, MouseNode.AllSignalTypes());
                 }
             }
         }
@@ -69,16 +69,16 @@ export default class Registry {
     unregister(...nodes) {
         for(let node of nodes) {
             if(node instanceof Node && this.has(node.id)) {
-                node._parent = null;
+                node._mnode = null;
                 delete this._entries[ node.id ];
 
                 //? Special routing instructions for convenience
                 if(node instanceof WebSocketNode) {
-                    this._parent.Router.removeRoute(node, WebSocketNode.AllSignalTypes());
+                    this._mnode.Router.removeRoute(node, WebSocketNode.AllSignalTypes());
                 } else if(node instanceof KeyboardNode) {
-                    this._parent.Router.removeRoute(node, KeyboardNode.AllSignalTypes());
+                    this._mnode.Router.removeRoute(node, KeyboardNode.AllSignalTypes());
                 } else if(node instanceof MouseNode) {
-                    this._parent.Router.removeRoute(node, MouseNode.AllSignalTypes());
+                    this._mnode.Router.removeRoute(node, MouseNode.AllSignalTypes());
                 }
             }
         }

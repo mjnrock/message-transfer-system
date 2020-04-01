@@ -32,11 +32,11 @@ export default class CanvasNode extends Repeater {
         });
     }
 
-    constructor({ canvas = null, ctx = null, draw = null, name = null, receive = null, parent = null, packager = null } = {}) {
+    constructor({ canvas = null, ctx = null, draw = null, name = null, receive = null, mnode = null, packager = null } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            parent: parent,
+            mnode: mnode,
             packager: packager
         });
 
@@ -91,7 +91,7 @@ export default class CanvasNode extends Repeater {
 
         return this;
     }
-    createCanvas({ ctx = "2d", parent = document.body, width = null, height = null } = {}) {
+    createCanvas({ ctx = "2d", mnode = document.body, width = null, height = null } = {}) {
         let canvas = document.createElement("canvas");
 
         this.setCanvas(
@@ -103,8 +103,8 @@ export default class CanvasNode extends Repeater {
             this.resize(width, height);
         }
 
-        if(parent instanceof Element) {
-            parent.append(canvas);
+        if(mnode instanceof Element) {
+            mnode.append(canvas);
         }
 
         return this;

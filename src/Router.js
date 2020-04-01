@@ -2,8 +2,8 @@ import Message from "./Message";
 import Node from "./Node";
 
 export default class Router {
-    constructor(parent) {
-        this._parent = parent;
+    constructor(mnode) {
+        this._mnode = mnode;
         
         this._routes = {
             "*": []
@@ -67,9 +67,9 @@ export default class Router {
         if(Message.conforms(msg)) {
             if(msg._elevate) {
                 if(typeof msg._elevate === "string" || msg._elevate instanceof String) {
-                    let local = this._parent.Registry.get(msg._elevate);
-                    // let local = this._parent.Registry.get(msg._elevate),
-                    //     lookups = this._parent.Registry.lookup(msg._elevate);
+                    let local = this._mnode.Registry.get(msg._elevate);
+                    // let local = this._mnode.Registry.get(msg._elevate),
+                    //     lookups = this._mnode.Registry.lookup(msg._elevate);
 
                     if(local instanceof Node) {     // Prioritize direct Registry entries first
                         local.receive(msg);
@@ -84,9 +84,9 @@ export default class Router {
                     } 
                 }
                 
-                this._parent.Network.route(msg);
+                this._mnode.Network.route(msg);
             } else {
-                let nodes = this.get(msg.type, true).map(id => this._parent.Registry.get(id));
+                let nodes = this.get(msg.type, true).map(id => this._mnode.Registry.get(id));
 
                 for(let node of nodes) {
                     // if(node instanceof Node && node.signet !== msg.source) {

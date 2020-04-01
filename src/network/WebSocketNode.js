@@ -24,11 +24,11 @@ export default class WebSocketNode extends Node {
         });
     }
 
-    constructor({ name = null, ws = null, receive = null, parent = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
+    constructor({ name = null, ws = null, receive = null, mnode = null, packager = null, isMaster = false, onClose = null, onOpen = null } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            parent: parent,
+            mnode: mnode,
             packager: packager
         });
 
@@ -151,13 +151,13 @@ export default class WebSocketNode extends Node {
                     console.log(`[${ oldId }] reassigned to [${ msg.payload }]`);
 
                     //? Delete after confirming the .changeId works as expected
-                    // const parent = this._parent;
-                    // parent.unregister(this);                    
+                    // const mnode = this._mnode;
+                    // mnode.unregister(this);                    
                     // this.id = msg.payload;
-                    // parent.register(this);
+                    // mnode.register(this);
 
                     this.id = msg.payload;
-                    this._parent.Registry.changeId(oldId, this.id);
+                    this._mnode.Registry.changeId(oldId, this.id);
                 } else {
                     this.message(msg);
                 }
