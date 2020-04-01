@@ -32,7 +32,6 @@ export default class Main extends Repeater {
     loadNetwork(isMaster = false, { routes = [] } = {}) {
         this.Network = new Network.ConnectionBroker(this, { isMaster });
         
-        console.log(`CB: ${ this.Network.id }`);
         this.register(this.Network);
 
         if(routes.length) {

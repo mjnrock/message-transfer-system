@@ -21,7 +21,9 @@ export default {
     Repeater,
     Registry,
     Router,
+
     MessageReceptionSequencer,
+    MSRP: MessageReceptionSequencer.Process,    // Elevated, as this is intended to be the primary access mode for all Message reception
 
     Main,
     
