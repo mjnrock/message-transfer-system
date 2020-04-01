@@ -79,10 +79,12 @@ export default class Router {
                     //             node.receive(msg);
                     //         }
                     //     }
+
+                        return this;
                     } 
-                } else {        // Default to a network send
-                    this._parent.Network.route(msg);
                 }
+                
+                this._parent.Network.route(msg);
             } else {
                 let nodes = this.get(msg.type, true).map(id => this._parent.Registry.get(id));
 

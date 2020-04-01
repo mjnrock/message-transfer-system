@@ -281,17 +281,17 @@ export default class MessageReceptionSequencer {
      * @param {any} payload 
      * @param {true|string} elevate DEFAULT: null | 
      */
-    send(type, payload, elevate = null) {
+    send(type, payload, { elevate = null, defaultConfig = true } = {}) {
         if(this.check()) {
             return this;
         }
 
         if(this._scope instanceof Node) {
-            this._scope.send(type, payload, { elevate });
+            this._scope.send(type, payload, { elevate, defaultConfig });
 
             return this;
         } else if(MessageReceptionSequencer.Parent instanceof Node) {
-            MessageReceptionSequencer.Parent.send(type, payload, { elevate });
+            MessageReceptionSequencer.Parent.send(type, payload, { elevate, defaultConfig });
 
             return this;
         }
@@ -303,17 +303,17 @@ export default class MessageReceptionSequencer {
      * @param {Message} msg
      * @param {true|string} elevate DEFAULT: null | 
      */
-    message(msg, elevate = null) {
+    message(msg, { elevate = null, defaultConfig = true } = {}) {
         if(this.check()) {
             return this;
         }
 
         if(this._scope instanceof Node) {
-            this._scope.message(msg, { elevate });
+            this._scope.message(msg, { elevate, defaultConfig });
 
             return this;
         } else if(MessageReceptionSequencer.Parent instanceof Node) {
-            MessageReceptionSequencer.Parent.message(msg, { elevate });
+            MessageReceptionSequencer.Parent.message(msg, { elevate, defaultConfig });
 
             return this;
         }
