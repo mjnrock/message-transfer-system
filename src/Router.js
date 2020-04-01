@@ -87,7 +87,8 @@ export default class Router {
                 let nodes = this.get(msg.type, true).map(id => this._parent.Registry.get(id));
 
                 for(let node of nodes) {
-                    if(node instanceof Node && node.signet !== msg.source) {
+                    // if(node instanceof Node && node.signet !== msg.source) {
+                    if(node instanceof Node) {
                         node.receive(msg);
                     }
                 }

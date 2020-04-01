@@ -70,11 +70,49 @@ export default class MessageReceptionSequencer {
     }
 
     /**
-     * This can be an array of SignalTypes or a function that returns a true or false result
-     * @param {SignalTypes[]|fn<bool>} filters 
+     * An execution scoped command that will DISABLE `this.repair`.
+     * This is meant as a hard-stop to certain Nodes, most notably cases where you want to prevent a Node from reacting to itself.
+     * @param  {...Node} nodes 
+     */
+    blacklist(...nodes) {
+        for(let node of nodes) {
+            if(node instanceof Node && this._message.source === node.signet) {
+                this.repair = () => this._forceShortCircuit();
+                
+                return this._forceShortCircuit();
+            }
+        }
+    }
+    /**
+     * A scoped exclusion command to prevent any passed Nodes from qualifying
+     * @param  {...Node} nodes 
+     */
+    exclude(...nodes) {
+        if(this.check()) {
+            return this;
+        }
+
+        for(let node of nodes) {
+            if(node instanceof Node && this._message.source === node.signet) {
+                return this._forceShortCircuit();
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * This can be an array of Nodes, an array of SignalTypes, or a function that returns a true or false result
+     * @param {Node[]|SignalTypes[]|fn<bool>} filters 
      */
     if(...filters) {
         this.repair();  // Conditionals self-repair to allow for scoping
+
+        for(let potentialNode of filters) {
+            if(potentialNode instanceof Node && this._message.source === potentialNode.signet) {
+                return this;
+            }
+        }
 
         if(typeof filters[ 0 ] === "function") {
             let result = filters[ 0 ](this._message);

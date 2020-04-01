@@ -3,9 +3,14 @@ import MTSLib from "./../src/package";
 const Main = new MTSLib.Main({
     name: "Main",
     receive: msg => MTSLib.MSRP(msg, Main)
+        // .blacklist(Main)
+        // .exclude(Main)
+        // .if(Main)
         .if("Test", "Zebra")
             .run(() => console.log("THIS SHOULD RUN 1"), "test-1")
         .if("Cat")
+        // .if(Main)
+        //     .exclude(Main)
             .run(() => console.log("THIS SHOULD RUN 3"), "test-3")
             .run(() => console.log("THIS SHOULD RUN 4"), "test-4")
             .or(true, () => true, () => false)
@@ -18,7 +23,7 @@ const Main = new MTSLib.Main({
             .prop({
                 cat: "Kiszka"
             }, false)
-        .debug()
+        // .debug()
 });
 // const Node1 = new MTSLib.Node();
 const Node1 = new MTSLib.Node({
@@ -27,7 +32,7 @@ const Node1 = new MTSLib.Node({
 });
 
 Main.register(Node1);
-Main.Router.addRoute(Node1, true);
+// Main.Router.addRoute(Node1, true);
 
 Main.send("Test", "Hello");
 // Node1.send("Cat", "Hay");
