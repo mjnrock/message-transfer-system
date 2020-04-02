@@ -91,24 +91,6 @@ export default class CanvasNode extends Repeater {
 
         return this;
     }
-    createCanvas({ ctx = "2d", mnode = document.body, width = null, height = null } = {}) {
-        let canvas = document.createElement("canvas");
-
-        this.setCanvas(
-            canvas,
-            ctx
-        );
-
-        if(width && height) {
-            this.resize(width, height);
-        }
-
-        if(mnode instanceof Element) {
-            mnode.append(canvas);
-        }
-
-        return this;
-    }
     
 
     get canvas() {
