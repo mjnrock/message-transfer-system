@@ -1,5 +1,3 @@
-import { GenerateUUID } from "./helper";
-
 export default class StateChangeSequencerFactory {
     static FocusType = {
         CURRENT: 1,
@@ -15,12 +13,6 @@ export default class StateChangeSequencerFactory {
         this._message = msg;
 
         this._state = null;
-        // this._scopes = [
-        //     type,
-        //     []
-        // ];
-        // this._depth = 0;
-        // this._currentScope = this._scopes[ 1 ];
         
         this._scope = {
             type: type,
@@ -46,13 +38,6 @@ export default class StateChangeSequencerFactory {
     }
 
     _beginScope(type = StateChangeSequencerFactory.ScopeType.AND) {
-        // this._currentScope.push([
-        //     type,
-        //     []
-        // ]);
-        // this._depth += 1;
-        // this._currentScope = this._currentScope[ this._currentScope.length - 1][ 1 ];
-
         let scope = {
             type: type,
             parent: this._scope,
@@ -63,13 +48,6 @@ export default class StateChangeSequencerFactory {
         this._currentScope = scope;
     }
     _endScope() {
-        // this._depth -= 1;
-        // let scope = this._scopes[ 1 ];
-        // for(let i = 1; i < this._depth; i++) {
-        //     scope = scope[ i ][ 1 ];
-        // }
-
-        // this._currentScope = scope;
 
         if(this._currentScope.parent) {
             this._currentScope = this._currentScope.parent;
@@ -98,7 +76,6 @@ export default class StateChangeSequencerFactory {
         return this;
     }
     end() {
-        // this._endScope(this._currentScope.id);
         this._endScope();
 
         return this;
@@ -227,11 +204,6 @@ export default class StateChangeSequencerFactory {
         return [
             this._scopes
         ];
-    }
-    peek() {
-        console.log(`${ this._lastStatusResult }|${ this.status }|${ this._state }`);
-
-        return this;
     }
     debug(fn = console.log) {
         if(typeof fn === "function") {
