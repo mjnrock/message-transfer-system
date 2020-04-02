@@ -1,5 +1,3 @@
-import { GenerateUUID } from "./helper";
-
 export default class StateChangeSequencer {
     static FocusType = {
         CURRENT: 1,
@@ -8,180 +6,65 @@ export default class StateChangeSequencer {
     };
     static ScopeType = {
         OR: "or",
-        AND: "and",
-        // NOT: "not",
-        // NOR: "nor"
+        AND: "and"
     };
 
     constructor(msg, type = StateChangeSequencer.ScopeType.AND) {
         this._message = msg;
 
-        this._state = null;
-        this._scopes = {};
-        this._currentScope = null;
-        this._lastStatusResult = null;
+        this._scope = {
+            type: type,
+            parent: null,
+            children: []
+        };
+        this._currentScope = this._scope;
         
         this._focus = StateChangeSequencer.FocusType.CURRENT;
-        
-        this._beginScope(null, type);
     }
 
-    /**
-     * Create a new scope
-     */
-    _beginScope(parent = null, scopeType = StateChangeSequencer.ScopeType.AND) {
+    _beginScope(type = StateChangeSequencer.ScopeType.AND) {
         let scope = {
-            id: GenerateUUID(),
-            parent: parent,
-            status: null,
-            type: scopeType
+            type: type,
+            parent: this._scope,
+            children: []
         };
 
-        this._scopes[ scope.id ] = scope;
+        this._currentScope.children.push(scope);
         this._currentScope = scope;
-
-        return scope;
     }
-    /**
-     * End a scope
-     */
-    _endScope(id) {
-        let status = this._scopes[ id ].status;
-
-        this._currentScope = this._scopes[ id ].parent;
-        delete this._scopes[ id ];
-
-        return status;
-    }
-
-    /**
-     * An alias to the current scope's status
-     */
-    get status() {        
-        return this._currentScope.status;
-    }
-    /**
-     * An alias to the current scope's status
-     */
-    set status(value) {
-        this._currentScope.status = value;
-
-        if(this._currentScope.parent === null) {
-            if(this._state === null) {
-                this._state = value;
-            }
-
-            let type = this._currentScope.type;
-            if(type === StateChangeSequencer.ScopeType.OR) {
-                this._state = this._state || value;
-            } else if(type === StateChangeSequencer.ScopeType.AND) {
-                this._state = this._state && value;
-            }
+    _endScope() {
+        if(this._currentScope.parent) {
+            this._currentScope = this._currentScope.parent;
         }
     }
-    /**
-     * Returns whether or not the status has become false.
-     * As such, this is a negated function.
-     */
-    check() {
-        if(this._currentScope.status === null || this._currentScope.status === void 0) {
-            return false;
-        }
 
-        return !this._currentScope.status;
-    }
-
-    /**
-     * Sets the focus on the `Message.current`
-     */
     current() {
         this._focus = StateChangeSequencer.FocusType.CURRENT;
 
         return this;
     }
-    /**
-     * Sets the focus on the `Message.previous`
-     */
     previous() {
         this._focus = StateChangeSequencer.FocusType.PREVIOUS;
 
         return this;
     }
-    /**
-     * Sets the focus on the `Message.key`
-     */
     key() {
         this._focus = StateChangeSequencer.FocusType.KEY;
 
         return this;
     }
 
-    /**
-     * Opens a sub-scope block
-     * @param {ScopeType|string} scopeType 
-     */
-    begin(scopeType = StateChangeSequencer.ScopeType.AND) {
-        this._beginScope(this._currentScope, scopeType);
+    begin(type = StateChangeSequencer.ScopeType.AND) {
+        this._beginScope(type);
 
         return this;
     }
-    /**
-     * For any method called in the list below, `.end()` will close the current sub-scope.
-     * As the parent is undefined for the root, calling `.end()` on the root scope will cause an error, intentionally, as that is a noop.
-     * Affects:
-     *      `.begin(...)`
-     *      `.or()`
-     *      `.and()`
-     */
     end() {
-        let scope = this._currentScope,
-            parent = this._currentScope.parent,
-            status = this._endScope(scope.id);
-
-        // if(scope.type === StateChangeSequencer.ScopeType.NOT || scope.type === StateChangeSequencer.ScopeType.NOR) {
-        //     status = !status;
-        // }
-
-        if(this._state === null || this._state === void 0) {
-            this._state = status;
-        }
-
-        if(parent.type === StateChangeSequencer.ScopeType.OR) {
-            this._state = this._state || status;
-        } else if(parent.type === StateChangeSequencer.ScopeType.AND) {
-            this._state = this._state && status;
-        }
-        // else if(parent.type === StateChangeSequencer.ScopeType.NOT) {
-        //     this._state = this._state && status;
-        // } else if(parent.type === StateChangeSequencer.ScopeType.NOR) {
-        //     this._state = this._state || status;
-        // }
+        this._endScope();
 
         return this;
     }
-
-    /**
-     * And alias of `.begin(StateChangeSequencer.ScopeType.OR)`
-     */
-    or() {
-        return this.begin(StateChangeSequencer.ScopeType.OR);
-    }
-    /**
-     * And alias of `.begin(StateChangeSequencer.ScopeType.AND)`
-     */
-    and() {
-        return this.begin(StateChangeSequencer.ScopeType.AND);
-    }
-    // not() {
-    //     return this.begin(StateChangeSequencer.ScopeType.NOT);
-    // }
-    // nor() {
-    //     return this.begin(StateChangeSequencer.ScopeType.NOR);
-    // }
-
-    /**
-     * Return the appropriate Message property, based on `this._focus`
-     */
+    
     _getFocus() {
         if(this._focus === StateChangeSequencer.FocusType.CURRENT) {
             return this._message.current;
@@ -192,121 +75,106 @@ export default class StateChangeSequencer {
         }
     }
 
-    /**
-     * Compare `this.status` to the input value, based on the current scope's type
-     */
-    _evaluateScopeType(value) {
-        this._lastStatusResult = value;
-        if(this.status === null || this.status === void 0) {
-            this.status = value;
-        }
-
-        if(this._currentScope.type === StateChangeSequencer.ScopeType.AND) {
-            return this.status && value;
-        } else if(this._currentScope.type === StateChangeSequencer.ScopeType.OR) {
-            return this.status || value;
-        }
-        
-        //* These are identical to AND and OR *at this level*, as they will be reconciled on a .end() call
-        // else if(this._currentScope.type === StateChangeSequencer.ScopeType.NOT) {
-        //     return left && right;
-        // } else if(this._currentScope.type === StateChangeSequencer.ScopeType.NOR) {
-        //     return left || right;
-        // }
-
-        return false;
+    or() {
+        return this.begin(StateChangeSequencer.ScopeType.OR);
+    }
+    and() {
+        return this.begin(StateChangeSequencer.ScopeType.AND);
     }
 
-    //* COMPARATORS
-    equals(input) {        
-        let focus = this._getFocus();
-        let status = focus === input;
 
-        this.status = this._evaluateScopeType(status);
+    //* COMPARATORS
+    equals(input) {
+        this._currentScope.children.push(this._getFocus() === input);
 
         return this;
     }
     gt(input) {
-        let focus = this._getFocus();
-        let status = focus > input;
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(this._getFocus() > input);
 
         return this;
     }
     gte(input) {
-        let focus = this._getFocus();
-        let status = focus >= input;
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(this._getFocus() >= input);
 
         return this;
     }
     lt(input) {
-        let focus = this._getFocus();
-        let status = focus < input;
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(this._getFocus() < input);
 
         return this;
     }
     lte(input) {
-        let focus = this._getFocus();
-        let status = focus <= input;
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(this._getFocus() <= input);
 
         return this;
     }
     in(...input) {
-        let focus = this._getFocus();
-        let status = input.includes(focus);
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(input.includes(this._getFocus()));
 
         return this;
     }
     between(a, b) {
         let focus = this._getFocus();
-        let status = (focus >= a && focus <= b);
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push((focus >= a) && (focus <= b));
 
         return this;
     }
     regex(pattern) {
-        let focus = this._getFocus();
-        let status = pattern instanceof RegExp ? pattern.test(focus) : false;
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(pattern instanceof RegExp ? pattern.test(this._getFocus()) : false);
 
         return this;
     }
     
     //* NEGATED COMPARATORS
-    notEquals(input) {        
-        let focus = this._getFocus();
-        let status = focus !== input;
-
-        this.status = this._evaluateScopeType(status);
+    notEquals(input) {
+        this._currentScope.children.push(this._getFocus() !== input);
 
         return this;
     }
     notIn(...input) {
-        let focus = this._getFocus();
-        let status = !(input.includes(focus));
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(!(input.includes(this._getFocus())));
 
         return this;
     }
     notBetween(a, b) {
         let focus = this._getFocus();
-        let status = !(focus >= a && focus <= b);
-
-        this.status = this._evaluateScopeType(status);
+        this._currentScope.children.push(!((focus >= a) && (focus <= b)));
 
         return this;
+    }
+
+
+    booleanize(scope) {
+        let result = null;
+
+        for(let child of scope.children) {
+            if(typeof child === "object") {
+                let childResult = this.booleanize(child);
+
+                if(result === null || result === void 0) {
+                    result = childResult;
+                }
+
+                if(child.type === StateChangeSequencer.ScopeType.AND) {
+                    result = result && childResult;
+                } else if(child.type === StateChangeSequencer.ScopeType.OR) {
+                    result = result || childResult;
+                }
+            } else {
+                if(result === null || result === void 0) {
+                    result = child;
+                }
+
+                if(scope.type === StateChangeSequencer.ScopeType.AND) {
+                    result = result && child;
+                } else if(scope.type === StateChangeSequencer.ScopeType.OR) {
+                    result = result || child;
+                }
+            }
+        }
+
+        return result;
     }
 
 
@@ -316,13 +184,18 @@ export default class StateChangeSequencer {
      * A default terminator function
      */
     done() {
-        return this.getState();
+        return this.getResult();
     }
-    getState() {
-        return this._state;
+    getResult() {
+        let result = this.booleanize(this._scope);
+
+        return result;
     }
     getMessage() {
         return this._message;
+    }
+    getScope() {
+        return this._scope;
     }
 
 
@@ -332,11 +205,6 @@ export default class StateChangeSequencer {
         return [
             this._scopes
         ];
-    }
-    peek() {
-        console.log(`${ this._lastStatusResult }|${ this.status }|${ this._state }`);
-
-        return this;
     }
     debug(fn = console.log) {
         if(typeof fn === "function") {
