@@ -1,3 +1,8 @@
+//! ---------------------------------------------------
+//!     Presently Not in Sync with Rule.js
+//!     Update to account for .value()
+//! ---------------------------------------------------
+
 export default class RuleFactory {
     static FocusType = {
         CURRENT: 1,

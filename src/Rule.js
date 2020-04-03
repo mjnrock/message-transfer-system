@@ -1,13 +1,18 @@
+import Message from "./Message";
+
 export default class Rule {
     static FocusType = {
+        // For Node.StateChange or Node.PropChange Messages
         CURRENT: 1,
         PREVIOUS: 2,
         KEY: 3,
 
+        // For other Messages
         TYPE: 4,
         PAYLOAD: 5,
         SOURCE: 6,
 
+        // For running a rule without using a Message
         VALUE: 7,
     };
     static ScopeType = {
@@ -18,9 +23,14 @@ export default class Rule {
         NOR: "nand",
     };
 
-    constructor(msg, type = Rule.ScopeType.AND) {
-        this._message = msg;
-        this._value = null;
+    constructor(msgOrValue, type = Rule.ScopeType.AND) {
+        if(Message.conforms(msgOrValue)) {
+            this._message = msgOrValue;
+            this._value = null;
+        } else {
+            this._message = null;
+            this._value = msgOrValue;
+        }
 
         this._scope = {
             type: type,
