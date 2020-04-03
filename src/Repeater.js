@@ -7,6 +7,16 @@ export default class Repeater extends Node {
         TICK: "Repeater.Tick",
         RENDER: "Repeater.Render",
     };
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(Repeater.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
+    }
 
     static BroadcastType = {
         MESSAGE: 2 << 0,
