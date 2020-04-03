@@ -124,6 +124,8 @@ export default class Rule {
         } else if(this._focus === Rule.FocusType.VALUE) {
             return this._value;
         }
+
+        return false;
     }
 
     or() {

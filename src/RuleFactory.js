@@ -53,6 +53,8 @@ export default class RuleFactory {
         } else if(this._focus === RuleFactory.FocusType.SOURCE) {
             return "msg.source";
         }
+
+        return false;
     }
 
     _beginScope(type = RuleFactory.ScopeType.AND) {
