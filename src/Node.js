@@ -2,6 +2,21 @@ import { GenerateUUID } from "./helper";
 import Message from "./Message";
 
 export default class Node {
+    static SignalTypes = {
+        STATE_CHANGE: "Node.StateChange",
+        PROP_CHANGE: "Node.PropChange",
+    };
+    
+    static AllSignalTypes(...filter) {
+        return Object.values(Node.SignalTypes).filter(st => {
+            if(filter.includes(st)) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
     constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
         this.id = GenerateUUID();
         this.name = name;
@@ -58,7 +73,7 @@ export default class Node {
         this._state = value;
 
         if(this._emitStateChange === true) {
-            this.emit(`state::${ this.signet }`, {
+            this.emit(Node.SignalTypes.STATE_CHANGE, {
                 previous: this._state,
                 current: value
             });

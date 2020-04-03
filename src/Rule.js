@@ -1,16 +1,26 @@
-export default class StateChangeSequencer {
+export default class Rule {
     static FocusType = {
         CURRENT: 1,
         PREVIOUS: 2,
         KEY: 3,
+
+        TYPE: 4,
+        PAYLOAD: 5,
+        SOURCE: 6,
+
+        VALUE: 7,
     };
     static ScopeType = {
         OR: "or",
-        AND: "and"
+        AND: "and",
+
+        NAND: "nor",
+        NOR: "nand",
     };
 
-    constructor(msg, type = StateChangeSequencer.ScopeType.AND) {
+    constructor(msg, type = Rule.ScopeType.AND) {
         this._message = msg;
+        this._value = null;
 
         this._scope = {
             type: type,
@@ -19,10 +29,10 @@ export default class StateChangeSequencer {
         };
         this._currentScope = this._scope;
         
-        this._focus = StateChangeSequencer.FocusType.CURRENT;
+        this._focus = Rule.FocusType.CURRENT;
     }
 
-    _beginScope(type = StateChangeSequencer.ScopeType.AND) {
+    _beginScope(type = Rule.ScopeType.AND) {
         let scope = {
             type: type,
             parent: this._scope,
@@ -39,22 +49,45 @@ export default class StateChangeSequencer {
     }
 
     current() {
-        this._focus = StateChangeSequencer.FocusType.CURRENT;
+        this._focus = Rule.FocusType.CURRENT;
 
         return this;
     }
     previous() {
-        this._focus = StateChangeSequencer.FocusType.PREVIOUS;
+        this._focus = Rule.FocusType.PREVIOUS;
 
         return this;
     }
     key() {
-        this._focus = StateChangeSequencer.FocusType.KEY;
+        this._focus = Rule.FocusType.KEY;
 
         return this;
     }
 
-    begin(type = StateChangeSequencer.ScopeType.AND) {
+    type() {
+        this._focus = Rule.FocusType.TYPE;
+
+        return this;
+    }
+    payload() {
+        this._focus = Rule.FocusType.PAYLOAD;
+
+        return this;
+    }
+    source() {
+        this._focus = Rule.FocusType.SOURCE;
+
+        return this;
+    }
+
+    value(value) {
+        this._value = value;
+        this._focus = Rule.FocusType.VALUE;
+
+        return this;
+    }
+
+    begin(type = Rule.ScopeType.AND) {
         this._beginScope(type);
 
         return this;
@@ -66,20 +99,34 @@ export default class StateChangeSequencer {
     }
     
     _getFocus() {
-        if(this._focus === StateChangeSequencer.FocusType.CURRENT) {
-            return this._message.current;
-        } else if(this._focus === StateChangeSequencer.FocusType.PREVIOUS) {
-            return this._message.previous;
-        } else if(this._focus === StateChangeSequencer.FocusType.KEY) {
-            return this._message.key;
+        if(this._focus === Rule.FocusType.CURRENT) {
+            return this._message.payload.current;
+        } else if(this._focus === Rule.FocusType.PREVIOUS) {
+            return this._message.payload.previous;
+        } else if(this._focus === Rule.FocusType.KEY) {
+            return this._message.payload.key;
+        } else if(this._focus === Rule.FocusType.TYPE) {
+            return this._message.type;
+        } else if(this._focus === Rule.FocusType.PAYLOAD) {
+            return this._message.payload;
+        } else if(this._focus === Rule.FocusType.SOURCE) {
+            return this._message.source;
+        } else if(this._focus === Rule.FocusType.VALUE) {
+            return this._value;
         }
     }
 
     or() {
-        return this.begin(StateChangeSequencer.ScopeType.OR);
+        return this.begin(Rule.ScopeType.OR);
     }
     and() {
-        return this.begin(StateChangeSequencer.ScopeType.AND);
+        return this.begin(Rule.ScopeType.AND);
+    }
+    nor() {
+        return this.begin(Rule.ScopeType.NOR);
+    }
+    nand() {
+        return this.begin(Rule.ScopeType.NAND);
     }
 
 
@@ -156,9 +203,9 @@ export default class StateChangeSequencer {
                     result = childResult;
                 }
 
-                if(child.type === StateChangeSequencer.ScopeType.AND) {
+                if(child.type === Rule.ScopeType.AND || scope.type === Rule.ScopeType.NAND) {
                     result = result && childResult;
-                } else if(child.type === StateChangeSequencer.ScopeType.OR) {
+                } else if(child.type === Rule.ScopeType.OR || scope.type === Rule.ScopeType.NOR) {
                     result = result || childResult;
                 }
             } else {
@@ -166,12 +213,16 @@ export default class StateChangeSequencer {
                     result = child;
                 }
 
-                if(scope.type === StateChangeSequencer.ScopeType.AND) {
+                if(scope.type === Rule.ScopeType.AND || scope.type === Rule.ScopeType.NAND) {
                     result = result && child;
-                } else if(scope.type === StateChangeSequencer.ScopeType.OR) {
+                } else if(scope.type === Rule.ScopeType.OR || scope.type === Rule.ScopeType.NOR) {
                     result = result || child;
                 }
             }
+        }
+
+        if(scope.type === Rule.ScopeType.NOR || scope.type === Rule.ScopeType.NAND) {
+            result = !result;
         }
 
         return result;
@@ -198,25 +249,7 @@ export default class StateChangeSequencer {
         return this._scope;
     }
 
-
-
-    //* DEBUGGING FUNCTIONS
-    _getDefaultArgs() {
-        return [
-            this._scopes
-        ];
-    }
-    debug(fn = console.log) {
-        if(typeof fn === "function") {
-            fn(...this._getDefaultArgs());
-
-            return this;
-        }
-
-        return this;
-    }
-
-    static Process(msg, type = StateChangeSequencer.ScopeType.AND) {
-        return new StateChangeSequencer(msg, type);
+    static Process(msg, type = Rule.ScopeType.AND) {
+        return new Rule(msg, type);
     }
 };

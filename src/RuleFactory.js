@@ -1,15 +1,22 @@
-export default class StateChangeSequencerFactory {
+export default class RuleFactory {
     static FocusType = {
         CURRENT: 1,
         PREVIOUS: 2,
         KEY: 3,
+
+        TYPE: 4,
+        PAYLOAD: 5,
+        SOURCE: 6,
     };
     static ScopeType = {
         OR: "or",
-        AND: "and"
+        AND: "and",
+        
+        NAND: "nand",
+        NOR: "nor",
     };
 
-    constructor(msg, type = StateChangeSequencerFactory.ScopeType.AND) {
+    constructor(msg, type = RuleFactory.ScopeType.AND) {
         this._message = msg;
 
         this._state = null;
@@ -24,20 +31,26 @@ export default class StateChangeSequencerFactory {
 
         this._lastStatusResult = null;
         
-        this._focus = StateChangeSequencerFactory.FocusType.CURRENT;
+        this._focus = RuleFactory.FocusType.CURRENT;
     }
 
     getFocusParameter() {
-        if(this._focus === StateChangeSequencerFactory.FocusType.CURRENT) {
-            return "msg.current";
-        } else if(this._focus === StateChangeSequencerFactory.FocusType.PREVIOUS) {
-            return "msg.previous";
-        } else if(this._focus === StateChangeSequencerFactory.FocusType.KEY) {
-            return "msg.key";
+        if(this._focus === RuleFactory.FocusType.CURRENT) {
+            return "msg.payload.current";
+        } else if(this._focus === RuleFactory.FocusType.PREVIOUS) {
+            return "msg.payload.previous";
+        } else if(this._focus === RuleFactory.FocusType.KEY) {
+            return "msg.payload.key";
+        } else if(this._focus === RuleFactory.FocusType.TYPE) {
+            return "msg.type";
+        } else if(this._focus === RuleFactory.FocusType.PAYLOAD) {
+            return "msg.payload";
+        } else if(this._focus === RuleFactory.FocusType.SOURCE) {
+            return "msg.source";
         }
     }
 
-    _beginScope(type = StateChangeSequencerFactory.ScopeType.AND) {
+    _beginScope(type = RuleFactory.ScopeType.AND) {
         let scope = {
             type: type,
             parent: this._scope,
@@ -55,22 +68,38 @@ export default class StateChangeSequencerFactory {
     }
 
     current() {
-        this._focus = StateChangeSequencerFactory.FocusType.CURRENT;
+        this._focus = RuleFactory.FocusType.CURRENT;
 
         return this;
     }
     previous() {
-        this._focus = StateChangeSequencerFactory.FocusType.PREVIOUS;
+        this._focus = RuleFactory.FocusType.PREVIOUS;
 
         return this;
     }
     key() {
-        this._focus = StateChangeSequencerFactory.FocusType.KEY;
+        this._focus = RuleFactory.FocusType.KEY;
 
         return this;
     }
 
-    begin(type = StateChangeSequencerFactory.ScopeType.AND) {
+    type() {
+        this._focus = RuleFactory.FocusType.TYPE;
+
+        return this;
+    }
+    payload() {
+        this._focus = RuleFactory.FocusType.PAYLOAD;
+
+        return this;
+    }
+    source() {
+        this._focus = RuleFactory.FocusType.SOURCE;
+
+        return this;
+    }
+
+    begin(type = RuleFactory.ScopeType.AND) {
         this._beginScope(type);
 
         return this;
@@ -82,10 +111,16 @@ export default class StateChangeSequencerFactory {
     }
 
     or() {
-        return this.begin(StateChangeSequencerFactory.ScopeType.OR);
+        return this.begin(RuleFactory.ScopeType.OR);
     }
     and() {
-        return this.begin(StateChangeSequencerFactory.ScopeType.AND);
+        return this.begin(RuleFactory.ScopeType.AND);
+    }
+    nor() {
+        return this.begin(RuleFactory.ScopeType.NOR);
+    }
+    nand() {
+        return this.begin(RuleFactory.ScopeType.NAND);
     }
 
 
@@ -153,9 +188,9 @@ export default class StateChangeSequencerFactory {
         let schema = "(",
             joiner = "";
 
-        if(scope.type === StateChangeSequencerFactory.ScopeType.AND) {
+        if(scope.type === RuleFactory.ScopeType.AND || scope.type === RuleFactory.ScopeType.NAND) {
             joiner = " && ";
-        } else if(scope.type === StateChangeSequencerFactory.ScopeType.OR) {
+        } else if(scope.type === RuleFactory.ScopeType.OR || scope.type === RuleFactory.ScopeType.NOR) {
             joiner = " || ";
         }
 
@@ -169,6 +204,10 @@ export default class StateChangeSequencerFactory {
         }
 
         schema += children.join(joiner);
+
+        if(scope.type === RuleFactory.ScopeType.NAND || scope.type === RuleFactory.ScopeType.NOR) {
+            schema = `(!${ schema })`;
+        }
 
         return `${ schema })`;
     }
@@ -215,7 +254,7 @@ export default class StateChangeSequencerFactory {
         return this;
     }
 
-    static Process(msg, type = StateChangeSequencerFactory.ScopeType.AND) {
-        return new StateChangeSequencerFactory(msg, type);
+    static Process(msg, type = RuleFactory.ScopeType.AND) {
+        return new RuleFactory(msg, type);
     }
 };

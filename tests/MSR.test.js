@@ -2,7 +2,7 @@ import MTSLib from "./../src/package";
 
 const Main = new MTSLib.Main({
     name: "Main",
-    receive: msg => MTSLib.MSRP(msg, {
+    receive: msg => MTSLib.$.MSRP(msg, {
         scope: Main
     })
         .if("Test", "Zebra")

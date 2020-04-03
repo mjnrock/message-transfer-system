@@ -1,13 +1,18 @@
-import StateChangeSequencer from "../src/StateChangeSequencer";
-import StateChangeSequencerFactory from "./../src/StateChangeSequencerFactory";
+import Rule from "../src/Rule";
+import RuleFactory from "./../src/RuleFactory";
+import Node from "../src/Node";
 
 let message = {
-    key: "bob.cat",
-    current: 10,
-    previous: 5
+    type: Node.SignalTypes.STATE_CHANGE,
+    payload: {
+        key: "bob.cat",
+        current: 10,
+        previous: 5
+    },
+    source: null
 };
 
-let res = StateChangeSequencerFactory.Process(message, "and")
+let res = RuleFactory.Process(message, "and")
 .current()
     .or()
         .gt(1)
@@ -36,41 +41,45 @@ let res = StateChangeSequencerFactory.Process(message, "and")
     .end()
 .done()
 
-let res2 = StateChangeSequencer.Process(message, "and");
-
-console.time("Test");
-res2
-.current()
-    .or()
-        .gt(1)
-        .lt(52)
-        .and()
-            .gt(5)
-            .lt(45)
-        .end()
-    .end()
-    .or()
-        .gt(5)
-        .lt(90)
-        .and()
-            .gt(7)
-            .lt(45)
+let res2 = Rule.Process(message, "and")
+    .current()
+        .or()
+            .gt(1)
+            .lt(52)
             .and()
-                .gt(3)
+                .gt(5)
                 .lt(45)
             .end()
         .end()
-        .equals(10)
-    .end()
-.key()
-    .begin()
-        .regex(/\./gi)
-    .end()
-.done()
-console.timeEnd("Test");
+        .or()
+            .gt(5)
+            .lt(90)
+            .and()
+                .gt(7)
+                .lt(45)
+                .and()
+                    .gt(3)
+                    .lt(45)
+                .end()
+            .end()
+            .equals(10)
+        .end()
+    .key()
+        .begin()
+            .regex(/\./gi)
+        .end()
+    .done()
 
 let test = eval(res);
+console.log(test(message))
 
-console.time("Test2");
-test(message)
-console.timeEnd("Test2");
+console.log(res2)
+
+
+let res3 = Rule.Process(message, "or")
+    .value(15)
+        .equals(15)
+        .lt(4)
+    .done()
+
+console.log(res3)
