@@ -281,6 +281,55 @@ export default class MessageReceptionSequencer {
     }
 
     /**
+     * Sets `_state[ key ] = _results[ value ]`, according to the @mapping
+     * @param {kvp} mapping 
+     * @param {bool} useScope 
+     */
+    resultProp(mapping = {}, useScope = true) {
+        if(this.check()) {
+            return this;
+        }
+
+        let node = this._node;
+        if(typeof mapping === "object" && Object.keys(mapping).length) {
+            if(node instanceof Node && useScope) {
+                Object.entries(mapping).forEach(([ key, value]) => {
+                    node.state[ key ] = this._results[ value ];
+                });
+            } else {
+                Object.entries(mapping).forEach(([ key, value]) => {
+                    this._state[ key ] = this._results[ value ];
+                });
+            }
+
+            return this;
+        }
+
+        return this._forceShortCircuit();
+    }
+    resultState(name, useScope = true) {
+        if(this.check()) {
+            return this;
+        }
+
+        let node = this._node;
+
+        if(this._results[ name ]) {
+            if(node instanceof Node && useScope) {
+                node.state = this._results[ name ];
+
+                return this;
+            }
+
+            this._state = this._results[ name ];
+
+            return this;
+        }
+
+        return this._forceShortCircuit();
+    }
+
+    /**
      * A `Node.send` elevation for `this._node` first, or `MessageReceptionSequencer.MasterNode` as a fallback.  Both absent will short-circuit the MSR.
      * @param {string|number} type 
      * @param {any} payload 
