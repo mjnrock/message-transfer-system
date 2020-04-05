@@ -8,6 +8,10 @@ import Router from "./Router";
 
 import MasterNode from "./MasterNode";
 
+import StateNode from "./StateNode";
+import StructNode from "./StructNode";
+import ActionNode from "./ActionNode";
+
 import MessageReceptionSequencer from "./MessageReceptionSequencer";
 import Rule from "./Rule";
 import RuleFactory from "./RuleFactory";
@@ -28,6 +32,10 @@ export default {
     Router,
 
     MasterNode,
+
+    StateNode,
+    StructNode,
+    ActionNode,
 
     MessageReceptionSequencer,
     Rule,

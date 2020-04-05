@@ -303,6 +303,23 @@ export default class MessageReceptionSequencer {
 
         return this._forceShortCircuit();
     }
+    broadcast(type, payload, elevate = true, { defaultConfig = true } = {}) {
+        if(this.check()) {
+            return this;
+        }
+
+        if(this._node instanceof Node) {
+            this._node.send(type, payload, { elevate, defaultConfig });
+
+            return this;
+        } else if(MessageReceptionSequencer.MasterNode instanceof Node) {
+            MessageReceptionSequencer.MasterNode.send(type, payload, { elevate, defaultConfig });
+
+            return this;
+        }
+
+        return this._forceShortCircuit();
+    }
     /**
      * A `Node.message` elevation for `this._node` first, or `MessageReceptionSequencer.MasterNode` as a fallback.  Both absent will short-circuit the MSR.
      * @param {Message} msg
