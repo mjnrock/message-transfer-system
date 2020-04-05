@@ -18,7 +18,7 @@ export default class Registry {
         return id;
     }
 
-    lookup(name) {
+    find(name) {
         return Object.values(this._entries).filter(ent => ent.name === name);
     }
     

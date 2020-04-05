@@ -69,7 +69,7 @@ export default class Router {
                 if(typeof msg._elevate === "string" || msg._elevate instanceof String) {
                     let local = this._mnode.Registry.get(msg._elevate);
                     // let local = this._mnode.Registry.get(msg._elevate),
-                    //     lookups = this._mnode.Registry.lookup(msg._elevate);
+                    //     lookups = this._mnode.Registry.find(msg._elevate);
 
                     if(local instanceof Node) {     // Prioritize direct Registry entries first
                         local.receive(msg);

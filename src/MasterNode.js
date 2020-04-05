@@ -25,6 +25,9 @@ export default class MasterNode extends Repeater {
     get get() {
         return this.Registry.get.bind(this.Registry);
     }
+    get find() {
+        return this.Registry.find.bind(this.Registry);
+    }
     get register() {
         return this.Registry.register.bind(this.Registry);
     }
