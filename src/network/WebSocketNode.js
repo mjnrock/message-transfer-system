@@ -8,8 +8,8 @@ export default class WebSocketNode extends Node {
         CLIENT_ID: `WebSocketNode.ClientId`,
         ACKNOWLEDGE: `WebSocketNode.Acknowledge`,
         OPEN: `WebSocketNode.Open`,
-        MESSAGE: `WebSocketNode.Message`,
-        MESSAGE_ERROR: `WebSocketNode.MessageError`,
+        MESSAGE: `WebSocketNode`,
+        MESSAGE_ERROR: `WebSocketNodeError`,
         CLOSE: `WebSocketNode.Close`,
         ERROR: `WebSocketNode.Error`,
     };
@@ -78,8 +78,8 @@ export default class WebSocketNode extends Node {
             this.internal.WebSocket.onopen = this._onWsOpen.bind(this);
         }
 
-        this.internal.WebSocket.onclose = this._onWsClose.bind(this);
         this.internal.WebSocket.onerror = this._onWsError.bind(this);
+        this.internal.WebSocket.onclose = this._onWsClose.bind(this);
         this.internal.WebSocket.onmessage = this._onWsMessage.bind(this);
 
         if(this.internal.isMaster) {
@@ -133,7 +133,7 @@ export default class WebSocketNode extends Node {
                 this.internal.WebSocket.send(packet.toJson());
             }
         } catch(e) {
-            this.send(WebSocketNode.SignalTypes.ERROR, e);
+            this._onWsError(e);
         }
     }
 
@@ -167,7 +167,7 @@ export default class WebSocketNode extends Node {
         }
     }
     _onWsMessageError(e) {
-        this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e.message);
+        this.send(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
     }
     _onWsOpen(e) {
         this.send(WebSocketNode.SignalTypes.OPEN, e);

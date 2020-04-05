@@ -34,7 +34,7 @@ export default {
     RuleFactory,
 
     $: {
-        MSRP: MessageReceptionSequencer.Process,    // Elevated, as this is intended to be the primary access mode for all Message reception
+        MRSP: MessageReceptionSequencer.Process,    // Elevated, as this is intended to be the primary access mode for all Message reception
         RP: Rule.Process,
         RFP: RuleFactory.Process,
     },

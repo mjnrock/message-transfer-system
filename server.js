@@ -14,13 +14,11 @@ app.set("trust proxy", true);
 // console.log(expressWs.getWss());
 // console.log(expressWs.getWss().clients);
 
-const MTS = (new MTSLib.Main({
-    receive: function(msg) {
-        if(msg.type === MTSLib.Browser.CanvasNode.SignalTypes.DRAW_CIRCLE) {
-            this.message((new MTSLib.Message(msg.type, msg.payload)).elevate());
-        }
-    }
-})).loadNetwork(true);
+const MTS = MTSLib.Modules.Network(new MTSLib.MasterNode({
+    receive: msg => MTSLib.$.MRSP(msg)
+        .if("GyroData")
+        .debug()
+}), { isMaster: true });
 // MTS.addMessage(MTSLib.Network.WebSocketNode.SignalTypes.MESSAGE, new MTSLib.Message("Ping", "Pong", MTS.signet), 1000);
 
 console.warn(`MTS: ${ MTS.id }`);

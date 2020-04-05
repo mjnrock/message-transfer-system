@@ -261,6 +261,13 @@ export default class Rule {
         return this._scope;
     }
 
+
+    debug(fn = console.log) {
+        if(typeof fn === "function") {
+            fn(this._message);
+        }
+    }
+
     static Process(msg, type = Rule.ScopeType.AND) {
         return new Rule(msg, type);
     }
