@@ -1,4 +1,4 @@
-import { Bitwise, GenerateUUID } from "./helper";
+import { Bitwise, GenerateUUID, Dice } from "./helper";
 import Node from "./Node";
 import Message from "./Message";
 
@@ -33,7 +33,7 @@ export default class Repeater extends Node {
 
         this.internal = {
             BroadcastType: 0,
-            Intervals: new Set()
+            Intervals: {}
         };
 
         this.setBroadcastType(broadcastType);
@@ -49,32 +49,42 @@ export default class Repeater extends Node {
         }
     }
 
-    addInterval(...args) {
+    addCommand(...args) {
         if(typeof args[ 0 ] === "function" && typeof args[ 1 ] === "number") {
-            return this.addCallback(...args);
+            return this.addInterval(...args);
         } else if(Message.conforms(args[ 0 ]) && typeof args[ 1 ] === "number") {
-            return this.addMessage(args[ 0 ].type, args[ 0 ].payload, args[ 1 ]);
+            return this.addMessager(args[ 0 ].type, args[ 0 ].payload, args[ 1 ]);
         } else if(args[ 0 ] && args[ 1 ] && typeof args[ 2 ] === "number") {
-            return this.addMessage(...args);
+            return this.addMessager(...args);
         }
     }
-    clearInterval(id) {
-        if(typeof id === "number") {
-            clearInterval(id);
-            this.internal.Intervals.delete(id);
+    clearInterval(nameOrId) {
+        if(typeof nameOrId === "string" || nameOrId instanceof String || typeof nameOrId === "number") {
+            clearInterval(this.internal.Intervals[ nameOrId ]);
+            delete this.internal.Intervals[ nameOrId ];
         }
     }
 
-    addCallback(callback, interval) {
+    addInterval(callback, interval, { name = null } = {}) {
         let id = setInterval(() => {
             callback(this._mnode, this);
         }, interval);
 
-        this.internal.Intervals.add(id);
+        this.internal.Intervals[ name || id ] = id;
 
-        return id;
+        return name || id;
     }
-    addMessage(type, payload, interval) {
+    addRandomInterval(callback, min, max, { name = null } = {}) {
+        let id = this.addInterval(() => {
+            callback(this._mnode, this);
+
+            this.clearInterval(id);
+            this.addRandomInterval(callback, min, max, { name });
+        }, Dice.random(min, max), { name });
+    }
+
+
+    addMessager(type, payload, interval, { name = null } = {}) {
         let id = setInterval(() => {
             if(Bitwise.has(this.internal.BroadcastType, Repeater.BroadcastType.MESSAGE)) {
                 this.send(type, payload, { defaultConfig: false });
@@ -84,8 +94,8 @@ export default class Repeater extends Node {
             }
         }, interval);
 
-        this.internal.Intervals.add(id);
-        
-        return id;
+        this.internal.Intervals[ name || id ] = id;
+
+        return name || id;
     }
 };
