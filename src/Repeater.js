@@ -61,7 +61,7 @@ export default class Repeater extends Node {
     clearInterval(id) {
         if(typeof id === "number") {
             clearInterval(id);
-            this.internal.Intervals.remove(id);
+            this.internal.Intervals.delete(id);
         }
     }
 
