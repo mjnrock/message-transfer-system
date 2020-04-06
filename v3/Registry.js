@@ -4,23 +4,15 @@ export default class Registry {
     constructor({ register = null, unregister = null } = {}) {
         this._entries = {};
 
-        if(typeof register === "object") {
-            this._register = register;
-        } else {
-            this._register = {
-                key: node => node.id,
-                check: node => node instanceof Node && !this.has(node.id)
-            };
-        }
-
-        if(typeof unregister === "object") {
-            this._unregister = unregister;
-        } else {
-            this._unregister = {
-                key: node => node.id,
-                check: node => node instanceof Node && this.has(node.id)
-            };
-        }
+        
+        this._register = register || {
+            key: node => node.id,
+            check: node => node instanceof Node && !this.has(node.id)
+        };
+        this._unregister = unregister || {
+            key: node => node.id,
+            check: node => node instanceof Node && this.has(node.id)
+        };
     }
 
 

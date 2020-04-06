@@ -1,3 +1,4 @@
+import Channel from "./Channel";
 import { GenerateUUID } from "./util/helper";
 
 export default class ChannelManager {
@@ -25,7 +26,7 @@ export default class ChannelManager {
         this._channels[ channel.id ] = channel;
 
         if(!this._current) {
-            this.use(channel);
+            this.use(channel.id);
         }
 
         return this;
@@ -50,7 +51,7 @@ export default class ChannelManager {
     }
 
     receive(channel, message) {
-        if(typeof this.node.receive === "function") {
+        if(message.source !== this.node.signet) {
             return this.node.receive(message, {
                 id: channel.id,
                 name: channel.name,

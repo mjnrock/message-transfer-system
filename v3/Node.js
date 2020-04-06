@@ -15,11 +15,17 @@ export default class Node {
 
     get signet() {
         return this.id;
-    }    
+    }
 
-    receive(msg) {
+    send(type, payload, { recipient } = {}) {
+        this.ChannelManager.send(type, payload, { recipient });
+    }
+    message(msg) {
+        this.ChannelManager.message(msg);
+    }
+    receive(msg, channelInfo) {
         if(typeof this._hooks.receive === "function") {
-            return this._hooks.receive(msg);
+            return this._hooks.receive(msg, channelInfo);
         }
     }
 };

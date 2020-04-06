@@ -38,7 +38,7 @@ export default class Channel {
             if(msg.recipient) {
                 let node = this.Registry.find(msg.recipient);
         
-                if(node && typeof node.ChannelManager.receive === "function") {
+                if(node instanceof Node) {
                     node.ChannelManager.receive(this, msg);
                 }
             } else {
@@ -49,7 +49,7 @@ export default class Channel {
     post(msg) {
         if(Message.conforms(msg)) {
             this.Registry.each(node => {
-                if(typeof node.ChannelManager.receive === "function") {
+                if(node instanceof Node) {
                     node.ChannelManager.receive(this, msg);
                 }
             });
@@ -60,7 +60,9 @@ export default class Channel {
         let success = this.Registry.register(...nodes);
 
         for(let node of success) {
-            node.ChannelManager.join(this);
+            if(node instanceof Node) {
+                node.ChannelManager.join(this);
+            }
         }
     }
     leave() {
@@ -68,9 +70,8 @@ export default class Channel {
 
         for(let node of success) {
             if(node instanceof Node) {
-
+                node.ChannelManager.leave(this);
             }
-            node.ChannelManager.leave(this);
         }
     }
 };

@@ -1,26 +1,27 @@
 import { GenerateUUID } from "./util/helper";
 
 export default class Message {
-    constructor(type, payload, { source = null, recipient = null, provenance = [], id = GenerateUUID() } = {}) {
+    // constructor(type, payload, { source = null, recipient = null, provenance = [], id = GenerateUUID() } = {}) {
+    constructor(type, payload, { source = null, recipient = null, id = GenerateUUID() } = {}) {
         this.id = id;
         this.type = type;
         this.payload = payload;
 
         this.source = source;
         this.recipient = recipient;
-        this.provenance = provenance;
+        // this.provenance = provenance;
 
         this.timestamp = Date.now();
 
         return this;
     }
 
-    claim(signet) {
-        this.provenance.push(Object.freeze({ id: signet, timestamp: Date.now(), action: "in" }));
-    }
-    release(signet) {
-        this.provenance.push(Object.freeze({ id: signet, timestamp: Date.now(), action: "out" }));
-    }
+    // claim(signet) {
+    //     this.provenance.push(Object.freeze({ id: signet, timestamp: Date.now(), action: "in" }));
+    // }
+    // release(signet) {
+    //     this.provenance.push(Object.freeze({ id: signet, timestamp: Date.now(), action: "out" }));
+    // }
 
     toJson() {
         return JSON.stringify(this);
@@ -40,7 +41,7 @@ export default class Message {
                 id: obj.id,
                 source: obj.source,
                 recipient: obj.recipient,
-                provenance: obj.provenance,
+                // provenance: obj.provenance,
             }
         );
     }
@@ -53,7 +54,7 @@ export default class Message {
                     && ("payload" in obj)
                     && ("source" in obj)
                     && ("recipient" in obj)
-                    && ("provenance" in obj)
+                    // && ("provenance" in obj)
                     && ("timestamp" in obj);
             }
 
