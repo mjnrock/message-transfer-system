@@ -4,8 +4,19 @@ import Message from "./Message";
 
 export default class Repeater extends Node {
     static SignalType = {
-        TICK: "Repeater.Tick",
-        RENDER: "Repeater.Render",
+        INTERVAL_STATIC: "Repeater.IntervalStatic",
+        INTERVAL_RANDOM: "Repeater.IntervalRandom",
+        INTERVAL_FORMULAIC: "Repeater.IntervalFormulaic",
+
+        TIMEOUT_STATIC: "Repeater.TimeoutStatic",
+        TIMEOUT_RANDOM: "Repeater.TimeoutRandom",
+        TIMEOUT_FORMULAIC: "Repeater.TimeoutFormulaic",
+    };
+
+    static TimeType = {
+        STATIC: 1,
+        RANDOM: 2,
+        FORMULAIC: 3
     };
     
     static AllSignalTypes(...filter) {
@@ -18,12 +29,7 @@ export default class Repeater extends Node {
         });
     }
 
-    static BroadcastType = {
-        MESSAGE: 2 << 0,
-        SUBSCRIPTION: 2 << 1
-    };
-
-    constructor({ name = null, broadcastType = Repeater.BroadcastType.MESSAGE, receive = null, mnode = null, packager = null } = {}) {
+    constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
@@ -32,70 +38,119 @@ export default class Repeater extends Node {
         });
 
         this.internal = {
-            BroadcastType: 0,
-            Intervals: {}
+            Intervals: {},
+            Timeouts: {}
         };
-
-        this.setBroadcastType(broadcastType);
     }
 
-    setBroadcastType(bts) {
-        if(Array.isArray(bts)) {
-            this.internal.BroadcastType = bts.reduce((a, v) => {
-                return Bitwise.add(a, v);
-            }, 0);
-        } else if(typeof bts === "number") {
-            this.internal.BroadcastType = bts;
-        }
-    }
+    addTimeout(input, timeValue, { name = GenerateUUID() } = {}) {
+        let type = Repeater.TimeType.STATIC,
+            id = null;
 
-    addCommand(...args) {
-        if(typeof args[ 0 ] === "function" && typeof args[ 1 ] === "number") {
-            return this.addInterval(...args);
-        } else if(Message.conforms(args[ 0 ]) && typeof args[ 1 ] === "number") {
-            return this.addMessager(args[ 0 ].type, args[ 0 ].payload, args[ 1 ]);
-        } else if(args[ 0 ] && args[ 1 ] && typeof args[ 2 ] === "number") {
-            return this.addMessager(...args);
-        }
-    }
-    clearInterval(nameOrId) {
-        if(typeof nameOrId === "string" || nameOrId instanceof String || typeof nameOrId === "number") {
-            clearInterval(this.internal.Intervals[ nameOrId ]);
-            delete this.internal.Intervals[ nameOrId ];
-        }
-    }
+        if(typeof timeValue === "number") {
+            type = Repeater.TimeType.STATIC;
 
-    addInterval(callback, interval, { name = null } = {}) {
-        let id = setInterval(() => {
-            callback(this._mnode, this);
-        }, interval);
-
-        this.internal.Intervals[ name || id ] = id;
-
-        return name || id;
-    }
-    addRandomInterval(callback, min, max, { name = null } = {}) {
-        let id = this.addInterval(() => {
-            callback(this._mnode, this);
-
-            this.clearInterval(id);
-            this.addRandomInterval(callback, min, max, { name });
-        }, Dice.random(min, max), { name });
-    }
-
-
-    addMessager(type, payload, interval, { name = null } = {}) {
-        let id = setInterval(() => {
-            if(Bitwise.has(this.internal.BroadcastType, Repeater.BroadcastType.MESSAGE)) {
-                this.send(type, payload, { defaultConfig: false });
+            if(typeof input === "function") {
+                id = setTimeout(input, parseFloat(timeValue), ...this._getDefaultArgs());
+            } else if(Array.isArray(input)) {
+                id = setTimeout(() => this.send(...input), parseFloat(timeValue));
+            } else if("type" in input && "payload" in input) {
+                id = setTimeout(() => this.send(input.type, input.payload), parseFloat(timeValue));
             }
-            if(Bitwise.has(this.internal.BroadcastType, Repeater.BroadcastType.SUBSCRIPTION)) {
-                this.emit(type, payload);
+
+            if(id) {
+                this.internal.Timeouts[ name ] = {
+                    id,
+                    type,
+                    name
+                };
+    
+                return name;
             }
-        }, interval);
+        } else if(typeof timeValue === "function") {
+            let timeout = timeValue(...this._getDefaultArgs());
 
-        this.internal.Intervals[ name || id ] = id;
+            type = Repeater.TimeType.FORMULAIC;
 
-        return name || id;
+            return this.addTimeout(input, timeout, { name });
+        } else if(Array.isArray(timeValue)) {
+            let [ min, max ] = timeValue;
+
+            type = Repeater.TimeType.RANDOM;            
+
+            return this.addTimeout(input, Dice.random(min, max), { name });
+        }
+        
+        return false;
+    }
+    clearTimeout(name) {
+        clearTimeout(this.internal.Timeouts[ name ].id);
+        delete this.internal.Timeouts[ name ];
+
+        return this;
+    }
+
+    addInterval(input, timeValue, { name = GenerateUUID() } = {}) {
+        let type = Repeater.TimeType.STATIC,
+            id = null;
+
+        if(typeof timeValue === "number") {
+            type = Repeater.TimeType.STATIC;
+
+            if(typeof input === "function") {
+                id = setInterval(input, parseFloat(timeValue), ...this._getDefaultArgs());
+            } else if(Array.isArray(input)) {
+                id = setInterval(() => this.send(...input), parseFloat(timeValue));
+            } else if("type" in input && "payload" in input) {
+                id = setInterval(() => this.send(input.type, input.payload), parseFloat(timeValue));
+            }
+        } else if(typeof timeValue === "function") {
+            let firstPass = timeValue(...this._getDefaultArgs());
+
+            type = Repeater.TimeType.FORMULAIC;
+            id = setTimeout(() => {
+                if(typeof input === "function") {
+                    input(...this._getDefaultArgs());
+                } else if(Array.isArray(input)) {
+                    this.send(...input);
+                } else if("type" in input && "payload" in input) {
+                    this.send(input.type, input.payload);
+                }
+
+                this.clearTimeout(name);
+                this.addInterval(input, timeValue, { name });
+            }, firstPass);
+        } else if(Array.isArray(timeValue)) {
+            let [ min, max ] = timeValue;
+
+            type = Repeater.TimeType.RANDOM;
+
+            this.addInterval(input, () => Dice.random(min, max), { name });
+        }
+
+        if(id) {
+            this.internal.Intervals[ name ] = {
+                id,
+                type,
+                name
+            };
+
+            return name;
+        }
+        
+        return false;
+    }
+    clearInterval(name) {
+        clearInterval(this.internal.Intervals[ name ].id);
+        delete this.internal.Intervals[ name ];
+
+        return this;
+    }
+
+    _getDefaultArgs() {
+        return {
+            me: this,
+            state: this.state
+        };
     }
 };

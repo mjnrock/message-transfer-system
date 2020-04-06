@@ -46,6 +46,10 @@ export default class CanvasNode extends Repeater {
             Images: {},
             Draw: draw
         };
+
+        this.state = {
+            isActive: false
+        };
     }
 
     toggleSmoothLines() {
@@ -63,13 +67,21 @@ export default class CanvasNode extends Repeater {
         };
     }
 
-    render() {
+    render(isActive) {
+        if(isActive === true) {
+            this.state.isActive = true;
+        } else if(isActive === false) {
+            this.state.isActive = false;
+        }
+
         if(window.requestAnimationFrame) {
-            window.requestAnimationFrame((ts) => {
-                this.draw(ts);
-                
-                this.render();
-            });
+            if(this.state.isActive === true) {
+                window.requestAnimationFrame((ts) => {
+                    this.draw(ts);
+                    
+                    this.render();
+                });
+            }
         }
     }
     draw(...args) {

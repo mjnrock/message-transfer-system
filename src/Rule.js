@@ -268,7 +268,7 @@ export default class Rule {
         }
     }
 
-    static Process(msg, type = Rule.ScopeType.AND) {
-        return new Rule(msg, type);
+    static Process(msgOrValue, type = Rule.ScopeType.AND) {
+        return new Rule(msgOrValue, type);
     }
 };
