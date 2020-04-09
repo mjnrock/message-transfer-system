@@ -7,10 +7,12 @@ let N1 = new Node({
 
         let res = Proposition.Process(signal)
             .type("test")
-            .payload()
-                .between(6, 100)
-            .value(({ p }) => p * 500)
-                .lt(2000)
+            .payload("c.d.e")
+                .between(2, 9)
+            // .payload()
+            //     .between(6, 100)
+            // .value(({ p }) => p * 500)
+            //     .lt(2000)
             .end()
             .done()
 
