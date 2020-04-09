@@ -15,6 +15,23 @@ export default class Registry {
         };
     }
 
+    
+    setRegister(keyFn, checkFn) {
+        if(typeof keyFn === "function" && typeof checkFn === "function") {
+            this._register = {
+                key: keyFn,
+                check: checkFn
+            }
+        }
+    }
+    setUnregister(keyFn, checkFn) {
+        if(typeof keyFn === "function" && typeof checkFn === "function") {
+            this._unregister = {
+                key: keyFn,
+                check: checkFn
+            }
+        }
+    }
 
     
     has(id) {
@@ -25,7 +42,7 @@ export default class Registry {
     }
 
     find(nameOrId) {
-        let res = Object.values(this._entries).filter(ent => ent.name === nameOrId);
+        let [ res ] = Object.values(this._entries).filter(ent => ent.name === nameOrId) || [];
 
         if(res.length === 0) {
             return this.get(nameOrId);
@@ -33,7 +50,8 @@ export default class Registry {
 
         return res;
     }
-    changeId(oldId, newId) {
+
+    updateId(oldId, newId) {
         let entry = this._entries[ oldId ];
 
         if(entry) {
@@ -43,7 +61,6 @@ export default class Registry {
 
         return this;
     }
-
     
 
     each(fn) {
@@ -67,7 +84,6 @@ export default class Registry {
 
         return [];
     }
-
 
 
     register(...entries) {

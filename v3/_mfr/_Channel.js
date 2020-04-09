@@ -1,7 +1,7 @@
-import Registry from "./Registry";
+import Registry from "../Registry";
 import Message from "./Message";
-import Node from "./Node";
-import { GenerateUUID } from "./util/helper";
+import Node from "../Node";
+import { GenerateUUID } from "../util/helper";
 
 export default class Channel {
     constructor(name = GenerateUUID()) {
@@ -15,6 +15,10 @@ export default class Channel {
         return `${ this.name }<${ this.id }>`;
     }
 
+    get find() {
+        return this.Registry.find.bind(this.Registry);
+    }
+
     broadcast(type, payload) {
         if(Message.conforms(type)) {
             let msg = type;
@@ -23,7 +27,7 @@ export default class Channel {
             this.post(msg);
         } else {            
             this.post(
-                new Message(type, payload, { source: this.signet } = {})
+                new Message(type, payload, { source: this.signet })
             );
         }
     }
@@ -33,10 +37,10 @@ export default class Channel {
             new Message(type, payload, { source, recipient })
         );
     }
-    message(msg) {
+    message(msg, { recipient }) {
         if(Message.conforms(msg)) {
-            if(msg.recipient) {
-                let node = this.Registry.find(msg.recipient);
+            if(msg.recipient || recipient) {
+                let node = this.Registry.find(msg.recipient || recipient);
         
                 if(node instanceof Node) {
                     node.ChannelManager.receive(this, msg);

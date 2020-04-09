@@ -15,8 +15,12 @@ let Ch1 = new Channel("Main");
 Ch1.join(
     N1,
     N2,
-    N3
+);
+let Ch2 = new Channel("Second");
+Ch2.join(
+    N2,
+    N3,
 );
 
-N1.send("Test1", "Hello!", { recipient: N2.id });
+N1.send("Test1", "Hello!");
 N2.send("Test2", "Hi!");
