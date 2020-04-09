@@ -6,5 +6,5 @@ require = require("esm")(module/*, options*/)
 // module.exports = require("./tests/Main.test.js");
 // module.exports = require("./tests/MSR.test.js");
 // module.exports = require("./tests/SCR.test.js");
-// module.exports = require("./v3/tests/Channel.test.js");
-module.exports = require("./v3/tests/IO.test.js");
+// module.exports = require("./v3/tests/Feed.test.js");
+module.exports = require("./v3/tests/Proposition.test.js");
