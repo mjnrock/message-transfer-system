@@ -31,7 +31,7 @@ export default class Signal {
      * @payload [ the remainder of the buffer ] Put last so the payload can be as large as needed
      *  ! CAVEAT: @payload will undergo a `JSON.stringify` before being put into the buffer, as it is assumed to be an object
      */
-    toSignalBuffer() {   
+    toSignalBuffer() {
         let payload = JSON.stringify(this.payload);
         let bb = new ByteBuffer(
             ByteBuffer.TINY(),
