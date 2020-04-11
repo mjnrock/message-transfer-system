@@ -27,7 +27,7 @@ export default class ByteBuffer {
         return this._Buffer.byteLength;
     }
 
-	getEndianness() {
+	isLittleEndian() {
 		return this._isLittleEndian;
 	}
 	toggleBigEndian() {
@@ -51,7 +51,7 @@ export default class ByteBuffer {
     forward(bytes = 1) {
         this._position += bytes;
 
-        this._position = Math.min(this._position, this._Buffer.byteLength);
+        this._position = Math.min(this._position, this.size);
 
         return this;
     }
@@ -86,13 +86,24 @@ export default class ByteBuffer {
         return this;
     }
 
-    read(dt) {
-		let bytes = ByteBuffer.ResolveBytes(dt),
-            value = this.DV[ `get${ dt }` ](this._position, this._isLittleEndian);
-            
-        this.forward(bytes);
+    read(dt, qty = 1) {
+        let bytes = ByteBuffer.ResolveBytes(dt);
+        
+        if(qty === 1) {
+            let value = this.DV[ `get${ dt }` ](this._position, this._isLittleEndian);            
+            this.forward(bytes);
 
-        return value;
+            return value;
+        } else if(qty > 1) {
+            let arr = [];
+
+            for(let i = 0; i < qty; i++) {
+                arr.push(this.DV[ `get${ dt }` ](this._position, this._isLittleEndian));
+                this.forward(bytes);
+            }
+    
+            return arr;
+        }
     }
     write(dt, value) {
         let bytes = ByteBuffer.ResolveBytes(dt);
@@ -102,6 +113,38 @@ export default class ByteBuffer {
 
 		return this;
     }
+
+	writeTiny(value, isSigned = true) {
+		return this.write(isSigned ? "Int8" : "Uint8", value);
+	}
+	readTiny(qty = 1, isSigned = true) {
+		return this.read(isSigned ? "Int8" : "Uint8", qty);
+	}
+	writeShort(value, isSigned = true) {
+		return this.write(isSigned ? "Int16" : "Uint16", value);
+	}
+	readShort(qty = 1, isSigned = true) {
+		return this.read(isSigned ? "Int16" : "Uint16", qty);
+	}
+	writeInt(value, isSigned = true) {
+		return this.write(isSigned ? "Int32" : "Uint32", value);
+	}
+	readInt(qty = 1, isSigned = true) {
+		return this.read(isSigned ? "Int32" : "Uint32", qty);
+    }
+    
+	writeFloat(value) {
+		return this.write("Float32", value);
+	}
+	readFloat(qty = 1) {
+		return this.read("Float32", qty);
+	}
+	writeFloat64(value) {
+		return this.write("Float64", value);
+	}
+	readFloat64(qty = 1) {
+		return this.read("Float64", qty);
+	}
 
 	writeString(input) {
 		for (let i in input) {
@@ -113,14 +156,14 @@ export default class ByteBuffer {
 		return this;
 	}
 	readString(length) {
-		let array = [];
+		let str = "";
 		for (let i = 0; i < length; i++) {
 			//  Simple ASCII decoding, translating to UTF8 (UInt8 Array)
-			array.push(String.fromCharCode(this.DV.getUint8(this._position)));
+			str += String.fromCharCode(this.DV.getUint8(this._position));
 			this.forward(1);
 		}
 
-		return array.join("");
+		return str;
     }
     
 	static WriteString(string) {
@@ -135,16 +178,16 @@ export default class ByteBuffer {
         return dv.buffer;
 	}
 	static ReadString(buffer, { offset = 0, length = buffer.byteLength } = {}) {
-        let array = [],
+        let str = "",
             dv = new DataView(buffer);
 
 		for(let i = 0; i < length; i++) {
 			//  Simple ASCII decoding, translating to UTF8 (UInt8 Array)
-			array.push(String.fromCharCode(dv.getUint8(offset + i)));
+            str += String.fromCharCode(dv.getUint8(offset + i));
 		}
 
-		return array.join("");
-	}
+		return str;
+    }
 
 	static ResolveBits(dt) {
 		return dt.toString().replace(/\D/g, "") * 8;

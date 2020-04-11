@@ -1,37 +1,37 @@
 import ByteBuffer from "./../util/ByteBuffer";
 import Signal from "./../Signal";
 
-let s = new Signal("Test", {
-    cat: 2,
-    names: [ "Kiszka", "Buddha" ]
-});
+// let s = new Signal("Test", {
+//     cat: 2,
+//     names: [ "Kiszka", "Buddha" ]
+// });
 
-console.log(s);
-let buff = s.toBuffer();     // Using Signal methods
-// let buff = ByteBuffer.WriteString(s.toJson());  // From static method
-console.log(buff);
+// console.log(s);
+// let buff = s.toBuffer();     // Using Signal methods
+// // let buff = ByteBuffer.WriteString(s.toJson());  // From static method
+// console.log(buff);
 
-console.log(Signal.fromBuffer(buff));   // Using static Signal methods
-// console.log(ByteBuffer.ReadString(buff));   // From static method
+// console.log(Signal.FromBuffer(buff));   // Using static Signal methods
+// // console.log(ByteBuffer.ReadString(buff));   // From static method
 
-// let bb1 = new ByteBuffer(
-//     ByteBuffer.TINY(3),
-//     ByteBuffer.TINY()
-// );
 
-// bb1.writeTiny(15);
-// bb1.writeTiny(3);
-// bb1.writeTiny(46);
-// bb1.writeBoolean([ true, true, true, false ]);
+let bb1 = new ByteBuffer(
+    ByteBuffer.INT(3)
+);
 
-// bb1.resetPosition();
+bb1.writeInt(15);
+bb1.writeInt(3);
+bb1.writeInt(46);
 
-// console.log(bb1.Buffer);
+bb1.reset();
 
-// console.log(bb1.readTiny());
-// console.log(bb1.readTiny());
-// console.log(bb1.readTiny());
-// console.log(bb1.readBoolean());
+console.log(bb1.Buffer);
+
+console.log(bb1.readInt());
+console.log(bb1.readInt());
+console.log(bb1.readInt());
+bb1.reset();
+console.log(bb1.readInt(3));
 
 
 // let str = "Hello world!";

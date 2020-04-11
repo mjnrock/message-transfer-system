@@ -15,16 +15,10 @@ export default class Signal {
         return JSON.stringify(this);
     }
     toBuffer() {
-        let json = this.toJson(),
-            bb = new ByteBuffer(json.length);
-
-        bb.writeString(json);
-        bb.reset();
-
-        return bb.Buffer;
+        return ByteBuffer.WriteString(this.toJson());
     }
 
-    static fromJson(json) {
+    static FromJson(json) {
         let obj = json;
 
         while(typeof obj === "string" || obj instanceof String) {
@@ -41,13 +35,13 @@ export default class Signal {
         );
     }
 
-    static fromBuffer(buffer) {
+    static FromBuffer(buffer) {
         let json = ByteBuffer.ReadString(buffer);
 
-        return Signal.fromJson(json);
+        return Signal.FromJson(json);
     }
 
-    static conforms(obj) {
+    static Conforms(obj) {
         if(typeof obj === "object") {
             return ("type" in obj)
                 && ("shape" in obj)
