@@ -14,8 +14,49 @@ export default class Signal {
     toJson() {
         return JSON.stringify(this);
     }
-    toBuffer() {
+    /**
+     * This will create a buffer from `this.toJson()`
+     */
+    toJsonBuffer() {
         return ByteBuffer.WriteString(this.toJson());
+    }
+    /**
+     * This will create a simplified buffer using TINYs as flag lengths for each input.  The schema is as follows:
+     * @typeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @type [ value of @typeLength in bytes ] This is the actual @type data
+     * @shapeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @shape [ value of @shapeLength in bytes ] This is the actual @shape data
+     * @timestampLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @timestamp [ value of @timestampLength in bytes ] This is the actual @timestamp data
+     * @payload [ the remainder of the buffer ] Put last so the payload can be as large as needed
+     */
+    toSignalBuffer() {   
+        let payload = JSON.stringify(this.payload);
+        let bb = new ByteBuffer(
+            ByteBuffer.TINY(),
+            ByteBuffer.STRING(this.type.toString()),
+
+            ByteBuffer.TINY(),
+            ByteBuffer.STRING(this.shape.toString()),
+
+            ByteBuffer.TINY(),
+            ByteBuffer.STRING(this.timestamp.toString()),
+
+            ByteBuffer.STRING(payload),
+        );
+
+        bb.writeTiny(this.type.length);
+        bb.writeString(this.type.toString());
+
+        bb.writeTiny(this.shape.length);
+        bb.writeString(this.shape.toString());
+
+        bb.writeTiny(this.timestamp.toString().length);
+        bb.writeString(this.timestamp.toString());
+
+        bb.writeString(payload);
+
+        return bb.Buffer;
     }
 
     static FromJson(json) {
@@ -35,7 +76,51 @@ export default class Signal {
         );
     }
 
-    static FromBuffer(buffer) {
+    /**
+     * This will extract a Signal buffer and return a new Signal, leveraging `Signal.FromJson`
+     * @typeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @type [ value of @typeLength in bytes ] This is the actual @type data
+     * @shapeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @shape [ value of @shapeLength in bytes ] This is the actual @shape data
+     * @timestampLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
+     * @timestamp [ value of @timestampLength in bytes ] This is the actual @timestamp data
+     * @payload [ the remainder of the buffer ] Calculated by taking the buffer length and subtracting the current position (at this point in the read)
+     */
+    static FromSignalBuffer(buffer) {
+        let bb = new ByteBuffer(buffer);
+        
+        let obj = {
+            typeLen: null,
+            type: null,
+            
+            shapeLen: null,
+            shape: null,
+
+            timestampLen: null,
+            timestamp: null,
+
+            payload: null,
+        };
+
+        obj.typeLen = bb.readTiny();
+        obj.type = bb.readString(obj.typeLen);
+
+        obj.shapeLen = bb.readTiny();
+        obj.shape = bb.readString(obj.shapeLen);
+
+        obj.timestampLen = bb.readTiny();
+        obj.timestamp = parseFloat(bb.readString(obj.timestampLen));
+
+        obj.payload = bb.readString(bb.size - bb.position);
+
+        try {
+            obj.payload = JSON.parse(obj.payload);
+        } catch (e) {}
+
+        return Signal.FromJson(obj);
+    }
+
+    static FromJsonBuffer(buffer) {
         let json = ByteBuffer.ReadString(buffer);
 
         return Signal.FromJson(json);

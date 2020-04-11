@@ -10,14 +10,21 @@ export default class ByteBuffer {
 
     constructor(...inputs) {
         let size = 0;
-        if(inputs.length > 1) {
-            size = inputs.reduce((a, v) => a + v);
-        } else if(inputs.length === 1) {
-            size = inputs[ 0 ];
-        }
+        
+        if(inputs[ 0 ] instanceof ArrayBuffer) {
+            this._Buffer = inputs[ 0 ];
+            this.reset();
+            this.DV = new DataView(this._Buffer);
+        } else {
+            if(inputs.length > 1) {
+                size = inputs.reduce((a, v) => a + v);
+            } else if(inputs.length === 1) {
+                size = inputs[ 0 ];
+            }
 
-        this._Buffer = new ArrayBuffer(size);
-        this.DV = new DataView(this._Buffer);
+            this._Buffer = new ArrayBuffer(size);
+            this.DV = new DataView(this._Buffer);
+        }
         
 		this._position = 0;
 		this._isLittleEndian = false;
