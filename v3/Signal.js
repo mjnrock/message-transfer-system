@@ -29,6 +29,7 @@ export default class Signal {
      * @timestampLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
      * @timestamp [ value of @timestampLength in bytes ] This is the actual @timestamp data
      * @payload [ the remainder of the buffer ] Put last so the payload can be as large as needed
+     *  ! CAVEAT: @payload will undergo a `JSON.stringify` before being put into the buffer, as it is assumed to be an object
      */
     toSignalBuffer() {   
         let payload = JSON.stringify(this.payload);
@@ -85,6 +86,7 @@ export default class Signal {
      * @timestampLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
      * @timestamp [ value of @timestampLength in bytes ] This is the actual @timestamp data
      * @payload [ the remainder of the buffer ] Calculated by taking the buffer length and subtracting the current position (at this point in the read)
+     *  ! CAVEAT: Because this assumes that the `Signal.toSignalBuffer` method was used, @payload will undergo a `JSON.parse()` before being returned
      */
     static FromSignalBuffer(buffer) {
         let bb = new ByteBuffer(buffer);
