@@ -37,7 +37,7 @@ export default class Feed {
         return false;
     }
     unlisten(nameOrNode) {
-        if(nodeOrFn instanceof Node) {
+        if(nameOrNode instanceof Node) {
             delete this._listeners[ nameOrNode.id ];
 
             return true;
@@ -51,17 +51,17 @@ export default class Feed {
     }
 
     emit(type, payload, { shape } = {}) {
-        let message;
+        let msg;
             
-        if(Message.conforms(type)) {
-            message = type;
+        if(Message.Conforms(type)) {
+            msg = type;
         } else {
-            message = new Message(type, payload, { shape });
+            msg = new Message(type, payload, { shape });
         }
 
         for(let subscriber of Object.values(this._listeners)) {
             if(subscriber instanceof Node) {
-                subscriber.hear(msg, this);
+                subscriber.receive(msg, this);
             } else if(typeof subscriber === "function") {
                 subscriber(msg, this);
             }

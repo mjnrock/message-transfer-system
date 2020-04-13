@@ -1,6 +1,5 @@
 import { GenerateUUID } from "./util/helper";
 import Feed from "./Feed";
-import Signal from "./Signal";
 
 export default class Node {
     static MessageTypes = {
@@ -20,7 +19,7 @@ export default class Node {
     /**
      * @param isPublic bool | DEFAULT: false | Will determine whether state updates should be emitted or not
      */
-    constructor({ name, hear, isPublic = false } = {}) {
+    constructor({ name, receive, isPublic = false } = {}) {
         this.id = GenerateUUID();
         this.name = name || GenerateUUID();
 
@@ -31,7 +30,7 @@ export default class Node {
         this._state = {};
 
         this._hooks = {
-            hear: hear
+            receive: receive
         };
         this._config = {
             isPublic: isPublic
@@ -175,14 +174,9 @@ export default class Node {
         }
     }
 
-    hear(msg, feed) {
-        if(typeof this._hooks.hear === "function") {
-            return this._hooks.hear(msg, feed);
-        }
-    }
-    receive(signal, meta, channel) {
+    receive(msg, feed) {
         if(typeof this._hooks.receive === "function") {
-            return this._hooks.receive(signal, meta, channel);
+            return this._hooks.receive(msg, feed);
         }
     }
 };

@@ -1,5 +1,5 @@
-import { GenerateUUID } from "./util/helper";
-import Node from "./Node";
+import { GenerateUUID } from "./../util/helper";
+import Node from "./../Node";
 import Signal from "./Signal";
 
 export default class Channel {

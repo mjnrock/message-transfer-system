@@ -1,4 +1,4 @@
-import ByteBuffer from "./util/ByteBuffer";
+import ByteBuffer from "./../util/ByteBuffer";
 
 export default class Signal {
     constructor(payload) {
