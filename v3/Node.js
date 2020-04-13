@@ -1,5 +1,6 @@
 import { GenerateUUID } from "./util/helper";
 import Feed from "./Feed";
+import Signal from "./Signal";
 
 export default class Node {
     static MessageTypes = {
@@ -179,9 +180,9 @@ export default class Node {
             return this._hooks.hear(msg, feed);
         }
     }
-    receive(payload, meta, channel) {
+    receive(signal, meta, channel) {
         if(typeof this._hooks.receive === "function") {
-            return this._hooks.receive(payload, meta, channel);
+            return this._hooks.receive(signal, meta, channel);
         }
     }
 };

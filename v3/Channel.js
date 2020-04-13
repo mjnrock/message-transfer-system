@@ -1,5 +1,6 @@
 import { GenerateUUID } from "./util/helper";
 import Node from "./Node";
+import Signal from "./Signal";
 
 export default class Channel {
     constructor(topic, shape, { members = {} } = {}) {
@@ -37,8 +38,14 @@ export default class Channel {
     }
 
     relay(payload, meta = {}) {
+        let data = payload;
+
+        if(!(payload instanceof Signal)) {
+            data = new Signal(payload);
+        }
+        
         for(let member of Object.values(this.members)) {
-            member.receive(payload, meta, this);
+            member.receive(data, meta, this);
         }
     }
 };
