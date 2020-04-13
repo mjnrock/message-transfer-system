@@ -1,11 +1,11 @@
-import Signal from "./Signal";
+import Message from "./Message";
 
 export default class Proposition {
     static FocusType = {
-        TYPE: 1,    //  Signal property
-        PAYLOAD: 2, //  Signal property
-        SHAPE: 3,   //  Signal property
-        TIMESTAMP: 4,   //  Signal property
+        TYPE: 1,    //  Message property
+        PAYLOAD: 2, //  Message property
+        SHAPE: 3,   //  Message property
+        TIMESTAMP: 4,   //  Message property
 
         VALUE: 5,   //  A generic custom value
     };
@@ -17,13 +17,13 @@ export default class Proposition {
         NOR: "nand",
     };
 
-    constructor(signalOrValue, type = Proposition.ScopeType.AND) {
-        if(Signal.conforms(signalOrValue)) {
-            this._signal = signalOrValue;
+    constructor(msgOrValue, type = Proposition.ScopeType.AND) {
+        if(Message.conforms(msgOrValue)) {
+            this._message = messageOrValue;
             this._value = null;
         } else {
-            this._signal = null;
-            this._value = signalOrValue;
+            this._message = null;
+            this._value = messageOrValue;
         }
 
         this._scope = {
@@ -66,7 +66,7 @@ export default class Proposition {
 
         if(prop) {
             let props = prop.split("."),
-                res = this._signal.payload;
+                res = this._message.payload;
 
             for(let p of props) {
                 if(res[ p ] !== void 0) {
@@ -96,7 +96,7 @@ export default class Proposition {
 
     value(value) {
         if(typeof value === "function") {
-            this._value = value({ s: this._signal, p: this._signal.payload, t: this._signal.type, sh: this._signal.shape });
+            this._value = value({ s: this._message, p: this._message.payload, t: this._message.type, sh: this._message.shape });
         } else {
             this._value = value;
         }
@@ -118,13 +118,13 @@ export default class Proposition {
     
     _getFocus() {
         if(this._focus === Proposition.FocusType.TYPE) {
-            return this._signal.type;
+            return this._message.type;
         } else if(this._focus === Proposition.FocusType.PAYLOAD) {
-            return this._signal.payload;
+            return this._message.payload;
         } else if(this._focus === Proposition.FocusType.SHAPE) {
-            return this._signal.shape;
+            return this._message.shape;
         } else if(this._focus === Proposition.FocusType.TIMESTAMP) {
-            return this._signal.timestamp;
+            return this._message.timestamp;
         } else if(this._focus === Proposition.FocusType.VALUE) {
             return this._value;
         }
@@ -258,8 +258,8 @@ export default class Proposition {
 
         return result;
     }
-    getSignal() {
-        return this._signal;
+    getMessage() {
+        return this._message;
     }
     getScope() {
         return this._scope;
@@ -268,11 +268,11 @@ export default class Proposition {
 
     debug(fn = console.log) {
         if(typeof fn === "function") {
-            fn(this._signal);
+            fn.call(this, this._message);
         }
     }
 
-    static Process(signalOrValue, type = Proposition.ScopeType.AND) {
-        return new Proposition(signalOrValue, type);
+    static Process(msgOrValue, type = Proposition.ScopeType.AND) {
+        return new Proposition(msgOrValue, type);
     }
 };

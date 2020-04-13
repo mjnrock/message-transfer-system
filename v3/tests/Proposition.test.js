@@ -2,10 +2,10 @@ import Node from "../Node";
 import Proposition from "./../Proposition";
 
 let N1 = new Node({
-    receive: (signal, signature) => {
-        // console.log(`[1]:`, signal, signature);
+    receive: (msg, signature) => {
+        // console.log(`[1]:`, message, signature);
 
-        let res = Proposition.Process(signal)
+        let res = Proposition.Process(msg)
             .type("test")
             .payload("c.d.e")
                 .between(2, 9)
@@ -20,7 +20,7 @@ let N1 = new Node({
     }
 });
 let N2 = new Node({
-    receive: (signal, signature) => console.log(`[1]:`, signal, signature)
+    receive: (msg, signature) => console.log(`[1]:`, message, signature)
 });
 
 N1.listen(N2);

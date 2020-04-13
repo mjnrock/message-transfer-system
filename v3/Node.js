@@ -2,12 +2,12 @@ import { GenerateUUID } from "./util/helper";
 import Feed from "./Feed";
 
 export default class Node {
-    static SignalTypes = {
+    static MessageTypes = {
         STATE_CHANGE: "Node.StateChange",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(Node.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(Node.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -19,7 +19,7 @@ export default class Node {
     /**
      * @param isPublic bool | DEFAULT: false | Will determine whether state updates should be emitted or not
      */
-    constructor({ name, receive, isPublic = false } = {}) {
+    constructor({ name, hear, isPublic = false } = {}) {
         this.id = GenerateUUID();
         this.name = name || GenerateUUID();
 
@@ -30,7 +30,7 @@ export default class Node {
         this._state = {};
 
         this._hooks = {
-            receive: receive
+            hear: hear
         };
         this._config = {
             isPublic: isPublic
@@ -51,7 +51,7 @@ export default class Node {
 
             if(this.config.isPublic === true) {
                 this.emit(
-                    Node.SignalTypes.STATE_CHANGE,
+                    Node.MessageTypes.STATE_CHANGE,
                     {
                         current: this.state,
                         previous: oldValue
@@ -173,9 +173,15 @@ export default class Node {
             feed.emit(type, payload, { shape });
         }
     }
-    receive(msg, feedInfo) {
+
+    hear(msg, feed) {
+        if(typeof this._hooks.hear === "function") {
+            return this._hooks.hear(msg, feed);
+        }
+    }
+    receive(payload, meta, channel) {
         if(typeof this._hooks.receive === "function") {
-            return this._hooks.receive(msg, feedInfo);
+            return this._hooks.receive(payload, meta, channel);
         }
     }
 };

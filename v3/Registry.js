@@ -4,7 +4,7 @@ export default class Registry {
     constructor({ register = null, unregister = null } = {}) {
         this._entries = {};
 
-        
+        // Make this a Node registry, by default
         this._register = register || {
             key: node => node.id,
             check: node => node instanceof Node && !this.has(node.id)

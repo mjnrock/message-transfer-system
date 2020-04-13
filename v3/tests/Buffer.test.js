@@ -1,7 +1,7 @@
 import ByteBuffer from "./../util/ByteBuffer";
-import Signal from "./../Signal";
+import Message from "./../Message";
 
-let s = new Signal("Test", {
+let s = new Message("Test", {
     cat: 2,
     names: [ "Kiszka", "Buddha" ]
 });
@@ -9,20 +9,20 @@ let s = new Signal("Test", {
 console.log(s);
 let buff = s.toBuffer(true);
 console.log(buff);
-console.log(Signal.FromSignalBuffer(buff));
+console.log(Message.FromMessageBuffer(buff));
 
 
-// let s = new Signal("Test", {
+// let s = new Message("Test", {
 //     cat: 2,
 //     names: [ "Kiszka", "Buddha" ]
 // });
 
 // console.log(s);
-// let buff = s.toBuffer();     // Using Signal methods
+// let buff = s.toBuffer();     // Using Message methods
 // // let buff = ByteBuffer.WriteString(s.toJson());  // From static method
 // console.log(buff);
 
-// console.log(Signal.FromJsonBuffer(buff));   // Using static Signal methods
+// console.log(Message.FromJsonBuffer(buff));   // Using static Message methods
 // // console.log(ByteBuffer.ReadString(buff));   // From static method
 
 

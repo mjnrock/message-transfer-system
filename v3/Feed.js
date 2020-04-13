@@ -1,6 +1,6 @@
 import { GenerateUUID } from "./util/helper";
 import Node from "./Node";
-import Signal from "./Signal";
+import Message from "./Message";
 
 export default class Feed {
     constructor(source, { name = null, listeners = {} } = {}) {
@@ -51,24 +51,19 @@ export default class Feed {
     }
 
     emit(type, payload, { shape } = {}) {
-        let signal,
-            info = {
-                id: this.id,
-                name: this.name,    // At a root level Feed, this will be the Node's signet
-                signet: this.signet
-            };
+        let message;
             
-        if(Signal.conforms(type)) {
-            signal = type;
+        if(Message.conforms(type)) {
+            message = type;
         } else {
-            signal = new Signal(type, payload, { shape });
+            message = new Message(type, payload, { shape });
         }
 
         for(let subscriber of Object.values(this._listeners)) {
             if(subscriber instanceof Node) {
-                subscriber.receive(signal, info);
+                subscriber.hear(msg, this);
             } else if(typeof subscriber === "function") {
-                subscriber(signal, info);
+                subscriber(msg, this);
             }
         }
     }
