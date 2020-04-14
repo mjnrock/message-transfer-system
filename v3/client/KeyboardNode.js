@@ -19,12 +19,11 @@ export default class KeyboardNode extends Node {
         });
     }
 
-    constructor({ name = null, keymap = null, keyflags = null, receive = null, mnode = null, packager = null} = {}) {
+    constructor({ name, keymap, keyflags, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            mnode: mnode,
-            packager: packager
+            isPublic: isPublic,
         });
         
         window.onkeydown = this.onKeyDown.bind(this);

@@ -32,12 +32,11 @@ export default class MouseNode extends Node {
         });
     }
 
-    constructor({ name = null, btnmap = null, btnflags = null, receive = null, mnode = null, packager = null} = {}) {
+    constructor({ name, btnmap, btnflags, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            mnode: mnode,
-            packager: packager
+            isPublic: isPublic,
         });
         
         window.onmousedown = this.onMouseDown.bind(this);

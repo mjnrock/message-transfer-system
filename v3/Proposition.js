@@ -188,6 +188,17 @@ export default class Proposition {
 
         return this;
     }
+
+    isA(type) {
+        this._currentScope.children.push(typeof this._getFocus() === type);
+
+        return this;
+    }
+    instanceOf(clazz) {
+        this._currentScope.children.push(this._getFocus() instanceof clazz);
+
+        return this;
+    }
     
     //* NEGATED COMPARATORS
     notEquals(input) {

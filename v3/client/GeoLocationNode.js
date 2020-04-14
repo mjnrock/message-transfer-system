@@ -17,12 +17,11 @@ export default class GeoLocationNode extends Node {
         });
     }
 
-    constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
+    constructor({ name, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            mnode: mnode,
-            packager: packager
+            isPublic: isPublic,
         });
         
         if(!navigator.geolocation) {

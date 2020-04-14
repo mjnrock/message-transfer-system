@@ -22,12 +22,11 @@ export default class QRCodeNode extends Node {
         });
     }
 
-    constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
+    constructor({ name, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            mnode: mnode,
-            packager: packager
+            isPublic: isPublic,
         });
 
         this.supply = {

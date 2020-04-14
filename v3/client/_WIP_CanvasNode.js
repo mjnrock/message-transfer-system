@@ -1,7 +1,7 @@
 import { GenerateUUID } from "../util/helper";
-import Node from "../Node";
+import Repeater from "../Repeater";
 
-export default class CanvasNode extends Node {
+export default class CanvasNode extends Repeater {
     static SignalTypes = {
         CLEAR: "CanvasNode.Clear",
         ERASE: "CanvasNode.Erase",
@@ -32,12 +32,11 @@ export default class CanvasNode extends Node {
         });
     }
 
-    constructor({ canvas = null, ctx = null, draw = null, name = null, receive = null, mnode = null, packager = null } = {}) {
+    constructor({ canvas, ctx, draw, name, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
-            mnode: mnode,
-            packager: packager
+            isPublic: isPublic,
         });
 
         this.supply = {
