@@ -7,7 +7,7 @@ export default class Proposition {
         SHAPE: 3,   //  Message property
         TIMESTAMP: 4,   //  Message property
 
-        VALUE: 5,   //  A generic custom value
+        VALUE: 5,   //  A generic custom value for ad hoc purposes
     };
     static ScopeType = {
         OR: "or",
