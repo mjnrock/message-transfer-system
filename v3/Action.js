@@ -1,4 +1,5 @@
 import Node from "./Node";
+import Rule from "./Rule";
 
 export default class Action {
     constructor({ node, state = {}, result = true } = {}) {
@@ -6,6 +7,18 @@ export default class Action {
         this._state = state;
 
         this._result = result;
+        this.__reverter = this;
+    }
+
+    get elseif() {
+        return new Rule (
+            this.__reverter._message || this.__reverter._value,
+            {
+                type: this.__reverter._scope.type,
+                node: this.__reverter._action._node,
+                state: this.__reverter._action._state,
+            }
+        );
     }
 
     get result() {
@@ -112,17 +125,17 @@ export default class Action {
     /**
      * Default terminal function.  If attached, returns the Node's state, otherwise returns `this._state`.
      */
-    done() {
+    get done() {
         if(this._node instanceof Node) {
             return this._node.state;
         }
 
         return this._state;
     }
-    getState() {
+    get getState() {
         return this._state;
     }
-    getNode() {
+    get getNode() {
         return this._node;
     }
 };

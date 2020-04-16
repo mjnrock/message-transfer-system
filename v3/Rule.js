@@ -8,17 +8,17 @@ export default class Rule extends Proposition {
         this._action = new Action({ node, state });
     }
 
-    if() {
+    get if() {
         return this;
     }
-
-    then() {
-        this._action.result = this.getResult();
+    get then() {
+        this._action._result = this.getResult;
+        this._action.__reverter = this;
 
         return this._action;
     }
 
     static Process(msgOrValue, { type, node, state } = {}) {
-        return new Rule(msgOrValue, type, { node, state });
+        return new Rule(msgOrValue, { type, node, state });
     }
 };

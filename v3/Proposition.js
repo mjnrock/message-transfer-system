@@ -261,18 +261,18 @@ export default class Proposition {
     /**
      * A default terminator function
      */
-    done() {
-        return this.getResult();
+    get done() {
+        return this.getResult;
     }
-    getResult() {
+    get getResult() {
         let result = this.evaluate(this._scope);
 
         return result;
     }
-    getMessage() {
+    get getMessage() {
         return this._message;
     }
-    getScope() {
+    get getScope() {
         return this._scope;
     }
 
