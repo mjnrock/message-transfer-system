@@ -1,9 +1,18 @@
 import Node from "./Node";
 
 export default class Action {
-    constructor({ node, state = {} } = {}) {
+    constructor({ node, state = {}, result = true } = {}) {
         this._node = node;
         this._state = state;
+
+        this._result = result;
+    }
+
+    get result() {
+        return this._result;
+    }
+    set result(result) {
+        this._result = result;
     }
 
     _getDefaultArgs() {
@@ -15,8 +24,18 @@ export default class Action {
         };
     }
 
+    node(node) {
+        this._node = node;
+
+        return this;
+    }
+
     //* ACTION METHODS
     run(method, ...args) {
+        if(!this.result) {
+            return this;
+        }
+
         if(this._node instanceof Node && typeof this._node[ method ] === "function") {
             this._node[ method ](this._getDefaultArgs(), ...args);
         } else if(typeof method === "function") {
@@ -27,6 +46,10 @@ export default class Action {
     }
 
     prop(propsObj = {}) {
+        if(!this.result) {
+            return this;
+        }
+
         if(typeof propsObj === "object" && Object.keys(propsObj).length) {
             let scope = this._state;
 
@@ -57,6 +80,10 @@ export default class Action {
         return this;
     }
     state(stateObj) {
+        if(!this.result) {
+            return this;
+        }
+        
         if(typeof stateObj === "object") {
             if(this._node instanceof Node) {
                 this._node.state = stateObj;
@@ -69,6 +96,10 @@ export default class Action {
     }
 
     emit(type, payload, { shape, destination } = {}) {
+        if(!this.result) {
+            return this;
+        }
+        
         if(this._node instanceof Node) {
             this._node.emit(type, payload, { shape, destination });
         }

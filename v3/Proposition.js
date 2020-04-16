@@ -18,12 +18,12 @@ export default class Proposition {
     };
 
     constructor(msgOrValue, type = Proposition.ScopeType.AND) {
-        if(Message.conforms(msgOrValue)) {
-            this._message = messageOrValue;
+        if(Message.Conforms(msgOrValue)) {
+            this._message = msgOrValue;
             this._value = null;
         } else {
             this._message = null;
-            this._value = messageOrValue;
+            this._value = msgOrValue;
         }
 
         this._scope = {
