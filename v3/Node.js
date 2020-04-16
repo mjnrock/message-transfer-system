@@ -168,9 +168,9 @@ export default class Node {
         }
     }
 
-    emit(type, payload, { shape } = {}) {
+    emit(type, payload, { shape, destination } = {}) {
         for(let feed of this._feeds) {
-            feed.emit(type, payload, { shape });
+            feed.emit(type, payload, { shape, destination });
         }
     }
 

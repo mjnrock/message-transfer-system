@@ -16,7 +16,7 @@ export default class Feed {
     }
 
     get signet() {
-        return `${ this.name }<${ this.id }>`;
+        return this.id;
     }
 
     get source() {
@@ -50,14 +50,8 @@ export default class Feed {
         return false;
     }
 
-    emit(type, payload, { shape } = {}) {
-        let msg;
-            
-        if(Message.Conforms(type)) {
-            msg = type;
-        } else {
-            msg = new Message(type, payload, { shape });
-        }
+    emit(type, payload, { shape, destination } = {}) {
+        let msg = new Message(type, payload, { shape, source: this._source.signet, destination });
 
         for(let subscriber of Object.values(this._listeners)) {
             if(subscriber instanceof Node) {

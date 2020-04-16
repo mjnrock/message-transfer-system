@@ -257,7 +257,7 @@ export default class Proposition {
 
 
 
-    //* TERMINAL FUNCTIONS
+    //* TERMINAL METHODS
     /**
      * A default terminator function
      */

@@ -1,14 +1,43 @@
 import ByteBuffer from "./util/ByteBuffer";
 
 export default class Message {
-    constructor(type, payload, { shape = "s0", timestamp = Date.now() } = {}) {
+    constructor(type, payload, { shape = "s0", timestamp = Date.now(), source, destination } = {}) {
         this.type = type;           //  The Message type, used for conditional work
         this.shape = shape;         //  The payload data shape, describing its conformation
         this.payload = payload;     //  The actual data of the Message
 
+        this.source = source;
+        this.destination = destination;
+
         this.timestamp = timestamp;
 
-        return this;
+        //  Immutability by <Proxy>
+        return new Proxy(this, {
+            get: function(target, key){
+                return target[ key ];
+            },
+
+            setProperty: function(target, key, value) {
+                //? Addable properties, but not modifiable
+                if(!target.hasOwnProperty(key)) {
+                    target[ key ] = value;
+                }
+
+                return true;
+            },
+            set: function(target, key, value){
+                return this.setProperty(target, key, value);
+            },
+
+            defineProperty: function (target, key) {
+                return this.setProperty(target, key, value);
+            },
+
+            deleteProperty: function(target, key) {
+                return false;
+            }
+        });
+        // return this;
     }
 
     toJson() {
@@ -38,6 +67,12 @@ export default class Message {
             ByteBuffer.TINY(),
             ByteBuffer.STRING(this.timestamp.toString()),
 
+            ByteBuffer.TINY(),
+            ByteBuffer.STRING(this.source.toString()),
+
+            ByteBuffer.TINY(),
+            ByteBuffer.STRING(this.destination.toString()),
+
             ByteBuffer.STRING(payload),
         );
 
@@ -46,6 +81,12 @@ export default class Message {
 
         bb.writeTiny(this.shape.length);
         bb.writeString(this.shape.toString());
+
+        bb.writeTiny(this.source.length);
+        bb.writeString(this.source.toString());
+
+        bb.writeTiny(this.destination.length);
+        bb.writeString(this.destination.toString());
 
         bb.writeTiny(this.timestamp.toString().length);
         bb.writeString(this.timestamp.toString());
@@ -74,6 +115,9 @@ export default class Message {
             {
                 shape: obj.shape,
                 timestamp: obj.timestamp,
+
+                source: obj.source,
+                destination: obj.destination,
             }
         );
     }
@@ -98,6 +142,12 @@ export default class Message {
             
             shapeLen: null,
             shape: null,
+            
+            sourceLen: null,
+            source: null,
+            
+            destinationLen: null,
+            destination: null,
 
             timestampLen: null,
             timestamp: null,
@@ -110,6 +160,12 @@ export default class Message {
 
         obj.shapeLen = bb.readTiny();
         obj.shape = bb.readString(obj.shapeLen);
+
+        obj.sourceLen = bb.readTiny();
+        obj.source = bb.readString(obj.sourceLen);
+
+        obj.destinationLen = bb.readTiny();
+        obj.destination = bb.readString(obj.destinationLen);
 
         obj.timestampLen = bb.readTiny();
         obj.timestamp = parseFloat(bb.readString(obj.timestampLen));
