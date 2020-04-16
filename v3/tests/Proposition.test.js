@@ -1,6 +1,7 @@
 import Node from "../Node";
 import Proposition from "./../Proposition";
 
+let RES = null;
 let N1 = new Node({
     receive: (msg, signature) => {
         // console.log(`[1]:`, message, signature);
@@ -14,8 +15,20 @@ let N1 = new Node({
             // .value(({ p }) => p * 500)
             //     .lt(2000)
             .end()
-            .done()
+            .getScope
 
+        RES = Proposition.Process(msg)
+            .type("test")
+            .payload("c.d.e")
+                .between(2, 9)
+            // .payload()
+            //     .between(6, 10)
+            // .value(({ p }) => p * 500)
+            //     .lt(2000)
+            .end()
+        .package
+
+        console.log(`[1]:`, msg);
         console.log(`[1]:`, res);
     }
 });
@@ -25,7 +38,7 @@ let N2 = new Node({
 
 N1.listen(N2);
 
-N2.emit("test", 105);
+N2.emit("test", 50);
 N2.emit("test", {
     a: 1,
     b: 2,
@@ -36,3 +49,22 @@ N2.emit("test", {
     }
 });
 // N1.emit("hi", 1);
+
+console.time();
+RES({
+    type: 'test',
+    shape: 's0',
+    payload: {
+        a: 1,
+        b: 2,
+        c: {
+            d: {
+                e: 50
+            }
+        }
+    },
+    source: '13d0c5a8-d053-4283-824b-2c00a78981e0',
+    destination: undefined,
+    timestamp: 1587050671226
+})
+console.timeEnd();

@@ -17,7 +17,7 @@ export default class Proposition {
         NOR: "nand",
     };
 
-    constructor(msgOrValue, { type = Proposition.ScopeType.AND, scope } = {}) {
+    constructor(msgOrValue, type = Proposition.ScopeType.AND) {
         if(Message.Conforms(msgOrValue)) {
             this._message = msgOrValue;
             this._value = null;
@@ -26,7 +26,7 @@ export default class Proposition {
             this._value = msgOrValue;
         }
 
-        this._scope = scope || {
+        this._scope = {
             type: type,
             parent: null,
             children: []
@@ -53,7 +53,7 @@ export default class Proposition {
     }
 
     type(...types) {
-        this._currentScope.children.push([ Proposition.FocusType.TYPE, ...types ]);
+        this._focus = Proposition.FocusType.TYPE;
 
         if(types.length) {
             this.in(...types);
@@ -62,12 +62,25 @@ export default class Proposition {
         return this;
     }
     payload(prop) {
-        this._currentScope.children.push([ Proposition.FocusType.PAYLOAD, prop ]);
+        this._focus = Proposition.FocusType.PAYLOAD;
+
+        if(prop) {
+            let props = prop.split("."),
+                res = this._message.payload;
+
+            for(let p of props) {
+                if(res[ p ] !== void 0) {
+                    res = res[ p ];
+                }
+            }
+
+            this.value(res);
+        }
 
         return this;
     }
     shape(...shapes) {
-        this._currentScope.children.push([ Proposition.FocusType.SHAPE, ...shapes ]);
+        this._focus = Proposition.FocusType.SHAPE;
         
         if(shapes.length) {
             this.in(...shapes);
@@ -76,13 +89,18 @@ export default class Proposition {
         return this;
     }
     timestamp() {
-        this._currentScope.children.push([ Proposition.FocusType.TIMESTAMP ]);
+        this._focus = Proposition.FocusType.TIMESTAMP;
 
         return this;
     }
 
     value(value) {
-        this._currentScope.children.push([ Proposition.FocusType.TYPE, value ]);
+        if(typeof value === "function") {
+            this._value = value({ s: this._message, p: this._message.payload, t: this._message.type, sh: this._message.shape });
+        } else {
+            this._value = value;
+        }
+        this._focus = Proposition.FocusType.VALUE;
 
         return this;
     }
@@ -130,126 +148,103 @@ export default class Proposition {
 
     //* COMPARATORS
     equals(input) {
-        this._currentScope.children.push(val => val === input);
+        this._currentScope.children.push(this._getFocus() === input);
 
         return this;
     }
     gt(input) {
-        this._currentScope.children.push(val => val > input);
+        this._currentScope.children.push(this._getFocus() > input);
 
         return this;
     }
     gte(input) {
-        this._currentScope.children.push(val => val >= input);
+        this._currentScope.children.push(this._getFocus() >= input);
 
         return this;
     }
     lt(input) {
-        this._currentScope.children.push(val => val < input);
+        this._currentScope.children.push(this._getFocus() < input);
 
         return this;
     }
     lte(input) {
-        this._currentScope.children.push(val => val <= input);
+        this._currentScope.children.push(this._getFocus() <= input);
 
         return this;
     }
     in(...input) {
-        this._currentScope.children.push(val => input.includes(val));
+        this._currentScope.children.push(input.includes(this._getFocus()));
 
         return this;
     }
     between(a, b) {
-        this._currentScope.children.push(val => (val >= a) && (val <= b));
+        let focus = this._getFocus();
+        this._currentScope.children.push((focus >= a) && (focus <= b));
 
         return this;
     }
     regex(pattern) {
-        this._currentScope.children.push(val => pattern instanceof RegExp ? pattern.test(val) : false);
+        this._currentScope.children.push(pattern instanceof RegExp ? pattern.test(this._getFocus()) : false);
 
         return this;
     }
 
     isA(type) {
-        this._currentScope.children.push(val => typeof val === type);
+        this._currentScope.children.push(typeof this._getFocus() === type);
 
         return this;
     }
     instanceOf(clazz) {
-        this._currentScope.children.push(val => val instanceof clazz);
+        this._currentScope.children.push(this._getFocus() instanceof clazz);
 
         return this;
     }
     
     //* NEGATED COMPARATORS
     notEquals(input) {
-        this._currentScope.children.push(val => val !== input);
+        this._currentScope.children.push(this._getFocus() !== input);
 
         return this;
     }
     notIn(...input) {
-        this._currentScope.children.push(val => !(input.includes(val)));
+        this._currentScope.children.push(!(input.includes(this._getFocus())));
 
         return this;
     }
     notBetween(a, b) {
-        this._currentScope.children.push(val => !((val >= a) && (val <= b)));
+        let focus = this._getFocus();
+        this._currentScope.children.push(!((focus >= a) && (focus <= b)));
 
         return this;
     }
 
-
-    _evalResult(scope, result, input) {
-        if(result === null || result === void 0) {
-            result = input;
-        }
-
-        if(scope.type === Proposition.ScopeType.AND || scope.type === Proposition.ScopeType.NAND) {
-            result = result && input;
-        } else if(scope.type === Proposition.ScopeType.OR || scope.type === Proposition.ScopeType.NOR) {
-            result = result || input;
-        }
-
-        return result;
-    }
-    _evalValue(value) {
-        if(typeof value === "function") {
-            this._value = value({ s: this._message, p: this._message.payload, t: this._message.type, sh: this._message.shape });
-        } else {
-            this._value = value;
-        }
-    }
 
     evaluate(scope) {
         let result = null;
 
         for(let child of scope.children) {
-            if(typeof child === "function") {
-                result = this._evalResult(scope, result, child(this._getFocus()));
-            } else if(Array.isArray(child)) {
-                this._focus = child[ 0 ];
+            if(typeof child === "object") {
+                let childResult = this.evaluate(child);
 
-                if(this._focus === Proposition.FocusType.PAYLOAD) {
-                    if(child[ 1 ]) {
-                        let props = child[ 1 ].split("."),
-                            res = this._message.payload;
-
-                        for(let p of props) {
-                            if(res[ p ] !== void 0) {
-                                res = res[ p ];
-                            }
-                        }
-
-                        this._focus = res;
-                    }
+                if(result === null || result === void 0) {
+                    result = childResult;
                 }
-                if(this._focus === Proposition.FocusType.VALUE) {
-                    this._evalValue(child[ 0 ])
+
+                if(child.type === Proposition.ScopeType.AND || child.type === Proposition.ScopeType.NAND) {
+                    result = result && childResult;
+                } else if(child.type === Proposition.ScopeType.OR || child.type === Proposition.ScopeType.NOR) {
+                    result = result || childResult;
                 }
-            } else if(typeof child === "object") {
-                result = this._evalResult(scope, result, this.evaluate(child));
             } else {
-                result = this._evalResult(scope, result, child);
+                if(result === null || result === void 0) {
+                    result = child;
+                }
+
+                if(scope.type === Proposition.ScopeType.AND || scope.type === Proposition.ScopeType.NAND) {
+                    result = result && child;
+                } else if(scope.type === Proposition.ScopeType.OR || scope.type === Proposition.ScopeType.NOR) {
+                    result = result || child;
+                }
             }
         }
 
@@ -281,12 +276,6 @@ export default class Proposition {
         return this._scope;
     }
 
-    get package() {
-        let scope = this.getScope;
-
-        return msg => (new Proposition(msg, { type: scope.type, scope })).done;
-    }
-
 
     debug(fn = console.log) {
         if(typeof fn === "function") {
@@ -295,6 +284,6 @@ export default class Proposition {
     }
 
     static Process(msgOrValue, type = Proposition.ScopeType.AND) {
-        return new Proposition(msgOrValue, { type });
+        return new Proposition(msgOrValue, type);
     }
 };
