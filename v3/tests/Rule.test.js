@@ -12,23 +12,22 @@ let N1 = new Node({
                 .payload()
                     .between(6, 30)
                 .end()
-            .then
-                .run(console.log)
-                .node(N2)
-                .prop({
-                    fish: 5
-                })
-                .node(N1)
-                .prop({
-                    lasagna: 69
-                })
+                .then
+                    .node(N2)
+                    .prop({
+                        fish: 5
+                    })
+                    .node(N1)
+                    .prop({
+                        lasagna: 69
+                    })
             .elseif
                 .type("test2")
-            .then
-                .node(N1)
-                .prop({
-                    cats: 4
-                })
+                .then
+                    .node(N1)
+                    .prop({
+                        cats: 4
+                    })
             .done
 
         // let res2 = Rule.Process(msg)
