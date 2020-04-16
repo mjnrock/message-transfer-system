@@ -33,7 +33,7 @@ export default class TouchNode extends Node {
         });
     }
 
-    constructor({ name, receive, isPublic = false } = {}) {
+    constructor({ name, element, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
@@ -41,10 +41,10 @@ export default class TouchNode extends Node {
         });
         
         window.addEventListener("load", () => {
-            window.addEventListener("touchstart", this.onTouchStart.bind(this));
-            window.addEventListener("touchend", this.onTouchEnd.bind(this));
-            window.addEventListener("touchmove", this.onTouchMove.bind(this));
-            window.addEventListener("touchcancel", this.onTouchCancel.bind(this));
+            (element || window).addEventListener("touchstart", this.onTouchStart.bind(this));
+            (element || window).addEventListener("touchend", this.onTouchEnd.bind(this));
+            (element || window).addEventListener("touchmove", this.onTouchMove.bind(this));
+            (element || window).addEventListener("touchcancel", this.onTouchCancel.bind(this));
         }, false);
 
         this.internal = {
@@ -58,8 +58,8 @@ export default class TouchNode extends Node {
             }
         };
         
-        if(!window) {
-            throw new Error("Window is not supported");
+        if(!(element || window)) {
+            throw new Error("No element provided and Window is not supported");
         }
     }
 

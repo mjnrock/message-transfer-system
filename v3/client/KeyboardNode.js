@@ -19,15 +19,15 @@ export default class KeyboardNode extends Node {
         });
     }
 
-    constructor({ name, keymap, keyflags, receive, isPublic = false } = {}) {
+    constructor({ name, element, keymap, keyflags, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
             isPublic: isPublic,
         });
         
-        window.onkeydown = this.onKeyDown.bind(this);
-        window.onkeyup = this.onKeyUp.bind(this);
+        (element || window).onkeydown = this.onKeyDown.bind(this);
+        (element || window).onkeyup = this.onKeyUp.bind(this);
 
         this.supply = {
             Map: keymap || {},
@@ -50,8 +50,8 @@ export default class KeyboardNode extends Node {
             ]);
         }
         
-        if(!window) {
-            throw new Error("Window is not supported");
+        if(!(element || window)) {
+            throw new Error("No element provided and Window is not supported");
         }
     }
 

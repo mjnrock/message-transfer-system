@@ -32,19 +32,19 @@ export default class MouseNode extends Node {
         });
     }
 
-    constructor({ name, btnmap, btnflags, receive, isPublic = false } = {}) {
+    constructor({ name, element, btnmap, btnflags, receive, isPublic = false } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
             isPublic: isPublic,
         });
         
-        window.onmousedown = this.onMouseDown.bind(this);
-        window.onmouseup = this.onMouseUp.bind(this);
-        window.onmousemove = this.onMouseMove.bind(this);
-        window.onclick = this.onClick.bind(this);
-        window.ondblclick = this.onDblClick.bind(this);
-        window.oncontextmenu = this.onContextMenu.bind(this);
+        (element || window).onmousedown = this.onMouseDown.bind(this);
+        (element || window).onmouseup = this.onMouseUp.bind(this);
+        (element || window).onmousemove = this.onMouseMove.bind(this);
+        (element || window).onclick = this.onClick.bind(this);
+        (element || window).ondblclick = this.onDblClick.bind(this);
+        (element || window).oncontextmenu = this.onContextMenu.bind(this);
 
         this.supply = {
             Map: btnmap || {},
@@ -65,8 +65,8 @@ export default class MouseNode extends Node {
             ]);
         }
         
-        if(!window) {
-            throw new Error("Window is not supported");
+        if(!(element || window)) {
+            throw new Error("No element provided and Window is not supported");
         }
     }
 
