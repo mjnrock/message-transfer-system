@@ -47,7 +47,21 @@ export default class TouchNode extends Node {
             (element || window).addEventListener("touchcancel", this.onTouchCancel.bind(this));
         }, false);
 
-        this.internal = {
+        this.supply = {
+            _config: {
+                taps: {
+                    threshold: 50
+                },
+                touch: {
+                    thresholdX: 50,
+                    thresholdY: 50
+                },
+                doubleClick: {
+                    thresholdX: 50,
+                    thresholdY: 50,
+                    timeout: 350
+                }
+            },
             Click: [],
             DoubleClick: [],
             Touches: {},
@@ -61,6 +75,13 @@ export default class TouchNode extends Node {
         if(!(element || window)) {
             throw new Error("No element provided and Window is not supported");
         }
+    }
+
+    get config() {
+        return this.supply._config;
+    }
+    set config(config) {
+        this.supply._config = config;
     }
 
     getTouches(e) {
@@ -193,40 +214,40 @@ export default class TouchNode extends Node {
         e.preventDefault();
 
         if(e.touches.length === 1) {
-            this.internal.Click = [
+            this.supply.Click = [
                 e.touches[ 0 ].clientX,
                 e.touches[ 0 ].clientY,
             ];
 
-            if(!this.internal.DoubleClick.length) {
-                this.internal.DoubleClick = [
+            if(!this.supply.DoubleClick.length) {
+                this.supply.DoubleClick = [
                     e.touches[ 0 ].pageX,
                     e.touches[ 0 ].pageY,
                     Date.now()
                 ];
 
                 setTimeout(() => {
-                    this.internal.DoubleClick = [];
-                }, 350);
+                    this.supply.DoubleClick = [];
+                }, this.config.doubleClick.timeout);
             } else {
-                this.internal.DoubleClick = [
-                    ...this.internal.DoubleClick,
+                this.supply.DoubleClick = [
+                    ...this.supply.DoubleClick,
                     e.touches[ 0 ].pageX,
                     e.touches[ 0 ].pageY,
                     Date.now()
                 ];
             }
         } else {
-            this.internal.Click = [];
-            this.internal.DoubleClick = [];
+            this.supply.Click = [];
+            this.supply.DoubleClick = [];
         }
 
         let touches = this.getTouches(e),
             now = Date.now();
 
         for(let touch of Object.values(touches.changed)) {
-            this.internal.Touches[ touch.id ] = [ touch.x, touch.y, now ];
-            this.internal.Taps.touches[ touch.id ] = {
+            this.supply.Touches[ touch.id ] = [ touch.x, touch.y, now ];
+            this.supply.Taps.touches[ touch.id ] = {
                 id: touch.id,
                 x: touch.x,
                 y: touch.y,
@@ -245,7 +266,7 @@ export default class TouchNode extends Node {
     onTouchEnd(e) {
         e.preventDefault();
 
-        if(this.internal.Click.length) {
+        if(this.supply.Click.length) {
             this.emit(
                 TouchNode.SignalTypes.TOUCH_CLICK,
                 {
@@ -255,20 +276,20 @@ export default class TouchNode extends Node {
                         alt: e.altKey,
                         meta: e.metaKey,
                     },
-                    x: this.internal.Click[ 0 ],
-                    y: this.internal.Click[ 1 ]
+                    x: this.supply.Click[ 0 ],
+                    y: this.supply.Click[ 1 ]
                 },
             );
 
-            this.internal.Click = [];
+            this.supply.Click = [];
         }
 
-        if(this.internal.DoubleClick.length > 3) {
-            let [ sx, sy, start, fx, fy, end ] = this.internal.DoubleClick,
+        if(this.supply.DoubleClick.length > 3) {
+            let [ sx, sy, start, fx, fy, end ] = this.supply.DoubleClick,
                 dx = Math.abs(sx - fx),
                 dy = Math.abs(sy - fy);
 
-            if((end - start <= 350) && (dx <= 50) && (dy <= 50)) {
+            if((end - start <= this.config.doubleClick.timeout) && (dx <= this.config.doubleClick.thresholdX) && (dy <= this.config.doubleClick.thresholdY)) {
                 this.emit(
                     TouchNode.SignalTypes.TOUCH_DOUBLE_CLICK,
                     {
@@ -293,7 +314,7 @@ export default class TouchNode extends Node {
                 );
             }
             
-            this.internal.DoubleClick = [];
+            this.supply.DoubleClick = [];
         }
 
         let touches = this.getTouches(e),
@@ -301,14 +322,14 @@ export default class TouchNode extends Node {
             eventTypes = {};
 
         for(let touch of Object.values(touches.changed)) {
-            if(this.internal.Touches[ touch.id ]) {
-                let [ sx, sy ] = this.internal.Touches[ touch.id ],
+            if(this.supply.Touches[ touch.id ]) {
+                let [ sx, sy ] = this.supply.Touches[ touch.id ],
                     [ fx, fy ] = [ touch.x, touch.y ],
                     dx = fx - sx,
                     dy = fy - sy,
                     dir = null;
 
-                if(Math.abs(dx) >= 50 || Math.abs(dy) >= 50) {
+                if(Math.abs(dx) >= this.config.touch.thresholdX || Math.abs(dy) >= this.config.touch.thresholdY) {
                     if(Math.abs(dx) > Math.abs(dy)) {
                         if(dx > 0) {
                             dir = "RIGHT";
@@ -344,14 +365,14 @@ export default class TouchNode extends Node {
                     eventTypes[ eventName ] += 1;
                 }
 
-                delete this.internal.Touches[ touch.id ];
+                delete this.supply.Touches[ touch.id ];
             }
         }
 
         //TODO Taps needs a time delay window (like 50/100 ms maybe): the taps have to be like, EXACTLY at the same time for this to register multiple taps.
         //* This is REALLY sensitive to timing.  It DOES work, it's just difficult to actually get multiple taps to line up--they seriously need to be like EXACTLY simultaneously
-        if(Object.keys(this.internal.Taps.touches).length > 1) {
-            this.internal.Taps.timestamp = Date.now();
+        if(Object.keys(this.supply.Taps.touches).length > 1) {
+            this.supply.Taps.timestamp = Date.now();
             this._endTaps();
         } else {
             this._clearTaps();
@@ -377,26 +398,24 @@ export default class TouchNode extends Node {
     }
 
     _clearTaps() {
-        clearTimeout(this.internal.Taps.timeout);
+        clearTimeout(this.supply.Taps.timeout);
 
-        this.internal.Taps = {
+        this.supply.Taps = {
             touches: {},
             timestamp: null,
             timeout: null
         };
     }
     _endTaps() {
-        let threshold = 50;    // ms
-
-        if(Date.now() - this.internal.Taps.timestamp < threshold) {
-            clearTimeout(this.internal.Taps.timeout);
-            this.internal.Taps.timeout = setTimeout(() => this._endTaps(), threshold);
+        if(Date.now() - this.supply.Taps.timestamp < this.config.taps.threshold) {
+            clearTimeout(this.supply.Taps.timeout);
+            this.supply.Taps.timeout = setTimeout(() => this._endTaps(), this.config.taps.threshold);
         } else {
             this.emit(
                 TouchNode.SignalTypes.TOUCH_MULTI,
                 {
-                    count: Object.keys(this.internal.Taps.touches).length,
-                    touches: Object.values(this.internal.Taps.touches)
+                    count: Object.keys(this.supply.Taps.touches).length,
+                    touches: Object.values(this.supply.Taps.touches)
                 },
             );
 

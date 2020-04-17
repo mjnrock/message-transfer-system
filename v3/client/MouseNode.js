@@ -47,6 +47,19 @@ export default class MouseNode extends Node {
         (element || window).oncontextmenu = this.onContextMenu.bind(this);
 
         this.supply = {
+            _config: {
+                swipe: {
+                    timeout: 750,
+                    threshold: 75
+                },
+                path: {
+                    timeout: 2000
+                },
+                selection: {
+                    timeout: 5000,
+                    threshold: 20
+                },
+            },
             Map: btnmap || {},
             Flags: btnflags || {},
             Mask: 0,
@@ -70,13 +83,20 @@ export default class MouseNode extends Node {
         }
     }
 
+    get config() {
+        return this.supply._config;
+    }
+    set config(config) {
+        this.supply._config = config;
+    }
+
     toggleComplexActions() {
         this.supply.emitComplexActions = !this.supply.emitComplexActions;
 
         return this;
     }
 
-    _startSwipe(button, x, y, timeout = 750, threshold = 75) {
+    _startSwipe(button, x, y, timeout, threshold) {
         let id = GenerateUUID();
 
         let obj = {
@@ -85,10 +105,10 @@ export default class MouseNode extends Node {
             start: [ x, y ],
             timestamp: Date.now(),
             threshold: {
-                position: threshold,
-                time: timeout
+                position: threshold || this.config.swipe.threshold,
+                time: timeout || this.config.swipe.timeout
             },
-            timeout: setTimeout(() => this._clearSwipe(button), timeout)
+            timeout: setTimeout(() => this._clearSwipe(button), timeout || this.config.swipe.timeout)
         };
         
         this.supply.Swipe[ button ] = obj;
@@ -140,7 +160,7 @@ export default class MouseNode extends Node {
         }
     }
 
-    _startPath(button, x, y, timeout = 2000) {
+    _startPath(button, x, y, timeout) {
         let id = GenerateUUID();
 
         let obj = {
@@ -149,16 +169,16 @@ export default class MouseNode extends Node {
             points: [
                 [ x, y ]
             ],
-            timeout: setTimeout(() => this._endPath(button), timeout)
+            timeout: setTimeout(() => this._endPath(button), timeout || this.config.path.timeout)
         };
         
         this.supply.Path[ button ] = obj;
     }
-    _addPath(button, x, y, timeout = 2000) {
+    _addPath(button, x, y, timeout) {
         this.supply.Path[ button ].points.push([ x, y ]);
         
         clearTimeout(this.supply.Path[ button ].timeout);
-        this.supply.Path[ button ].timeout = setTimeout(() => this._endPath(button), timeout);
+        this.supply.Path[ button ].timeout = setTimeout(() => this._endPath(button), timeout || this.config.path.timeout);
     }
     _endPath(button) {
         let path = this.supply.Path[ button ];
@@ -179,7 +199,7 @@ export default class MouseNode extends Node {
         }
     }
 
-    _startSelection(button, x, y, timeout = 5000, threshold = 20) {
+    _startSelection(button, x, y, timeout, threshold) {
         let id = GenerateUUID();
 
         let obj = {
@@ -189,8 +209,8 @@ export default class MouseNode extends Node {
                 start: [ x, y ],
                 end: []
             },
-            threshold: threshold,
-            timeout: setTimeout(() => this._endSelection(button), timeout)
+            threshold: threshold || this.config.selection.threshold,
+            timeout: setTimeout(() => this._endSelection(button), timeout || this.config.selection.timeout)
         };
         
         this.supply.Selection[ button ] = obj;

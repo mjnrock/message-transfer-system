@@ -30,10 +30,17 @@ export default class KeyboardNode extends Node {
         (element || window).onkeyup = this.onKeyUp.bind(this);
 
         this.supply = {
+            _config: {
+                sequence: {
+                    timeout: 750,
+                    minLength: 3,
+                    maxLength: 10
+                }
+            },
             Map: keymap || {},
             Flags: keyflags || {},
             Mask: 0,
-            Sequence: null
+            Sequence: null,
         };
 
         //*  Default: WASD/Arrows and Modifier keys
@@ -55,7 +62,14 @@ export default class KeyboardNode extends Node {
         }
     }
 
-    _startSequence(key, timeout = 750, minLength = 3, maxLength = 10) {
+    get config() {
+        return this.supply._config;
+    }
+    set config(config) {
+        this.supply._config = config;
+    }
+
+    _startSequence(key, timeout, minLength, maxLength) {
         let id = GenerateUUID();
 
         let obj = {
@@ -65,10 +79,10 @@ export default class KeyboardNode extends Node {
                 timestamp: Date.now()
             } ],
             length: {
-                min: minLength,
-                max: maxLength
+                min: minLength || this.config.sequence.minLength,
+                max: maxLength || this.config.sequence.maxLength
             },
-            timeout: setTimeout(() => this._endSequence(), timeout)
+            timeout: setTimeout(() => this._endSequence(), timeout || this.config.sequence.timeout)
         };
         
         this.supply.Sequence = obj;
