@@ -1,10 +1,11 @@
-import Node from "./Node";
+import Node from "../Node";
 import Rule from "./Rule";
 
 export default class Action {
-    constructor({ node, state = {}, result = true } = {}) {
+    constructor({ node, state = {}, message = null, result = true } = {}) {
         this._node = node;
         this._state = state;
+        this._message = message;
 
         this._result = result;
         this.__reverter = this;
@@ -115,6 +116,21 @@ export default class Action {
         
         if(this._node instanceof Node) {
             this._node.emit(type, payload, { shape, destination });
+        }
+
+        return this;
+    }
+
+    route(...nodes) {
+        if(!this.result) {
+            return this;
+        }
+        
+        nodes.push(this._node);
+        for(let node of nodes) {
+            if(this._node instanceof Node) {
+                node.receive(this._message);
+            }
         }
 
         return this;

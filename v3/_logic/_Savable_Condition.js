@@ -1,6 +1,6 @@
-import Message from "./Message";
+import Message from "../Message";
 
-export default class Proposition {
+export default class Condition {
     static FocusType = {
         TYPE: 1,    //  Message property
         PAYLOAD: 2, //  Message property
@@ -17,7 +17,7 @@ export default class Proposition {
         NOR: "nand",
     };
 
-    constructor(msgOrValue, { type = Proposition.ScopeType.AND, scope } = {}) {
+    constructor(msgOrValue, { type = Condition.ScopeType.AND, scope } = {}) {
         if(Message.Conforms(msgOrValue)) {
             this._message = msgOrValue;
             this._value = null;
@@ -33,10 +33,10 @@ export default class Proposition {
         };
         this._currentScope = this._scope;
         
-        this._focus = Proposition.FocusType.CURRENT;
+        this._focus = Condition.FocusType.CURRENT;
     }
 
-    _beginScope(type = Proposition.ScopeType.AND) {
+    _beginScope(type = Condition.ScopeType.AND) {
         let scope = {
             type: type,
             parent: this._scope,
@@ -53,7 +53,7 @@ export default class Proposition {
     }
 
     type(...types) {
-        this._currentScope.children.push([ Proposition.FocusType.TYPE, ...types ]);
+        this._currentScope.children.push([ Condition.FocusType.TYPE, ...types ]);
 
         if(types.length) {
             this.in(...types);
@@ -62,12 +62,12 @@ export default class Proposition {
         return this;
     }
     payload(prop) {
-        this._currentScope.children.push([ Proposition.FocusType.PAYLOAD, prop ]);
+        this._currentScope.children.push([ Condition.FocusType.PAYLOAD, prop ]);
 
         return this;
     }
     shape(...shapes) {
-        this._currentScope.children.push([ Proposition.FocusType.SHAPE, ...shapes ]);
+        this._currentScope.children.push([ Condition.FocusType.SHAPE, ...shapes ]);
         
         if(shapes.length) {
             this.in(...shapes);
@@ -76,18 +76,18 @@ export default class Proposition {
         return this;
     }
     timestamp() {
-        this._currentScope.children.push([ Proposition.FocusType.TIMESTAMP ]);
+        this._currentScope.children.push([ Condition.FocusType.TIMESTAMP ]);
 
         return this;
     }
 
     value(value) {
-        this._currentScope.children.push([ Proposition.FocusType.TYPE, value ]);
+        this._currentScope.children.push([ Condition.FocusType.TYPE, value ]);
 
         return this;
     }
 
-    begin(type = Proposition.ScopeType.AND) {
+    begin(type = Condition.ScopeType.AND) {
         this._beginScope(type);
 
         return this;
@@ -99,15 +99,15 @@ export default class Proposition {
     }
     
     _getFocus() {
-        if(this._focus === Proposition.FocusType.TYPE) {
+        if(this._focus === Condition.FocusType.TYPE) {
             return this._message.type;
-        } else if(this._focus === Proposition.FocusType.PAYLOAD) {
+        } else if(this._focus === Condition.FocusType.PAYLOAD) {
             return this._message.payload;
-        } else if(this._focus === Proposition.FocusType.SHAPE) {
+        } else if(this._focus === Condition.FocusType.SHAPE) {
             return this._message.shape;
-        } else if(this._focus === Proposition.FocusType.TIMESTAMP) {
+        } else if(this._focus === Condition.FocusType.TIMESTAMP) {
             return this._message.timestamp;
-        } else if(this._focus === Proposition.FocusType.VALUE) {
+        } else if(this._focus === Condition.FocusType.VALUE) {
             return this._value;
         }
 
@@ -115,16 +115,16 @@ export default class Proposition {
     }
 
     or() {
-        return this.begin(Proposition.ScopeType.OR);
+        return this.begin(Condition.ScopeType.OR);
     }
     and() {
-        return this.begin(Proposition.ScopeType.AND);
+        return this.begin(Condition.ScopeType.AND);
     }
     nor() {
-        return this.begin(Proposition.ScopeType.NOR);
+        return this.begin(Condition.ScopeType.NOR);
     }
     nand() {
-        return this.begin(Proposition.ScopeType.NAND);
+        return this.begin(Condition.ScopeType.NAND);
     }
 
 
@@ -204,9 +204,9 @@ export default class Proposition {
             result = input;
         }
 
-        if(scope.type === Proposition.ScopeType.AND || scope.type === Proposition.ScopeType.NAND) {
+        if(scope.type === Condition.ScopeType.AND || scope.type === Condition.ScopeType.NAND) {
             result = result && input;
-        } else if(scope.type === Proposition.ScopeType.OR || scope.type === Proposition.ScopeType.NOR) {
+        } else if(scope.type === Condition.ScopeType.OR || scope.type === Condition.ScopeType.NOR) {
             result = result || input;
         }
 
@@ -229,7 +229,7 @@ export default class Proposition {
             } else if(Array.isArray(child)) {
                 this._focus = child[ 0 ];
 
-                if(this._focus === Proposition.FocusType.PAYLOAD) {
+                if(this._focus === Condition.FocusType.PAYLOAD) {
                     if(child[ 1 ]) {
                         let props = child[ 1 ].split("."),
                             res = this._message.payload;
@@ -243,7 +243,7 @@ export default class Proposition {
                         this._focus = res;
                     }
                 }
-                if(this._focus === Proposition.FocusType.VALUE) {
+                if(this._focus === Condition.FocusType.VALUE) {
                     this._evalValue(child[ 0 ])
                 }
             } else if(typeof child === "object") {
@@ -253,7 +253,7 @@ export default class Proposition {
             }
         }
 
-        if(scope.type === Proposition.ScopeType.NOR || scope.type === Proposition.ScopeType.NAND) {
+        if(scope.type === Condition.ScopeType.NOR || scope.type === Condition.ScopeType.NAND) {
             result = !result;
         }
 
@@ -284,7 +284,7 @@ export default class Proposition {
     get package() {
         let scope = this.getScope;
 
-        return msg => (new Proposition(msg, { type: scope.type, scope })).done;
+        return msg => (new Condition(msg, { type: scope.type, scope })).done;
     }
 
 
@@ -294,7 +294,7 @@ export default class Proposition {
         }
     }
 
-    static Process(msgOrValue, type = Proposition.ScopeType.AND) {
-        return new Proposition(msgOrValue, { type });
+    static Process(msgOrValue, type = Condition.ScopeType.AND) {
+        return new Condition(msgOrValue, { type });
     }
 };

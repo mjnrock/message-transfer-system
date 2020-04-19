@@ -1,5 +1,5 @@
 import Node from "./../Node";
-import Proposition from "./../Proposition";
+import Condition from "./../Condition";
 import Action from "./../Action";
 import Rule from "./../Rule";
 

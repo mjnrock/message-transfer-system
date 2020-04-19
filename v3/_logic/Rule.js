@@ -1,7 +1,7 @@
-import Proposition from "./Proposition";
+import Condition from "./Condition";
 import Action from "./Action";
 
-export default class Rule extends Proposition {
+export default class Rule extends Condition {
     constructor(msgOrValue, { type, node, state } = {}) {
         super(msgOrValue, type);
 

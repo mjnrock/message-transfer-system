@@ -1,6 +1,6 @@
-import Message from "./Message";
+import Message from "../Message";
 
-export default class Proposition {
+export default class Condition {
     static FocusType = {
         TYPE: 1,    //  Message property
         PAYLOAD: 2, //  Message property
@@ -17,7 +17,7 @@ export default class Proposition {
         NOR: "nand",
     };
 
-    constructor(msgOrValue, type = Proposition.ScopeType.AND) {
+    constructor(msgOrValue, type = Condition.ScopeType.AND) {
         if(Message.Conforms(msgOrValue)) {
             this._message = msgOrValue;
             this._value = null;
@@ -33,10 +33,10 @@ export default class Proposition {
         };
         this._currentScope = this._scope;
         
-        this._focus = Proposition.FocusType.CURRENT;
+        this._focus = Condition.FocusType.CURRENT;
     }
 
-    _beginScope(type = Proposition.ScopeType.AND) {
+    _beginScope(type = Condition.ScopeType.AND) {
         let scope = {
             type: type,
             parent: this._scope,
@@ -53,7 +53,7 @@ export default class Proposition {
     }
 
     type(...types) {
-        this._focus = Proposition.FocusType.TYPE;
+        this._focus = Condition.FocusType.TYPE;
 
         if(types.length) {
             this.in(...types);
@@ -62,7 +62,7 @@ export default class Proposition {
         return this;
     }
     payload(prop) {
-        this._focus = Proposition.FocusType.PAYLOAD;
+        this._focus = Condition.FocusType.PAYLOAD;
 
         if(prop) {
             let props = prop.split("."),
@@ -80,7 +80,7 @@ export default class Proposition {
         return this;
     }
     shape(...shapes) {
-        this._focus = Proposition.FocusType.SHAPE;
+        this._focus = Condition.FocusType.SHAPE;
         
         if(shapes.length) {
             this.in(...shapes);
@@ -89,7 +89,7 @@ export default class Proposition {
         return this;
     }
     timestamp() {
-        this._focus = Proposition.FocusType.TIMESTAMP;
+        this._focus = Condition.FocusType.TIMESTAMP;
 
         return this;
     }
@@ -100,12 +100,12 @@ export default class Proposition {
         } else {
             this._value = value;
         }
-        this._focus = Proposition.FocusType.VALUE;
+        this._focus = Condition.FocusType.VALUE;
 
         return this;
     }
 
-    begin(type = Proposition.ScopeType.AND) {
+    begin(type = Condition.ScopeType.AND) {
         this._beginScope(type);
 
         return this;
@@ -117,15 +117,15 @@ export default class Proposition {
     }
     
     _getFocus() {
-        if(this._focus === Proposition.FocusType.TYPE) {
+        if(this._focus === Condition.FocusType.TYPE) {
             return this._message.type;
-        } else if(this._focus === Proposition.FocusType.PAYLOAD) {
+        } else if(this._focus === Condition.FocusType.PAYLOAD) {
             return this._message.payload;
-        } else if(this._focus === Proposition.FocusType.SHAPE) {
+        } else if(this._focus === Condition.FocusType.SHAPE) {
             return this._message.shape;
-        } else if(this._focus === Proposition.FocusType.TIMESTAMP) {
+        } else if(this._focus === Condition.FocusType.TIMESTAMP) {
             return this._message.timestamp;
-        } else if(this._focus === Proposition.FocusType.VALUE) {
+        } else if(this._focus === Condition.FocusType.VALUE) {
             return this._value;
         }
 
@@ -133,16 +133,16 @@ export default class Proposition {
     }
 
     or() {
-        return this.begin(Proposition.ScopeType.OR);
+        return this.begin(Condition.ScopeType.OR);
     }
     and() {
-        return this.begin(Proposition.ScopeType.AND);
+        return this.begin(Condition.ScopeType.AND);
     }
     nor() {
-        return this.begin(Proposition.ScopeType.NOR);
+        return this.begin(Condition.ScopeType.NOR);
     }
     nand() {
-        return this.begin(Proposition.ScopeType.NAND);
+        return this.begin(Condition.ScopeType.NAND);
     }
 
 
@@ -230,9 +230,9 @@ export default class Proposition {
                     result = childResult;
                 }
 
-                if(child.type === Proposition.ScopeType.AND || child.type === Proposition.ScopeType.NAND) {
+                if(child.type === Condition.ScopeType.AND || child.type === Condition.ScopeType.NAND) {
                     result = result && childResult;
-                } else if(child.type === Proposition.ScopeType.OR || child.type === Proposition.ScopeType.NOR) {
+                } else if(child.type === Condition.ScopeType.OR || child.type === Condition.ScopeType.NOR) {
                     result = result || childResult;
                 }
             } else {
@@ -240,15 +240,15 @@ export default class Proposition {
                     result = child;
                 }
 
-                if(scope.type === Proposition.ScopeType.AND || scope.type === Proposition.ScopeType.NAND) {
+                if(scope.type === Condition.ScopeType.AND || scope.type === Condition.ScopeType.NAND) {
                     result = result && child;
-                } else if(scope.type === Proposition.ScopeType.OR || scope.type === Proposition.ScopeType.NOR) {
+                } else if(scope.type === Condition.ScopeType.OR || scope.type === Condition.ScopeType.NOR) {
                     result = result || child;
                 }
             }
         }
 
-        if(scope.type === Proposition.ScopeType.NOR || scope.type === Proposition.ScopeType.NAND) {
+        if(scope.type === Condition.ScopeType.NOR || scope.type === Condition.ScopeType.NAND) {
             result = !result;
         }
 
@@ -283,7 +283,7 @@ export default class Proposition {
         }
     }
 
-    static Process(msgOrValue, type = Proposition.ScopeType.AND) {
-        return new Proposition(msgOrValue, type);
+    static Process(msgOrValue, type = Condition.ScopeType.AND) {
+        return new Condition(msgOrValue, type);
     }
 };

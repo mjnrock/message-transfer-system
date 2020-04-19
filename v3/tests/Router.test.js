@@ -1,11 +1,10 @@
 import Node from "../Node";
-import Condition from "./../Condition";
+import Condition from "../_logic/Condition";
+import Rule from "../_logic/Rule";
 
 let RES = null;
 let N1 = new Node({
     receive: (msg, signature) => {
-        // console.log(`[1]:`, message, signature);
-
         let res = Condition.Process(msg)
             .type("test")
             .payload("c.d.e")
@@ -27,13 +26,10 @@ let N1 = new Node({
             //     .lt(2000)
             .end()
         .package
-
-        console.log(`[1]:`, msg);
-        console.log(`[1]:`, res);
     }
 });
 let N2 = new Node({
-    receive: (msg, signature) => console.log(`[1]:`, message, signature)
+    receive: msg => Rule.Process
 });
 
 N1.listen(N2);
@@ -50,7 +46,6 @@ N2.emit("test", {
 });
 // N1.emit("hi", 1);
 
-console.time();
 RES({
     type: 'test',
     shape: 's0',
@@ -67,4 +62,3 @@ RES({
     destination: undefined,
     timestamp: 1587050671226
 })
-console.timeEnd();

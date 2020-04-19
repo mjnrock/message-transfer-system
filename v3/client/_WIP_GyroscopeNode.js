@@ -23,6 +23,19 @@
 //     MTS.send("GyroData", eventData, { elevate: true });
 // }, 1000);
 
+
+//* iOS 13+
+//? You MUST have a User Action first (e.g. a button click), as this will not activate if executed on page load
+// DeviceOrientationEvent.requestPermission()
+// .then(response => {
+    
+// })
+// DeviceMotionEvent.requestPermission()
+// .then(response => {
+
+// })
+
+//* iOS 12-
 // if (window.DeviceOrientationEvent) {
 //     window.addEventListener("deviceorientation", function (event) {
 //         // LOG2(event);
