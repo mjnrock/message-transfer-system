@@ -42,6 +42,7 @@ export default class CanvasNode extends Repeater {
         this.supply = {
             Canvas: canvas,
             Context: ctx || canvas ? canvas.getContext("2d") : null,
+            Video: document.createElement("video"),     // Local video element to deal with streaming conversions
             Images: {},
             Draw: draw
         };
@@ -110,6 +111,58 @@ export default class CanvasNode extends Repeater {
     get ctx() {
         return this.supply.Context;
     }
+    get video() {
+        return this.supply.Video;
+    }
+
+    //* <Streaming>
+    getCanvasStream({ fps = 10, pipeToVideo = false } = {}) {
+        if(this.canvas) {
+            let stream = this.canvas.captureStream(fps);
+
+            if(pipeToVideo === true) {
+                this.setVideoStream(stream);
+            }
+
+            return stream;
+        }
+
+        return false;
+    }
+    getVideoStream() {
+        return this.video.srcObject;
+    }
+    setVideoStream(stream) {
+        this.video.srcObject = stream;
+
+        return this;
+    }
+
+    drawVideoStream() {
+        this.canvas.drawImage(this.video, 0, 0);
+
+        return this;
+    }
+    /**
+     * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
+     */
+    startVideoStreamRender() {
+        this.supply.Draw = this.drawVideoStream();
+        this.render(true);
+
+        return this;
+    }
+    /**
+     * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
+     */
+    stopVideoStreamRender() {
+        this.supply.Draw = null;
+        this.render(false);
+
+        return this;
+    }
+    //* </Streaming>
+
 
     loadImage(name, uri) {        
         return new Promise((resolve, reject) => {
