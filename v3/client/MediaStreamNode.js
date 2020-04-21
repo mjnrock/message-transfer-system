@@ -62,14 +62,13 @@ export default class MediaStreamNode extends Node {
         return this._config.placeholder;
     }
 
-    makeRequest() {
+    getMediaDevices() {
         navigator.mediaDevices.enumerateDevices()
             .then(this._registerDevices.bind(this))
-            .then(this.media.bind(this))
             .catch(e => console.log(e));
     }
 
-    _registerDevices(devices) {            
+    _registerDevices(devices) {
         for(let device of devices) {
             if (device.kind === "videoinput") {
                 this._config.devices.video[ device.deviceId ] = device.label || `Video ${ Object.keys(this._config.devices.video).length + 1}`;
