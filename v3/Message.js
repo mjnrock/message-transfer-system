@@ -29,9 +29,9 @@ export default class Message {
                 return this.setProperty(target, key, value);
             },
 
-            defineProperty: function (target, key) {
-                return this.setProperty(target, key, value);
-            },
+            // defineProperty: function (target, key) {
+            //     return this.setProperty(target, key, value);
+            // },
 
             deleteProperty: function(target, key) {
                 return false;

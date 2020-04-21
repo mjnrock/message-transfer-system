@@ -1,4 +1,4 @@
-import { GenerateUUID, Dice } from "./helper";
+import { GenerateUUID, Dice } from "./util/helper";
 import Node from "./Node";
 
 export default class Repeater extends Node {

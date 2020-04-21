@@ -2,7 +2,7 @@ import Node from "../Node";
 import CanvasNode from "./CanvasNode";
 
 export default class MediaStreamNode extends Node {
-    static VideoResolutions = {
+    static Resolution = {
         P240: [ 426, 240 ],
         P360: [ 640, 360 ],
         P480: [ 854, 480 ],
@@ -17,7 +17,19 @@ export default class MediaStreamNode extends Node {
         K8: [ 7680, 4320 ],
     };
 
-    constructor({ name, receive, isPublic, video, stream } = {}) {
+    static SampleRate = {
+        PHONE: 8000,
+        CD_LOW: 11025,
+        CD_HALF: 22050,
+        MINIDV: 32000,
+        CD: 44100,
+        CD_HIGH: 88200,
+        DVD: 96000,
+        HDCD: 176400,
+        BDROM: 192000,
+    }
+
+    constructor({ name, receive, isPublic, video, stream, placeholder } = {}) {
         super({ name, receive, isPublic });
 
         this._config = {
@@ -28,14 +40,26 @@ export default class MediaStreamNode extends Node {
                 audio: {},
                 video: {},
                 speaker: {}
-            }
+            },
+            placeholder: placeholder
         };
         
         if(!video) {
-            video.setAttribute("autoplay", true);
-            video.setAttribute("controls", true);
+            this.video.setAttribute("autoplay", true);
+            this.video.setAttribute("controls", true);
             this.size(720, 480);
         }
+            
+        if(this.placeholder) {
+            this.placeholder.replaceWith(this.video);
+        }
+    }
+
+    /**
+     * This is meant to be a DOMElement to replace
+     */
+    get placeholder() {
+        return this._config.placeholder;
     }
 
     makeRequest() {
@@ -95,23 +119,45 @@ export default class MediaStreamNode extends Node {
         return this.useDevice("speaker", deviceIdOrIndex);
     }
     
-    getUserMedia(constraints = { audio: true, video: true }) {
+    getUserMedia({ callback, cn, constraints = { audio: true, video: true } } = {}) {
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
             this.stop();
             
             this.stream = stream;
+
+            return stream;
+        })
+        .then(stream => {
+            if(cn instanceof CanvasNode) {
+                cn.stream = stream;
+                cn.startVideoStreamRender();
+            }
+
+            if(typeof callback === "function") {
+                callback(stream, cn);
+            }
         })
             .catch(e => console.log(e));
 
         return this;
     }
-    getDisplayMedia(constraints) {    
+    getDisplayMedia({ callback, cn, constraints } = {}) {
         navigator.mediaDevices.getDisplayMedia(constraints)
             .then(stream => {
                 this.stop();
 
                 this.stream = stream;
+            })
+            .then(stream => {
+                if(cn instanceof CanvasNode) {
+                    cn.stream = stream;
+                    cn.startVideoStreamRender();
+                }
+
+                if(typeof callback === "function") {
+                    callback(stream, cn);
+                }
             })
             .catch(e => console.log(e));
 
@@ -185,8 +231,8 @@ export default class MediaStreamNode extends Node {
     }
 
     size(width = 720, height = 480) {
-        video.style.width = width;
-        video.style.height = height;
+        this.video.style.width = width;
+        this.video.style.height = height;
     }    
 
     toCanvas(canvas) {

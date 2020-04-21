@@ -4,7 +4,7 @@ module.exports = function (grunt) {
             files: {
                 expand: true,
                 dest: 'mts-react/src/lib',
-                cwd: 'src/',
+                cwd: 'v3/',
                 src: '**'
             }
         }

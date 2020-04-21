@@ -32,7 +32,7 @@ export default class CanvasNode extends Repeater {
         });
     }
 
-    constructor({ canvas, ctx, draw, name, receive, isPublic = false } = {}) {
+    constructor({ canvas, ctx, draw, name, receive, isPublic, placeholder } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
@@ -42,14 +42,45 @@ export default class CanvasNode extends Repeater {
         this.supply = {
             Canvas: canvas,
             Context: ctx || canvas ? canvas.getContext("2d") : null,
-            Video: document.createElement("video"),     // Local video element to deal with streaming conversions
             Images: {},
-            Draw: draw
+            Draw: draw,
         };
+
+        this._config = {
+            ...this._config,
+            placeholder: placeholder,
+            stream: null,
+            video: document.createElement("video"),
+        };
+        this._config.video.setAttribute("autoplay", true);
+        this._config.video.setAttribute("controls", true);
 
         this.state = {
             isActive: false
         };
+        
+        if(this.placeholder) {
+            this.placeholder.replaceWith(this.video);
+        }
+    }
+
+    get placeholder() {
+        return this._config.placeholder;
+    }
+
+    get stream() {
+        return this._config.stream;
+    }
+    set stream(stream) {
+        this._config.stream = stream;
+        this._config.video.srcObject = stream;
+    }
+
+    get video() {
+        return this._config.video;
+    }
+    set video(element) {
+        this._config.video = element;
     }
 
     toggleSmoothLines() {
@@ -86,7 +117,7 @@ export default class CanvasNode extends Repeater {
     }
     draw(...args) {
         if(typeof this.supply.Draw === "function") {
-            this.supply.Draw.call(this, ...args);
+            this.supply.Draw(...args);
         }
 
         return this;
@@ -111,35 +142,28 @@ export default class CanvasNode extends Repeater {
     get ctx() {
         return this.supply.Context;
     }
-    get video() {
-        return this.supply.Video;
+
+    stopStreamTracks() {
+        if(this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+        }
     }
 
     //* <Streaming>
-    getCanvasStream({ fps = 10, pipeToVideo = false } = {}) {
+    getCanvasStream(fps = 10) {
         if(this.canvas) {
-            let stream = this.canvas.captureStream(fps);
+            this.stopStreamTracks();
 
-            if(pipeToVideo === true) {
-                this.setVideoStream(stream);
-            }
+            this.stream = this.canvas.captureStream(fps);
 
-            return stream;
+            return true;
         }
 
         return false;
     }
-    getVideoStream() {
-        return this.video.srcObject;
-    }
-    setVideoStream(stream) {
-        this.video.srcObject = stream;
 
-        return this;
-    }
-
-    drawVideoStream() {
-        this.canvas.drawImage(this.video, 0, 0);
+    drawVideoStream(ts) {
+        this.ctx.drawImage(this.video, 0, 0);
 
         return this;
     }
@@ -147,7 +171,7 @@ export default class CanvasNode extends Repeater {
      * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
      */
     startVideoStreamRender() {
-        this.supply.Draw = this.drawVideoStream();
+        this.setDraw(ts => this.drawVideoStream(ts));
         this.render(true);
 
         return this;
@@ -156,7 +180,7 @@ export default class CanvasNode extends Repeater {
      * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
      */
     stopVideoStreamRender() {
-        this.supply.Draw = null;
+        this.setDraw(null);
         this.render(false);
 
         return this;
