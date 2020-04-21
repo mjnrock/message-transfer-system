@@ -1,4 +1,5 @@
 import Node from "../Node";
+import CanvasNode from "./CanvasNode";
 
 export default class MediaStreamNode extends Node {
     static VideoResolutions = {
@@ -119,7 +120,11 @@ export default class MediaStreamNode extends Node {
     getCanvasMedia(canvas, fps = 10) {
         this.stop();
 
-        this.stream = canvas.captureStream(fps);
+        if(canvas instanceof CanvasNode) {
+            this.stream = canvas.canvas.captureStream(fps);
+        } else {
+            this.stream = canvas.captureStream(fps);
+        }
 
         return this;
     }
