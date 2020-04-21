@@ -43,8 +43,12 @@ export default class WebSocketNode extends Node {
         }
     }
 
-    getSocket() {
+    get ws() {
         return this.supply.WebSocket;
+    }
+
+    getSocket() {
+        return this.ws;
     }
     getAddress() {
         let obj = this.getSocket()._socket.address();
@@ -55,35 +59,34 @@ export default class WebSocketNode extends Node {
         };
     }
     isReady() {
-        return this.supply.WebSocket && this.supply.WebSocket.readyState === 1;
+        return this.ws && this.ws.readyState === 1;
     }
 
     get signet() {
         return this.id;
     }
 
-    create({ ws = null, uri = "localhost:3000", protocol = "ws", isMaster = false } = {}) {
+    create({ ws = null, uri = "localhost:3000", protocol = "ws", type = "json" } = {}) {
         if(ws) {
-            this.supply.WebSocket = ws;
-        }
-        if(isMaster) {
-            this.supply.isMaster = true;
-        }
-        
-        if(!this.supply.WebSocket) {
-            this.supply.WebSocket = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
-            this.supply.WebSocket.onopen = this._onWsOpen.bind(this);
+            this.ws = ws;
         }
 
-        this.supply.WebSocket.onerror = this._onWsError.bind(this);
-        this.supply.WebSocket.onclose = this._onWsClose.bind(this);
-        this.supply.WebSocket.onmessage = this._onWsMessage.bind(this);
+        this.ws.binaryType = type;
+        
+        if(!this.ws) {
+            this.ws = new (WebSocket || global.WebSocket)(`${ protocol }://${ uri }`);
+            this.ws.onopen = this._onWsOpen.bind(this);
+        }
+
+        this.ws.onerror = this._onWsError.bind(this);
+        this.ws.onclose = this._onWsClose.bind(this);
+        this.ws.onmessage = this._onWsMessage.bind(this);
 
         return this;
     }
     destroy() {
-        if(this.supply.WebSocket) {
-            this.supply.WebSocket.close();
+        if(this.ws) {
+            this.ws.close();
 
             this.emit(WebSocketNode.SignalTypes.CLOSE, this.id);
         }
@@ -92,7 +95,7 @@ export default class WebSocketNode extends Node {
     wssend(type, payload) {
         let msg = new Message(type, payload, this.signet);
         
-        this.supply.WebSocket.send(msg.toJson());
+        this.ws.send(msg.toJson());
     }
 
     _onWsMessage(e) {
