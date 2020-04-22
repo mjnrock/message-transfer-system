@@ -1,5 +1,6 @@
 /lib
-/mts-react
+# /mts-react
+/mts-react/src/lib
 
 # Logs
 logs
