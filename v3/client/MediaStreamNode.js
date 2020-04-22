@@ -43,17 +43,10 @@ export default class MediaStreamNode extends Node {
             },
             placeholder: placeholder
         };
-
-        this._state = {
-            stream: {
-                isActive: false,
-                isPaused: false,
-            }
-        };
         
         if(!video) {
             this.video.setAttribute("autoplay", true);
-            this.video.setAttribute("controls", true);
+            this.video.setAttribute("controls", false);
             this.size(720, 480);
         }
             
@@ -62,14 +55,26 @@ export default class MediaStreamNode extends Node {
         }
     }
 
-    get streamId() {
-        return this.stream.id;
-    }
-    get streamIsActive() {
-        return this.stream.active;
-    }
-    get streamHasEnded() {
-        return this.stream.ended;
+    get check() {
+        if(this.stream) {
+            return {
+                hasAudio: !!this.getAudioTracks(0),
+                hasVideo: !!this.getVideoTracks(0),
+                isMainAudioMuted: !(this.getAudioTracks(0) || {}).enabled,
+                isMainVideoMuted: !(this.getVideoTracks(0) || {}).enabled,
+                isPaused: (!(this.getAudioTracks(0) || {}).enabled) && (!(this.getVideoTracks(0) || {}).enabled),
+                isActive: this.stream.active || false,
+            };
+        }
+        
+        return {
+            hasAudio: false,
+            hasVideo: false,
+            isMainAudioMuted: true,
+            isMainVideoMuted: true,
+            isPaused: true,
+            isActive: false,
+        };
     }
 
     get devices() {
@@ -192,7 +197,7 @@ export default class MediaStreamNode extends Node {
     getUserMedia({ callback, cn, constraints = { audio: true, video: { width: { min: 426, ideal: 1920 }, height: { min: 240, ideal: 1080 }} } } = {}) {
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
-            this.stop();
+            this.controller.stop();
             this.getMediaDevices();
             
             this.stream = stream;
@@ -216,7 +221,7 @@ export default class MediaStreamNode extends Node {
     getDisplayMedia({ callback, cn, constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }} } } = {}) {
         navigator.mediaDevices.getDisplayMedia(constraints)
             .then(stream => {
-                this.stop();
+                this.controller.stop();
 
                 this.stream = stream;
 
@@ -237,7 +242,7 @@ export default class MediaStreamNode extends Node {
         return this;
     }
     getCanvasMedia(canvas, fps = 10) {
-        this.stop();
+        this.controller.stop();
 
         if(canvas instanceof CanvasNode) {
             this.stream = canvas.canvas.captureStream(fps);
@@ -254,41 +259,63 @@ export default class MediaStreamNode extends Node {
     set stream(stream) {
         this._config.stream = stream;
         this._config.video.srcObject = stream;
-        this.state.stream.isActive = true;
-        this.state.stream.isPaused = false;
     }
 
-    /**
-     * This stops the tracks completely and sets `stream.ended = true`
-     */
-    stop() {
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-            this.state.stream.isActive = false;
-        }
-    }
-    /**
-     * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.
-     */
-    pause() {
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.enabled = false);
-            this.state.stream.isPaused = true;
-        }
-    }
-    /**
-     * This "unmutes" the stream by enabling it.
-     */
-    play() {
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.enabled = true);
-            this.state.stream.isPaused = false;
-        }
-    }
-    clear() {
-        this.stream = null;
-        this.state.stream.isActive = false;
-        this.state.stream.isPaused = false;
+    get controller() {
+        const _this = this;
+
+        return {
+            /**
+             * This stops the tracks completely and sets `stream.ended = true`
+             */
+            stop() {
+                if(_this.stream) {
+                    _this.stream.getTracks().forEach(track => track.stop());
+                }
+            },
+            /**
+             * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.
+             */
+            pause(type) {
+                if(_this.stream) {
+                    if(type === "audio") {
+                        _this.stream.getAudioTracks().forEach(track => track.enabled = false);
+                    } else if(type === "video") {
+                        _this.stream.getVideoTracks().forEach(track => track.enabled = false);
+                    } else {
+                        _this.stream.getTracks().forEach(track => track.enabled = false);
+                    }
+                }
+            },
+            /**
+             * This "unmutes" the stream by enabling it.
+             */
+            play(type) {
+                if(_this.stream) {
+                    if(type === "audio") {
+                        _this.stream.getAudioTracks().forEach(track => track.enabled = true);
+                    } else if(type === "video") {
+                        _this.stream.getVideoTracks().forEach(track => track.enabled = true);
+                    } else {
+                        _this.stream.getTracks().forEach(track => track.enabled = true);
+                    }
+                }
+            },
+            toggle(type) {
+                if(_this.stream) {
+                    if(type === "audio") {
+                        _this.stream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+                    } else if(type === "video") {
+                        _this.stream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+                    } else {
+                        _this.stream.getTracks().forEach(track => track.enabled = !track.enabled);
+                    }
+                }
+            },
+            clear() {
+                _this.stream = null;
+            }
+        };
     }
 
     

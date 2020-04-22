@@ -4,7 +4,7 @@ import Container from "./Container";
 import Mediabar from "./Mediabar";
 import StreamView from "./StreamView";
 import Infobar from "./Infobar";
-import Toolbar from "./Toolbar";
+// import Toolbar from "./Toolbar";
 
 import Context from "./Context";
 
