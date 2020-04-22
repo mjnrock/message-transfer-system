@@ -34,6 +34,11 @@ export default class MediaStreamNode extends Node {
 
         this._config = {
             ...this._config,
+            defaultConstraints: {
+                audio: { channels: 2, sampleRate: 44100 },
+                video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
+            },
+            lastConstraints: {},
             stream: stream,
             video: video || document.createElement("video"),
             devices: {
@@ -107,16 +112,6 @@ export default class MediaStreamNode extends Node {
         return this._config.placeholder;
     }
 
-    fromCanvas(canvas, fps = 10) {
-        if(canvas instanceof CanvasNode) {
-            this.stream = canvas.canvas.captureStream(fps);
-        } else {
-            this.stream = canvas.captureStream(fps);
-        }
-
-        return this;
-    }
-
     async getMediaDevices() {
         return await navigator.mediaDevices.enumerateDevices()
             .then(this._registerDevices.bind(this))
@@ -185,26 +180,28 @@ export default class MediaStreamNode extends Node {
             .catch(e => console.log(e));
     }
 
-    useDevice(type = "video", deviceIdOrIndex, constraints) {
+    useDevice(type = "video", deviceIdOrIndex, { callback, constraints } = {}) {
         if(type === "audio" || type === "video" || type === "speaker") {
-            let deviceId;
+            let device;
 
             if(typeof deviceIdOrIndex === "number") {
-                deviceId = Object.values(this._config.devices[ type ])[ deviceIdOrIndex ];
-            } else {
-                deviceId = this._config.devices[ type ][ deviceIdOrIndex ];
+                device = Object.values(this._config.devices[ type ])[ deviceIdOrIndex ];
+            } else if(typeof deviceIdOrIndex === "string" || deviceIdOrIndex instanceof String) {
+                device = this._config.devices[ type ][ deviceIdOrIndex ];
             }
 
-            if(deviceId) {
+            if(device) {
                 if(type === "speaker") {
-                    this.video.setSinkId(deviceId);
+                    this.video.setSinkId(device.id);
                 } else {
-                    let cons = {
-                        ...constraints
-                    };
-                    cons[ type ].deviceId = deviceId;
+                    let cons = constraints || this._config.lastConstraints || this._config.defaultConstraints;
+
+                    if(!(typeof cons[ type ] === "object")) {
+                        cons[ type ] = this._config.defaultConstraints[ type ];
+                    }
+                    cons[ type ].deviceId = { exact: device.id };
     
-                    this.getUserMedia(cons);
+                    this.getUserMedia({ callback, constraints: cons });
                 }
 
                 return true;
@@ -223,10 +220,13 @@ export default class MediaStreamNode extends Node {
         return this.useDevice("speaker", deviceIdOrIndex);
     }
     
-    getUserMedia({ callback, cn, constraints = { audio: true, video: { width: { min: 426, ideal: 1920 }, height: { min: 240, ideal: 1080 }} } } = {}) {
-        navigator.mediaDevices.getUserMedia(constraints)
+    getUserMedia({ callback, constraints } = {}) {
+        this.controller.stop();
+
+        navigator.mediaDevices.getUserMedia(constraints || this._config.defaultConstraints)
         .then(stream => {
-            this.controller.stop();
+            this._config.lastConstraints = constraints || this._config.defaultConstraints;
+
             this.getMediaDevices();
             
             this.stream = stream;
@@ -234,20 +234,15 @@ export default class MediaStreamNode extends Node {
             return stream;
         })
         .then(stream => {
-            if(cn instanceof CanvasNode) {
-                cn.stream = stream;
-                cn.startVideoStreamRender();
-            }
-
             if(typeof callback === "function") {
-                callback(stream, cn);
+                callback(stream);
             }
         })
             .catch(e => console.log(e));
 
         return this;
     }
-    getDisplayMedia({ callback, cn, constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }} } } = {}) {
+    getDisplayMedia({ callback, constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }} } } = {}) {
         navigator.mediaDevices.getDisplayMedia(constraints)
             .then(stream => {
                 this.controller.stop();
@@ -257,26 +252,25 @@ export default class MediaStreamNode extends Node {
                 return stream;
             })
             .then(stream => {
-                if(cn instanceof CanvasNode) {
-                    cn.stream = stream;
-                    cn.startVideoStreamRender();
-                }
-
                 if(typeof callback === "function") {
-                    callback(stream, cn);
+                    callback(stream);
                 }
             })
             .catch(e => console.log(e));
 
         return this;
     }
-    getCanvasMedia(canvas, fps = 10) {
+    getCanvasMedia(canvas, { fps = 10, callback } = {}) {
         this.controller.stop();
 
         if(canvas instanceof CanvasNode) {
             this.stream = canvas.canvas.captureStream(fps);
         } else {
             this.stream = canvas.captureStream(fps);
+        }
+
+        if(typeof callback === "function") {
+            callback(this.stream, { fps, canvas });
         }
 
         return this;

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from "react";
 
 import Context from "./Context";
@@ -11,9 +12,9 @@ export default class MuteGroup extends React.Component {
                 <div className="group">
                     {
                         this.props.display.hasAudio ? (
-                        <button className="ribbon-button" onClick={ e => this.props.feedback`stream.audio.mute` }>
+                        <button className="ribbon-button" onClick={ e => this.props.feedback(`stream.audio.mute`) }>
                             <span className="icon">
-                                <span className={ `mif-mic ${ this.props.display.isMainAudioMuted ? "fg-red" : "fg-green" }` }></span>
+                                <span className={ `mif-mic ${ this.props.display.isMainAudioMuted ? "fg-red" : "fg-emerald" }` }></span>
                             </span>
                             
                             <span className="caption">Audio</span>
@@ -23,9 +24,9 @@ export default class MuteGroup extends React.Component {
 
                     {
                         this.props.display.hasVideo ? (
-                            <button className="ribbon-button" onClick={ e => this.props.feedback`stream.video.mute` }>
+                            <button className="ribbon-button" onClick={ e => this.props.feedback(`stream.video.mute`) }>
                                 <span className="icon">
-                                    <span className={ `mif-camera ${ this.props.display.isMainVideoMuted ? "fg-red" : "fg-green" }` }></span>
+                                    <span className={ `mif-camera ${ this.props.display.isMainVideoMuted ? "fg-red" : "fg-emerald" }` }></span>
                                 </span>
                                 
                                 <span className="caption">Video</span>

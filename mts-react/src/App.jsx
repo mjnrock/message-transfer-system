@@ -22,6 +22,12 @@ export default class App extends React.Component {
             ],
         };
     }
+    
+    feedback(message, ...args) {
+        if(message === "update") {
+            this.forceUpdate();
+        }
+    }
 
     updateStream(stream) {
         this.setState({
@@ -66,7 +72,7 @@ export default class App extends React.Component {
 
         return (
             <Container>
-                <MediaBar streamUpdater={ this.updateStream.bind(this) } />
+                <MediaBar feedback={ this.feedback.bind(this) } streamUpdater={ this.updateStream.bind(this) } />
 
                 <Container>
                     <Container className="flex items-start">
