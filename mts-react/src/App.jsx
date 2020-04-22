@@ -1,7 +1,7 @@
 import React from "react";
 
 import Container from "./Container";
-import Mediabar from "./Mediabar";
+import MediaBar from "./MediaBar";
 import StreamView from "./StreamView";
 import Infobar from "./Infobar";
 // import Toolbar from "./Toolbar";
@@ -22,46 +22,6 @@ export default class App extends React.Component {
             ],
         };
     }
-
-    componentDidMount() {
-        // this.context.getMediaDevices().then(() => {
-        //     this.forceUpdate();
-        // });
-    }
-
-    // onAudioChange(e) {
-    //     // Refresh stream rendering, perform other actions
-    // }
-    // onVideoChange(e) {
-    //     // Refresh stream rendering, perform other actions
-    // }
-
-    // onShareDisplayMedia(e) {
-    //     this.context.getDisplayMedia({
-    //         callback: stream => {
-    //             this.setState({
-    //                 ...this.state,
-    //                 stream
-    //             });
-    //         }
-    //     });
-    // }
-    // onShareUserMedia(e) {
-    //     this.context.getUserMedia({
-    //         callback: stream => {
-    //             this.setState({
-    //                 ...this.state,
-    //                 stream
-    //             });
-    //         }
-    //     });
-    // }
-
-    // updateStream(stream) {
-    //     this.setState({
-    //         ...this.state,
-    //     })
-    // }
 
     updateStream(stream) {
         this.setState({
@@ -106,7 +66,7 @@ export default class App extends React.Component {
 
         return (
             <Container>
-                <Mediabar streamUpdater={ this.updateStream.bind(this) } />
+                <MediaBar streamUpdater={ this.updateStream.bind(this) } />
 
                 <Container>
                     <Container className="flex items-start">

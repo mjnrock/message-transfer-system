@@ -6,10 +6,10 @@ import Context from "./Context";
 import ControlGroup from "./ControlGroup";
 import MuteGroup from "./MuteGroup";
 
-export default class Mediabar extends React.Component {
+export default class MediaBar extends React.Component {
     static contextType = Context;
     
-    feedback(message) {
+    feedback([ message ]) {
         if(message === "stream.pause") {
             this.context.controller.pause(); 
         } else if(message === "stream.play") {
@@ -35,11 +35,20 @@ export default class Mediabar extends React.Component {
         });
     }
 
+    // TODO Audio/Video changing NEEDS to be handled by the MediaStreamNode
+    //* By swapping the media, it has no history of previous settings.  MSN should store the last @constraints used and modify by changing the @deviceId key and reapplying
     onAudioChange(e) {
-        // Refresh stream rendering, perform other actions
+        // this.context.getUserMedia({
+        //     callback: this.props.streamUpdater,
+        //     constraints: {
+        //         audio: { deviceId: { exact: this.context.currentAudioDevice.id } },
+        //         video: { deviceId: { exact: this.context.currentVideoDevice.id } },
+        //     },
+        // });
+        // TODO
     }
     onVideoChange(e) {
-        // Refresh stream rendering, perform other actions
+        // TODO
     }
 
     onShareDisplayMedia(e) {
@@ -92,8 +101,8 @@ export default class Mediabar extends React.Component {
                                 <span className="ribbon-split dropdown-toggle">Camera</span>
                                 <ul className="ribbon-dropdown" data-role="dropdown" data-duration="100">
                                     {
-                                        (Object.values(video) || []).map(device => (
-                                            <li key={ device.id }>
+                                        (Object.values(video) || []).map((device, i) => (
+                                            <li key={ device.id } className={ device.id === this.context.currentVideoDevice.id ? "checked" : null }>
                                                 <a href="#" onClick={ this.onVideoChange.bind(this) }>
                                                     { device.label }
                                                 </a>
@@ -113,8 +122,8 @@ export default class Mediabar extends React.Component {
                                 <span className="ribbon-split dropdown-toggle">Mic</span>
                                 <ul className="ribbon-dropdown" data-role="dropdown" data-duration="100">
                                     {
-                                        (Object.values(audio) || []).map(device => (
-                                            <li key={ device.id }>
+                                        (Object.values(audio) || []).map((device, i) => (
+                                            <li key={ device.id } className={ device.id === this.context.currentAudioDevice.id ? "checked" : null }>
                                                 <a href="#" onClick={ this.onAudioChange.bind(this) }>
                                                     { device.label }
                                                 </a>

@@ -81,6 +81,25 @@ export default class MediaStreamNode extends Node {
         return this._config.devices;
     }
 
+    get currentAudioDevice() {
+        if(this.getAudioTracks(0)) {
+            let id = this.getAudioTracks(0).getSettings().deviceId;
+
+            return this.devices.audio[ id ];
+        }
+
+        return false;
+    }
+    get currentVideoDevice() {
+        if(this.getVideoTracks(0)) {
+            let id = this.getVideoTracks(0).getSettings().deviceId;
+
+            return this.devices.video[ id ];
+        }
+
+        return false;
+    }
+
     /**
      * This is meant to be a DOMElement to replace
      */

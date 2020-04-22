@@ -11,7 +11,7 @@ export default class ControlGroup extends React.Component {
                 <div className="group">
                     {
                         !this.props.display.isPaused ? (
-                            <button className="ribbon-button" onClick={ e => this.props.feedback("stream.pause") }>
+                            <button className="ribbon-button" onClick={ e => this.props.feedback`stream.pause` }>
                                 <span className="icon">
                                     <span className="mif-pause"></span>
                                 </span>
@@ -19,7 +19,7 @@ export default class ControlGroup extends React.Component {
                                 <span className="caption">Pause</span>
                             </button>
                         ) : (
-                            <button className="ribbon-button" onClick={ e => this.props.feedback("stream.play") }>
+                            <button className="ribbon-button" onClick={ e => this.props.feedback`stream.play` }>
                                 <span className="icon">
                                     <span className="mif-play"></span>
                                 </span>
@@ -29,7 +29,7 @@ export default class ControlGroup extends React.Component {
                         )
                     }
 
-                    <button className="ribbon-button" onClick={ e => this.props.feedback("stream.stop") }>
+                    <button className="ribbon-button" onClick={ e => this.props.feedback`stream.stop` }>
                         <span className="icon">
                             <span className="mif-stop"></span>
                         </span>

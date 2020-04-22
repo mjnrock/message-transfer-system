@@ -64,16 +64,6 @@ export default class CanvasNode extends Repeater {
         }
     }
 
-    get streamId() {
-        return this.stream.id;
-    }
-    get streamIsActive() {
-        return this.stream.active;
-    }
-    get streamHasEnded() {
-        return this.stream.ended;
-    }
-
     get placeholder() {
         return this._config.placeholder;
     }
@@ -91,6 +81,13 @@ export default class CanvasNode extends Repeater {
     }
     set video(element) {
         this._config.video = element;
+    }
+
+    copyTo(canvas) {
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(this.canvas, 0, 0);
+
+        return canvas;
     }
 
     toggleSmoothLines() {
