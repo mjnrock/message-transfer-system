@@ -1,6 +1,7 @@
 import React from "react";
 
 import Container from "./Container";
+import Mediabar from "./Mediabar";
 import StreamView from "./StreamView";
 import Infobar from "./Infobar";
 import Toolbar from "./Toolbar";
@@ -23,36 +24,49 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        this.context.getMediaDevices().then(() => {
-            this.forceUpdate();
-        });
+        // this.context.getMediaDevices().then(() => {
+        //     this.forceUpdate();
+        // });
     }
 
-    onAudioChange(e) {
-        // Refresh stream rendering, perform other actions
-    }
-    onVideoChange(e) {
-        // Refresh stream rendering, perform other actions
-    }
+    // onAudioChange(e) {
+    //     // Refresh stream rendering, perform other actions
+    // }
+    // onVideoChange(e) {
+    //     // Refresh stream rendering, perform other actions
+    // }
 
-    onShareDisplayMedia(e) {
-        this.context.getDisplayMedia({
-            callback: stream => {
-                this.setState({
-                    ...this.state,
-                    stream
-                });
-            }
-        });
-    }
-    onShareUserMedia(e) {
-        this.context.getUserMedia({
-            callback: stream => {
-                this.setState({
-                    ...this.state,
-                    stream
-                });
-            }
+    // onShareDisplayMedia(e) {
+    //     this.context.getDisplayMedia({
+    //         callback: stream => {
+    //             this.setState({
+    //                 ...this.state,
+    //                 stream
+    //             });
+    //         }
+    //     });
+    // }
+    // onShareUserMedia(e) {
+    //     this.context.getUserMedia({
+    //         callback: stream => {
+    //             this.setState({
+    //                 ...this.state,
+    //                 stream
+    //             });
+    //         }
+    //     });
+    // }
+
+    // updateStream(stream) {
+    //     this.setState({
+    //         ...this.state,
+    //     })
+    // }
+
+    updateStream(stream) {
+        this.setState({
+            ...this.state,
+            stream
         });
     }
 
@@ -92,37 +106,19 @@ export default class App extends React.Component {
 
         return (
             <Container>
+                <Mediabar streamUpdater={ this.updateStream.bind(this) } />
+
                 <Container>
-                    <Toolbar className="ba br pa3">
-                        <select name="audio-devices" id="audio-devices" onChange={ this.onAudioChange.bind(this) }>
-                            { Object.values(this.context.devices.audio).map(device => (
-                                <option key={ device.id } value={ device.id }>{ device.label }</option>
-                            ))}
-                        </select>
-                        <select name="video-devices" id="video-devices" onChange={ this.onVideoChange.bind(this) }>
-                            { Object.values(this.context.devices.video).map(device => (
-                                <option key={ device.id } value={ device.id }>{ device.label }</option>
-                            ))}
-                        </select>
-
-                        <button onClick={ this.onShareDisplayMedia.bind(this) }>Display</button>
-                        <button onClick={ this.onShareUserMedia.bind(this) }>User</button>
-                        
-                        <button onClick={ e => this.context.stop() }>Stop</button>
-                        <button onClick={ e => this.context.pause() }>Pause</button>
-                        <button onClick={ e => this.context.play() }>Play</button>
-                    </Toolbar>
-
                     <Container className="flex items-start">
                         <Container className="w-80 flex flex-wrap items-start justify-center">
-                            <StreamView stream={ this.state.stream } width={ 640 } height={ 480 }/>
+                            <StreamView stream={ this.context.stream } width={ 640 } height={ 480 }/>
                         </Container>
                         
                         <Container className="w-20 bg-white black">
-                            <div className="overflow-scroll">
+                            <div className="overflow-y-scroll">
                                 {
                                     this.state.messages.map((text, i) => (
-                                        <div key={ i } className="ba br2 pa2 ma1">{ text }</div>
+                                        <div key={ i } className="panel ma1 pa2 br2">{ text }</div>
                                     ))
                                 }
                             </div>

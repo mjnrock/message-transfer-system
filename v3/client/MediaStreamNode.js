@@ -43,6 +43,13 @@ export default class MediaStreamNode extends Node {
             },
             placeholder: placeholder
         };
+
+        this._state = {
+            stream: {
+                isActive: false,
+                isPaused: false,
+            }
+        };
         
         if(!video) {
             this.video.setAttribute("autoplay", true);
@@ -247,6 +254,8 @@ export default class MediaStreamNode extends Node {
     set stream(stream) {
         this._config.stream = stream;
         this._config.video.srcObject = stream;
+        this.state.stream.isActive = true;
+        this.state.stream.isPaused = false;
     }
 
     /**
@@ -255,6 +264,7 @@ export default class MediaStreamNode extends Node {
     stop() {
         if(this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
+            this.state.stream.isActive = false;
         }
     }
     /**
@@ -263,6 +273,7 @@ export default class MediaStreamNode extends Node {
     pause() {
         if(this.stream) {
             this.stream.getTracks().forEach(track => track.enabled = false);
+            this.state.stream.isPaused = true;
         }
     }
     /**
@@ -271,10 +282,13 @@ export default class MediaStreamNode extends Node {
     play() {
         if(this.stream) {
             this.stream.getTracks().forEach(track => track.enabled = true);
+            this.state.stream.isPaused = false;
         }
     }
     clear() {
         this.stream = null;
+        this.state.stream.isActive = false;
+        this.state.stream.isPaused = false;
     }
 
     

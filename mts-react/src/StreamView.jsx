@@ -14,7 +14,7 @@ export default class StreamView extends React.Component {
     render() {
         return (
             <div className={ `bg-silver ${ this.props.className || null }` }>
-                <video ref={ this.video } width={ this.props.width || null } height={ this.props.height || null } autoPlay={ true } controls={ true }></video>
+                <video ref={ this.video } width={ this.props.width || null } height={ this.props.height || null } autoPlay={ true } controls={ false }></video>
             </div>
         );
     }
