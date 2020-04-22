@@ -64,6 +64,16 @@ export default class CanvasNode extends Repeater {
         }
     }
 
+    get streamId() {
+        return this.stream.id;
+    }
+    get streamIsActive() {
+        return this.stream.active;
+    }
+    get streamHasEnded() {
+        return this.stream.ended;
+    }
+
     get placeholder() {
         return this._config.placeholder;
     }

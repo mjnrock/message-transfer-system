@@ -55,6 +55,16 @@ export default class MediaStreamNode extends Node {
         }
     }
 
+    get streamId() {
+        return this.stream.id;
+    }
+    get streamIsActive() {
+        return this.stream.active;
+    }
+    get streamHasEnded() {
+        return this.stream.ended;
+    }
+
     /**
      * This is meant to be a DOMElement to replace
      */
@@ -71,13 +81,63 @@ export default class MediaStreamNode extends Node {
     _registerDevices(devices) {
         for(let device of devices) {
             if (device.kind === "videoinput") {
-                this._config.devices.video[ device.deviceId ] = device.label || `Video ${ Object.keys(this._config.devices.video).length + 1}`;
+                this._config.devices.video[ device.deviceId ] = {
+                    id: device.deviceId,
+                    label: device.label || `Video ${ Object.keys(this._config.devices.video).length + 1}`,
+                    device
+                };
             } else if (device.kind === "audioinput") {
-                this._config.devices.audio[ device.deviceId ] = device.label || `Microphone ${ Object.keys(this._config.devices.audio).length + 1}`;
+                this._config.devices.audio[ device.deviceId ] = {
+                    id: device.deviceId,
+                    label: device.label || `Microphone ${ Object.keys(this._config.devices.audio).length + 1}`,
+                    device
+                };
             } else if (device.kind === "audiooutput") {
-                this._config.devices.speaker[ device.deviceId ] = device.label || `Speaker ${ Object.keys(this._config.devices.speaker).length + 1}`;
+                this._config.devices.speaker[ device.deviceId ] = {
+                    id: device.deviceId,
+                    label: device.label || `Speaker ${ Object.keys(this._config.devices.speaker).length + 1}`,
+                    device
+                };
             } 
         }
+    }
+    
+    static async GetMediaDevices() {
+        let config = {
+            devices: {
+                audio: {},
+                video: {},
+                speaker: {},
+            }
+        };
+
+        return await navigator.mediaDevices.enumerateDevices()
+            .then(devices => {                
+                for(let device of devices) {
+                    if (device.kind === "videoinput") {
+                        config.devices.video[ device.deviceId ] = {
+                            id: device.deviceId,
+                            label: device.label || `Video ${ Object.keys(config.devices.video).length + 1}`,
+                            device
+                        };
+                    } else if (device.kind === "audioinput") {
+                        config.devices.audio[ device.deviceId ] = {
+                            id: device.deviceId,
+                            label: device.label || `Microphone ${ Object.keys(config.devices.audio).length + 1}`,
+                            device
+                        };
+                    } else if (device.kind === "audiooutput") {
+                        config.devices.speaker[ device.deviceId ] = {
+                            id: device.deviceId,
+                            label: device.label || `Speaker ${ Object.keys(config.devices.speaker).length + 1}`,
+                            device
+                        };
+                    } 
+                }
+
+                return config;
+            })
+            .catch(e => console.log(e));
     }
 
     useDevice(type = "video", deviceIdOrIndex, constraints) {
@@ -118,10 +178,11 @@ export default class MediaStreamNode extends Node {
         return this.useDevice("speaker", deviceIdOrIndex);
     }
     
-    getUserMedia({ callback, cn, constraints = { audio: true, video: true } } = {}) {
+    getUserMedia({ callback, cn, constraints = { audio: true, video: { width: { min: 426, ideal: 1920 }, height: { min: 240, ideal: 1080 }} } } = {}) {
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
             this.stop();
+            this.getMediaDevices();
             
             this.stream = stream;
 
@@ -141,12 +202,14 @@ export default class MediaStreamNode extends Node {
 
         return this;
     }
-    getDisplayMedia({ callback, cn, constraints } = {}) {
+    getDisplayMedia({ callback, cn, constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }} } } = {}) {
         navigator.mediaDevices.getDisplayMedia(constraints)
             .then(stream => {
                 this.stop();
 
                 this.stream = stream;
+
+                return stream;
             })
             .then(stream => {
                 if(cn instanceof CanvasNode) {
@@ -182,9 +245,28 @@ export default class MediaStreamNode extends Node {
         this._config.video.srcObject = stream;
     }
 
+    /**
+     * This stops the tracks completely and sets `stream.ended = true`
+     */
     stop() {
         if(this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
+        }
+    }
+    /**
+     * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.
+     */
+    pause() {
+        if(this.stream) {
+            this.stream.getTracks().forEach(track => track.enabled = false);
+        }
+    }
+    /**
+     * This "unmutes" the stream by enabling it.
+     */
+    play() {
+        if(this.stream) {
+            this.stream.getTracks().forEach(track => track.enabled = true);
         }
     }
     clear() {

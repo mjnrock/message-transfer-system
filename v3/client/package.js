@@ -5,6 +5,7 @@ import GeoLocationNode from "./GeoLocationNode";
 import CanvasNode from "./CanvasNode";
 import QRCodeNode from "./QRCodeNode";
 import BroadcastChannelNode from "./BroadcastChannelNode";
+import MediaStreamNode from "./MediaStreamNode";
 
 export default {
     KeyboardNode,
@@ -14,4 +15,5 @@ export default {
     CanvasNode,
     QRCodeNode,
     BroadcastChannelNode,
+    MediaStreamNode,
 };
