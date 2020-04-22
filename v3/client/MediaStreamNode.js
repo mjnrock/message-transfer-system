@@ -65,6 +65,10 @@ export default class MediaStreamNode extends Node {
         return this.stream.ended;
     }
 
+    get devices() {
+        return this._config.devices;
+    }
+
     /**
      * This is meant to be a DOMElement to replace
      */
@@ -72,8 +76,8 @@ export default class MediaStreamNode extends Node {
         return this._config.placeholder;
     }
 
-    getMediaDevices() {
-        navigator.mediaDevices.enumerateDevices()
+    async getMediaDevices() {
+        return await navigator.mediaDevices.enumerateDevices()
             .then(this._registerDevices.bind(this))
             .catch(e => console.log(e));
     }

@@ -5,20 +5,15 @@ import StreamView from "./StreamView";
 import Infobar from "./Infobar";
 import Toolbar from "./Toolbar";
 
-import MediaStreamNode from "./lib/client/MediaStreamNode";
 import Context from "./Context";
 
 export default class App extends React.Component {
     static contextType = Context;
-    
+
     constructor(props) {
         super(props);
 
         this.state = {
-            mediaNode: new MediaStreamNode(),
-            audio: {},
-            video: {},
-            speaker: {},
             stream: null,
             message: "",
             messages: [
@@ -28,21 +23,8 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        MediaStreamNode.GetMediaDevices().then(obj => {
-            // this.state.mediaNode.getUserMedia({
-            //     callback: stream => {
-            //         this.setState({
-            //             ...this.state,
-            //             ...obj.devices,
-            //             stream
-            //         });
-            //     }
-            // });
-
-            this.setState({
-                ...this.state,
-                ...obj.devices
-            });
+        this.context.getMediaDevices().then(() => {
+            this.forceUpdate();
         });
     }
 
@@ -54,24 +36,24 @@ export default class App extends React.Component {
     }
 
     onShareDisplayMedia(e) {
-        this.state.mediaNode.getDisplayMedia({
+        this.context.getDisplayMedia({
             callback: stream => {
                 this.setState({
                     ...this.state,
                     stream
                 });
             }
-        })
+        });
     }
     onShareUserMedia(e) {
-        this.state.mediaNode.getUserMedia({
+        this.context.getUserMedia({
             callback: stream => {
                 this.setState({
                     ...this.state,
                     stream
                 });
             }
-        })
+        });
     }
 
     onMessageEntry(e) {
@@ -99,9 +81,9 @@ export default class App extends React.Component {
             height: null,
             fps: null,
         };
-
-        if(this.state.mediaNode.getVideoTracks(0)) {
-            let settings = this.state.mediaNode.getVideoTracks(0).getSettings();
+        
+        if(this.context.getVideoTracks(0)) {
+            let settings = this.context.getVideoTracks(0).getSettings();
 
             info.width = settings.width;
             info.height = settings.height;
@@ -113,21 +95,22 @@ export default class App extends React.Component {
                 <Container>
                     <Toolbar className="ba br pa3">
                         <select name="audio-devices" id="audio-devices" onChange={ this.onAudioChange.bind(this) }>
-                            { Object.values(this.state.audio).map(device => (
+                            { Object.values(this.context.devices.audio).map(device => (
                                 <option key={ device.id } value={ device.id }>{ device.label }</option>
                             ))}
                         </select>
                         <select name="video-devices" id="video-devices" onChange={ this.onVideoChange.bind(this) }>
-                            { Object.values(this.state.video).map(device => (
+                            { Object.values(this.context.devices.video).map(device => (
                                 <option key={ device.id } value={ device.id }>{ device.label }</option>
                             ))}
                         </select>
 
                         <button onClick={ this.onShareDisplayMedia.bind(this) }>Display</button>
                         <button onClick={ this.onShareUserMedia.bind(this) }>User</button>
-                        <button onClick={ e => this.state.mediaNode.stop() }>Stop</button>
-                        <button onClick={ e => this.state.mediaNode.pause() }>Pause</button>
-                        <button onClick={ e => this.state.mediaNode.play() }>Play</button>
+                        
+                        <button onClick={ e => this.context.stop() }>Stop</button>
+                        <button onClick={ e => this.context.pause() }>Pause</button>
+                        <button onClick={ e => this.context.play() }>Play</button>
                     </Toolbar>
 
                     <Container className="flex items-start">
