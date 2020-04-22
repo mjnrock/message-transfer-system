@@ -107,6 +107,16 @@ export default class MediaStreamNode extends Node {
         return this._config.placeholder;
     }
 
+    fromCanvas(canvas, fps = 10) {
+        if(canvas instanceof CanvasNode) {
+            this.stream = canvas.canvas.captureStream(fps);
+        } else {
+            this.stream = canvas.captureStream(fps);
+        }
+
+        return this;
+    }
+
     async getMediaDevices() {
         return await navigator.mediaDevices.enumerateDevices()
             .then(this._registerDevices.bind(this))

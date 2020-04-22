@@ -32,7 +32,7 @@ export default class CanvasNode extends Repeater {
         });
     }
 
-    constructor({ canvas, ctx, draw, name, receive, isPublic, placeholder } = {}) {
+    constructor({ canvas, ctx, draw, name, receive, isPublic } = {}) {
         super({
             name: name || GenerateUUID(),
             receive: receive,
@@ -46,48 +46,9 @@ export default class CanvasNode extends Repeater {
             Draw: draw,
         };
 
-        this._config = {
-            ...this._config,
-            placeholder: placeholder,
-            stream: null,
-            video: document.createElement("video"),
-        };
-        this._config.video.setAttribute("autoplay", true);
-        this._config.video.setAttribute("controls", true);
-
         this.state = {
             isActive: false
         };
-        
-        if(this.placeholder) {
-            this.placeholder.replaceWith(this.video);
-        }
-    }
-
-    get placeholder() {
-        return this._config.placeholder;
-    }
-
-    get stream() {
-        return this._config.stream;
-    }
-    set stream(stream) {
-        this._config.stream = stream;
-        this._config.video.srcObject = stream;
-    }
-
-    get video() {
-        return this._config.video;
-    }
-    set video(element) {
-        this._config.video = element;
-    }
-
-    copyTo(canvas) {
-        let ctx = canvas.getContext("2d");
-        ctx.drawImage(this.canvas, 0, 0);
-
-        return canvas;
     }
 
     toggleSmoothLines() {
@@ -150,49 +111,35 @@ export default class CanvasNode extends Repeater {
         return this.supply.Context;
     }
 
-    stopStreamTracks() {
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-        }
+    // Export content to another canvas
+    copyTo(canvas) {
+        let ctx = canvas.getContext("2d");
+        ctx.drawImage(this.canvas, 0, 0);
+
+        return canvas;
     }
 
-    //* <Streaming>
-    getCanvasStream(fps = 10) {
-        if(this.canvas) {
-            this.stopStreamTracks();
-
-            this.stream = this.canvas.captureStream(fps);
-
-            return true;
-        }
-
-        return false;
+    // Get a stream of the current canvas
+    getStream(fps = 10) {
+        return this.canvas.captureStream(fps);
     }
 
-    drawVideoStream(ts) {
-        this.ctx.drawImage(this.video, 0, 0);
-
+    //* HTML Element Drawing
+    drawCanvas(canvas) {
+        this.ctx.drawImage(canvas, 0, 0);
+        
         return this;
     }
-    /**
-     * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
-     */
-    startVideoStreamRender() {
-        this.setDraw(ts => this.drawVideoStream(ts));
-        this.render(true);
-
+    drawVideo(video) {
+        this.ctx.drawImage(video, 0, 0);
+        
         return this;
     }
-    /**
-     * ! WARNING: This utilizes (and therefore overwrites) `this.supply.Draw`
-     */
-    stopVideoStreamRender() {
-        this.setDraw(null);
-        this.render(false);
-
+    drawImage(video) {
+        this.ctx.drawImage(video, 0, 0);
+        
         return this;
     }
-    //* </Streaming>
 
 
     loadImage(name, uri) {        
