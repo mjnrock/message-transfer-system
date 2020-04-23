@@ -42,73 +42,80 @@ export default class MediaStreamNode extends Node {
         this._config = {
             ...this._config,
             devices: {},
-            stream: stream,
-            tracks: {
-                video: null,
-                audio: null
-            },
 
-            video: video || document.createElement("video")
+            streams: {
+                video: null,
+                audio: null,
+                screen: null,
+                canvas: null
+            },
+            videos: {
+                audio: document.createElement("video").setAttribute("autoplay", true),
+                video: document.createElement("video").setAttribute("autoplay", true),
+                screen: document.createElement("video").setAttribute("autoplay", true),
+                canvas: document.createElement("video").setAttribute("autoplay", true)
+            }
         };
 
         this.video.setAttribute("autoplay", true);
     }
-
-    get stream() {
-        return this._config.stream;
+    
+    
+    get streams() {
+        return this._config.streams;
     }
-    set stream(value) {
-        this._config.stream = value;
-        this.video.srcObject = value;
-    }
-
-    get video() {
-        return this._config.video;
-    }
-    set video(value) {
-        this.video = value;
+    get videos() {
+        return this._config.videos;
     }
 
-    get videoStreamType() {
-        if(this.stream) {
-            let [ vtrack ] = this.stream.getVideoTracks(),
-                settings = vtrack.getSettings(),
-                type = false;
-
-            if(settings.deviceId) {
-                return "video";
-            } else if(settings.frameRate) {
-                return "display";
-            }
-        }
-
-        return false;
+    get $video() {
+        return this._config.streams.video;
+    }
+    set $video(value) {
+        this._config.feeds.video = value;
+        this.videos.video.srcObject = value;
+    }
+    get $audio() {
+        return this._config.streams.audio;
+    }
+    set $audio(value) {
+        this._config.feeds.audio = value;
+        this.videos.audio.srcObject = value;
+    }
+    get $screen() {
+        return this._config.streams.screen;
+    }
+    set $screen(value) {
+        this._config.streams.screen = value;
+        this.videos.screen.srcObject = value;
+    }
+    get $canvas() {
+        return this._config.streams.canvas;
+    }
+    set $canvas(value) {
+        this._config.streams.canvas = value;
+        this.videos.canvas.srcObject = value;
     }
 
     getUserMedia({ callback, constraints } = {}) {
         let cons = constraints || this.getDefaultConstraints();
 
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-        }
-
         navigator.mediaDevices.getUserMedia(cons)
             .then(stream => {                    
                 if(stream.getAudioTracks().length) {
-                    this.tracks.audio = stream.getAudioTracks()[ 0 ];
-                    this.tracks.audio.applyConstraints(cons.audio);
-                } else {
-                    this.tracks.audio = null;
-                }
+                    if(this.$audio) {
+                        this.$audio.getTracks().forEach(track => track.stop());
+                    }
 
+                    this.$audio = stream;
+                }
                 if(stream.getVideoTracks().length) {
-                    this.tracks.video = stream.getVideoTracks()[ 0 ];
-                    this.tracks.video.applyConstraints(cons.video);
-                } else {
-                    this.tracks.video = null;
-                }
+                    if(this.$video) {
+                        this.$video.getTracks().forEach(track => track.stop());
+                    }
 
-                this.stream = stream;
+                    this.$video = stream;
+                }
 
                 this.getMediaDevices();
 
@@ -123,56 +130,58 @@ export default class MediaStreamNode extends Node {
             })
             .catch(e => console.log(e));
     }
-    getDisplayMedia({ callback, constraints } = {}) {
-        let { video, audio } = this.getDefaultConstraints(),
-            cons = constraints || video;
+    
+    // getDisplayMedia({ callback, constraints } = {}) {
+    //     let { video, audio } = this.getDefaultConstraints(),
+    //         cons = constraints || video;
 
-        if(this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-        }
+    //     if(this.screen) {
+    //         this.screen.getTracks().forEach(track => track.stop());
+    //     }
 
-        navigator.mediaDevices.getDisplayMedia(cons)
-            .then(stream => {
-                if(stream.getVideoTracks().length) {
-                    this.tracks.video = stream.getVideoTracks()[ 0 ];
-                    this.tracks.video.applyConstraints(cons.video);
-                } else {
-                    this.tracks.video = null;
-                }
+    //     navigator.mediaDevices.getDisplayMedia(cons)
+    //         .then(stream => {
+    //             if(stream.getVideoTracks().length) {
+    //                 this.tracks.screen = stream.getVideoTracks()[ 0 ];
+    //                 this.tracks.screen.applyConstraints(cons.video);
+    //             } else {
+    //                 this.tracks.screen = null;
+    //             }
 
-                this.stream = stream;
+    //             this.screen = stream;
 
-                return stream;
-            })
-            .then(stream => {
-                if(typeof callback === "function") {
-                    callback(stream);
-                }
+    //             return stream;
+    //         })
+    //         .then(stream => {
+    //             if(typeof callback === "function") {
+    //                 callback(stream);
+    //             }
 
-                return stream;
-            })
-            .then(stream => {
-                navigator.mediaDevices.getUserMedia({ audio, video: false })
-                    .then(vox => {
-                        if(vox.getAudioTracks().length) {        
-                            this.tracks.audio = vox.getAudioTracks()[ 0 ];
-                            this.tracks.audio.applyConstraints(cons.audio);
-                            this.stream.addTrack(this.tracks.audio);
-                        }
+    //             return stream;
+    //         })
+    //         .then(stream => {
+    //             if(!this.media) {
+    //                 navigator.mediaDevices.getUserMedia({ audio, video: false })
+    //                     .then(vox => {
+    //                         if(vox.getAudioTracks().length) {        
+    //                             this.tracks.audio = vox.getAudioTracks()[ 0 ];
+    //                             this.tracks.audio.applyConstraints(cons.audio);
+    //                         }
 
-                        this.stream = stream;
-                        
-                        if(typeof callback === "function") {
-                            callback(stream);
-                        }
+    //                         this.media = vox;
+                            
+    //                         if(typeof callback === "function") {
+    //                             callback(stream);
+    //                         }
 
-                        return stream;
-                    })
+    //                         return stream;
+    //                     })
+    //             }
 
-                return stream;
-            })
-            .catch(e => console.log(e));
-    }
+    //             return stream;
+    //         })
+    //         .catch(e => console.log(e));
+    // }
 
     getTrack(search, type = MediaStreamNode.TrackType.AUDIO) {
         let track,
@@ -309,8 +318,10 @@ export default class MediaStreamNode extends Node {
 
             if(device.type === "audioinput") {
                 type = "audio";
+                cons.video = false;
             } else if(device.type === "videoinput") {
                 type = "video";
+                cons.audio = false;
             }
 
             cons[ type ].deviceId = { exact: device.id };
@@ -350,6 +361,7 @@ export default class MediaStreamNode extends Node {
     toggleCanvas() {
         this.toggleTrack(MediaStreamNode.TrackType.CANVAS);
     }
+
 
     getDefaultConstraints({ audio = true, video = true } = {}) {
         if(audio === true && video === true) {

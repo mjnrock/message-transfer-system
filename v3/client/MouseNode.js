@@ -2,7 +2,7 @@ import { Bitwise, GenerateUUID } from "./../util/helper";
 import Node from "./../Node";
 
 export default class MouseNode extends Node {
-    static SignalTypes = {
+    static MessageTypes = {
         //* Singleton Actions
         MOUSE_CLICK: "MouseNode.MouseClick",
         MOUSE_DOUBLE_CLICK: "MouseNode.MouseDoubleClick",
@@ -22,8 +22,8 @@ export default class MouseNode extends Node {
         MOUSE_PATH: "MouseNode.MousePath",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(MouseNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(MouseNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -138,7 +138,7 @@ export default class MouseNode extends Node {
                 }
                 
                 this.emit(
-                    MouseNode.SignalTypes[ `SWIPE_${ dir.toUpperCase() }`],
+                    MouseNode.MessageTypes[ `SWIPE_${ dir.toUpperCase() }`],
                     {
                         button: swipe.button,
                         mask: this.supply.Mask,
@@ -185,7 +185,7 @@ export default class MouseNode extends Node {
 
         if(path) {
             this.emit(
-                MouseNode.SignalTypes.MOUSE_PATH,
+                MouseNode.MessageTypes.MOUSE_PATH,
                 {
                     button: path.button,
                     mask: this.supply.Mask,
@@ -228,7 +228,7 @@ export default class MouseNode extends Node {
 
                 if(Math.abs(size.width) >= selection.threshold && Math.abs(size.height) >= selection.threshold) {
                     this.emit(
-                        MouseNode.SignalTypes.MOUSE_SELECTION,
+                        MouseNode.MessageTypes.MOUSE_SELECTION,
                         {
                             button: selection.button,
                             mask: this.supply.Mask,
@@ -259,7 +259,7 @@ export default class MouseNode extends Node {
 
         if(this.supply.emitComplexActions === true) {
             this.emit(
-                MouseNode.SignalTypes.MOUSE_MASK,
+                MouseNode.MessageTypes.MOUSE_MASK,
                 this.supply.Mask,
             );
         }
@@ -281,7 +281,7 @@ export default class MouseNode extends Node {
         if(this.supply.emitComplexActions === true) {        
             let pos = this.getMousePosition(e);
             this.emit(
-                MouseNode.SignalTypes.MOUSE_MOVE,
+                MouseNode.MessageTypes.MOUSE_MOVE,
                 {
                     mask: this.supply.Mask,
                     ...pos
@@ -306,7 +306,7 @@ export default class MouseNode extends Node {
 
         let pos = this.getMousePosition(e);
         this.emit(
-            MouseNode.SignalTypes.MOUSE_DOWN,
+            MouseNode.MessageTypes.MOUSE_DOWN,
             {
                 button: e.button,
                 mask: this.supply.Mask,
@@ -348,7 +348,7 @@ export default class MouseNode extends Node {
         
         let pos = this.getMousePosition(e);
         this.emit(
-            MouseNode.SignalTypes.MOUSE_UP,
+            MouseNode.MessageTypes.MOUSE_UP,
             {
                 button: e.button,
                 mask: this.supply.Mask,
@@ -385,7 +385,7 @@ export default class MouseNode extends Node {
 
         this.updateMask(e);
         this.emit(
-            MouseNode.SignalTypes.MOUSE_CLICK,
+            MouseNode.MessageTypes.MOUSE_CLICK,
             {
                 button: e.button,
                 mask: this.supply.Mask,
@@ -400,7 +400,7 @@ export default class MouseNode extends Node {
 
         this.updateMask(e);
         this.emit(
-            MouseNode.SignalTypes.MOUSE_DOUBLE_CLICK,
+            MouseNode.MessageTypes.MOUSE_DOUBLE_CLICK,
             this.getMousePosition(e),
         );
     
@@ -411,7 +411,7 @@ export default class MouseNode extends Node {
 
         this.updateMask(e);
         this.emit(
-            MouseNode.SignalTypes.MOUSE_CONTEXT_MENU,
+            MouseNode.MessageTypes.MOUSE_CONTEXT_MENU,
             this.getMousePosition(e),
         );
     

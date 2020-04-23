@@ -2,7 +2,7 @@ import { GenerateUUID, Dice } from "./util/helper";
 import Node from "./Node";
 
 export default class Repeater extends Node {
-    static SignalType = {
+    static MessageType = {
         INTERVAL_STATIC: "Repeater.IntervalStatic",
         INTERVAL_RANDOM: "Repeater.IntervalRandom",
         INTERVAL_FORMULAIC: "Repeater.IntervalFormulaic",
@@ -18,8 +18,8 @@ export default class Repeater extends Node {
         FORMULAIC: 3
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(Repeater.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(Repeater.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }

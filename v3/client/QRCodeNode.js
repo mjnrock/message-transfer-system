@@ -5,15 +5,15 @@ import Node from "./../Node";
 import CanvasNode from "./_WIP_CanvasNode";
 
 export default class QRCodeNode extends Node {
-    static SignalTypes = {
+    static MessageTypes = {
         TO_DATA_URL: "QRCodeNode.ToDataUrl",
         TO_IMAGE: "QRCodeNode.ToImage",
         TO_CANVAS: "QRCodeNode.ToCanvas",
         TO_CANVAS_NODE: "QRCodeNode.ToCanvasNode",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(QRCodeNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(QRCodeNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -44,7 +44,7 @@ export default class QRCodeNode extends Node {
             this.internal.LastDataUrl = url;
 
             this.emit(
-                QRCodeNode.SignalTypes.TO_DATA_URL,
+                QRCodeNode.MessageTypes.TO_DATA_URL,
                 url
             );
         });
@@ -57,7 +57,7 @@ export default class QRCodeNode extends Node {
             image.src = url;
 
             this.emit(
-                QRCodeNode.SignalTypes.TO_IMAGE,
+                QRCodeNode.MessageTypes.TO_IMAGE,
                 image
             );
         });
@@ -73,7 +73,7 @@ export default class QRCodeNode extends Node {
         if(canvas instanceof Element) {
             QRCode.toCanvas(canvas, input, opts, function(err) {
                 this.emit(
-                    QRCodeNode.SignalTypes.TO_CANVAS,
+                    QRCodeNode.MessageTypes.TO_CANVAS,
                     canvas
                 );
             });
@@ -91,7 +91,7 @@ export default class QRCodeNode extends Node {
             this.toCanvas(input, canvasNode.canvas, opts);
 
             this.emit(
-                QRCodeNode.SignalTypes.TO_CANVAS_NODE,
+                QRCodeNode.MessageTypes.TO_CANVAS_NODE,
                 canvasNode.id
             );
         } else {
@@ -102,7 +102,7 @@ export default class QRCodeNode extends Node {
             this.toCanvas(input, cn.canvas, opts);
             
             this.emit(
-                QRCodeNode.SignalTypes.TO_CANVAS_NODE,
+                QRCodeNode.MessageTypes.TO_CANVAS_NODE,
                 cn.id
             );
 

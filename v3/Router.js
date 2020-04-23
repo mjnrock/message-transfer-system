@@ -2,7 +2,9 @@ import Node from "./Node"
 import Condition from "./Condition";
 
 export default class Router extends Node {
-    constructor() {
+    constructor({ name, receive } = {}) {
+        super({ name, receive });
+
         this._routes = {};
     }
 
@@ -12,18 +14,22 @@ export default class Router extends Node {
                 node,
                 condition: condition instanceof Condition ? condition.package : condition
             };
+
+            this.listen(node);
         }
     }
     unregister(node) {
         if(node instanceof Node) {
             delete this._routes[ node.id ];
+            
+            this.unlisten(node);
         }
     }
 
     receive(msg, feed) {
         super.receive(msg, feed);
 
-        for(let { node, condition } of this._routes) {
+        for(let { node, condition } of Object.values(this._routes)) {
             if(condition(msg, feed) === true) {
                 node.receive(msg, feed);
             }

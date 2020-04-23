@@ -3,14 +3,14 @@ import Node from "./../Node";
 import Message from "./../Message";
 
 export default class BroadcastChannelNode extends Node {
-    static SignalTypes = {
+    static MessageTypes = {
         MESSAGE: "BroadcastChannelNode.Message",
         MESSAGE_ERROR: "BroadcastChannelNode.MessageError",
         ERROR: "BroadcastChannelNode.Error",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(BroadcastChannelNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(BroadcastChannelNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -59,7 +59,7 @@ export default class BroadcastChannelNode extends Node {
     }
 
     receive(msg) {
-        if(Message.conforms(msg) && msg.type === BroadcastChannelNode.SignalTypes.MESSAGE) {
+        if(Message.conforms(msg) && msg.type === BroadcastChannelNode.MessageTypes.MESSAGE) {
             this.bcmessage(msg.payload);
         }
     }
@@ -74,7 +74,7 @@ export default class BroadcastChannelNode extends Node {
                 this.supply.Channel.postMessage(msg);
             }
         } catch(e) {
-            this.emit(BroadcastChannelNode.SignalTypes.ERROR, e);
+            this.emit(BroadcastChannelNode.MessageTypes.ERROR, e);
         }
     }
 
@@ -90,6 +90,6 @@ export default class BroadcastChannelNode extends Node {
         }
     }
     _onBcMessageError(e) {
-        this.emit(BroadcastChannelNode.SignalTypes.MESSAGE_ERROR, e);
+        this.emit(BroadcastChannelNode.MessageTypes.MESSAGE_ERROR, e);
     }
 };

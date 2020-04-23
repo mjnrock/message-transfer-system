@@ -4,7 +4,7 @@ import Message from "./../Message";
 import Packet from "./Packet";
 
 export default class WebSocketNode extends Node {
-    static SignalTypes = {
+    static MessageTypes = {
         CLIENT_ID: `WebSocketNode.ClientId`,
         ACKNOWLEDGE: `WebSocketNode.Acknowledge`,
         OPEN: `WebSocketNode.Open`,
@@ -14,8 +14,8 @@ export default class WebSocketNode extends Node {
         ERROR: `WebSocketNode.Error`,
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(WebSocketNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(WebSocketNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -88,7 +88,7 @@ export default class WebSocketNode extends Node {
         if(this.ws) {
             this.ws.close();
 
-            this.emit(WebSocketNode.SignalTypes.CLOSE, this.id);
+            this.emit(WebSocketNode.MessageTypes.CLOSE, this.id);
         }
     }
 
@@ -106,10 +106,10 @@ export default class WebSocketNode extends Node {
         }
     }
     _onWsMessageError(e) {
-        this.emit(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
+        this.emit(WebSocketNode.MessageTypes.MESSAGE_ERROR, e);
     }
     _onWsOpen(e) {
-        this.emit(WebSocketNode.SignalTypes.OPEN, e);
+        this.emit(WebSocketNode.MessageTypes.OPEN, e);
 
         if(typeof this._hooks.onOpen === "function") {
             this._hooks.onOpen(this, e);
@@ -121,14 +121,14 @@ export default class WebSocketNode extends Node {
             payload = WebSocketNode.CloseCode[ e.code ];
         }
         
-        this.emit(WebSocketNode.SignalTypes.CLOSE, payload);
+        this.emit(WebSocketNode.MessageTypes.CLOSE, payload);
 
         if(typeof this._hooks.onClose === "function") {
             this._hooks.onClose(this, payload);
         }
     }
     _onWsError(e) {
-        this.emit(WebSocketNode.SignalTypes.ERROR, e);
+        this.emit(WebSocketNode.MessageTypes.ERROR, e);
     }
 
     static CloseCode = {

@@ -22,13 +22,13 @@ export default class MediaBar extends React.Component {
         } else if(message === "stream.video.mute") {
             this.context.controller.toggle("video");
         } else if(message === "change.audio") {
-            let { id } = args[ 0 ];
-            this.context.useDevice("audio", id, {
+            let device = args[ 0 ];
+            this.context.useDevice(device, {
                 callback: stream => this.props.feedback("update")
             });
         } else if(message === "change.video") {
-            let { id } = args[ 0 ];
-            this.context.useDevice("video", id, {
+            let device = args[ 0 ];
+            this.context.useDevice(device, {
                 callback: stream => this.props.feedback("update")
             });
         }
@@ -112,9 +112,9 @@ export default class MediaBar extends React.Component {
                             <span className="title">Streams</span>
                         </div>
                         
-                        <ControlGroup display={ this.context.check } feedback={ this.feedback.bind(this) } />
-                        <MuteGroup display={ this.context.check } feedback={ this.feedback.bind(this) } />
-                        <DeviceGroup display={ this.context.check } feedback={ this.feedback.bind(this) } />
+                        <ControlGroup feedback={ this.feedback.bind(this) } />
+                        <MuteGroup feedback={ this.feedback.bind(this) } />
+                        <DeviceGroup feedback={ this.feedback.bind(this) } />
                     </div>
                 </div>
             </nav>

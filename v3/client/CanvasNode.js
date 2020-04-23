@@ -2,7 +2,7 @@ import { GenerateUUID } from "../util/helper";
 import Repeater from "../Repeater";
 
 export default class CanvasNode extends Repeater {
-    static SignalTypes = {
+    static MessageTypes = {
         CLEAR: "CanvasNode.Clear",
         ERASE: "CanvasNode.Erase",
         ERASE_NGON: "CanvasNode.EraseNgon",
@@ -22,8 +22,8 @@ export default class CanvasNode extends Repeater {
         DRAW_TILE: "CanvasNode.DrawTile",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(CanvasNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(CanvasNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }

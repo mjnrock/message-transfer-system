@@ -1,5 +1,5 @@
 import React from "react";
-import MediaStreamNode from "./lib/client/MediaStreamNode";
+import MediaStreamNode from "../lib/client/MediaStreamNode";
 
 const context = React.createContext(new MediaStreamNode());
 

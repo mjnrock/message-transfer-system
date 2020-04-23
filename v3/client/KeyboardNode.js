@@ -2,15 +2,15 @@ import { Bitwise, GenerateUUID } from "./../util/helper";
 import Node from "./../Node";
 
 export default class KeyboardNode extends Node {
-    static SignalTypes = {
+    static MessageTypes = {
         KEY_MASK: "KeyboardNode.KeyMask",
         KEY_UP: "KeyboardNode.KeyUp",
         KEY_DOWN: "KeyboardNode.KeyDown",
         KEY_SEQUENCE: "KeyboardNode.KeySequence",   // Record all key UPs within a time threshold | Fire if threshold is exceeded, reset if UP happens
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(KeyboardNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(KeyboardNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -104,7 +104,7 @@ export default class KeyboardNode extends Node {
 
         if(sequence && (sequence.keys.length >= sequence.length.min && sequence.keys.length <= sequence.length.max)) {
             this.emit(
-                KeyboardNode.SignalTypes.KEY_SEQUENCE,
+                KeyboardNode.MessageTypes.KEY_SEQUENCE,
                 {
                     keys: sequence.keys,
                     length: sequence.keys.length,
@@ -129,7 +129,7 @@ export default class KeyboardNode extends Node {
         });
 
         this.emit(
-            KeyboardNode.SignalTypes.KEY_MASK,
+            KeyboardNode.MessageTypes.KEY_MASK,
             this.supply.Mask,
         );
 
@@ -141,7 +141,7 @@ export default class KeyboardNode extends Node {
 
         this.updateMask(e);
         this.emit(
-            KeyboardNode.SignalTypes.KEY_DOWN,
+            KeyboardNode.MessageTypes.KEY_DOWN,
             {
                 mask: this.supply.Mask,
                 key: e.which,
@@ -156,7 +156,7 @@ export default class KeyboardNode extends Node {
 
         this.updateMask(e);
         this.emit(
-            KeyboardNode.SignalTypes.KEY_UP,
+            KeyboardNode.MessageTypes.KEY_UP,
             {
                 mask: this.supply.Mask,
                 key: e.which,

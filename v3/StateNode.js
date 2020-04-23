@@ -2,15 +2,15 @@ import { GenerateUUID } from "./helper";
 import Node from "./Node";
 
 export default class StateNode extends Node {
-    static SignalType = {
+    static MessageType = {
         STATE_CHANGE: "StateNode.StateChange",
         PROP_CHANGE: "StateNode.PropChange",
         PROP_ARRAY_CHANGE: "StateNode.ArrayPropChange",
         PROP_OBJECT_CHANGE: "StateNode.ObjectPropChange",
     };
     
-    static AllSignalTypes(...filter) {
-        return Object.values(StateNode.SignalTypes).filter(st => {
+    static AllMessageTypes(...filter) {
+        return Object.values(StateNode.MessageTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -41,7 +41,7 @@ export default class StateNode extends Node {
         let [ type, key, oldValueSpecialCase, newValueSpecialCase ] = typeKey;
 
         this.emit(
-            StateNode.SignalType.PROP_CHANGE,
+            StateNode.MessageType.PROP_CHANGE,
             payload
         );
 
@@ -51,7 +51,7 @@ export default class StateNode extends Node {
             payload[ "current" ] = newValueSpecialCase;
 
             this.emit(
-                StateNode.SignalType.PROP_ARRAY_CHANGE,
+                StateNode.MessageType.PROP_ARRAY_CHANGE,
                 payload
             );
         } else if(type === "o" || type === "O") {
@@ -60,7 +60,7 @@ export default class StateNode extends Node {
             payload[ "current" ] = newValueSpecialCase;
 
             this.emit(
-                StateNode.SignalType.PROP_OBJECT_CHANGE,
+                StateNode.MessageType.PROP_OBJECT_CHANGE,
                 payload
             );
         }

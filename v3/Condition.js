@@ -1,4 +1,4 @@
-import Message from "../Message";
+import Message from "./Message";
 
 export default class Condition {
     static FocusType = {
@@ -325,5 +325,8 @@ export default class Condition {
 
     static Process(msgOrValue, type = Condition.ScopeType.AND) {
         return new Condition(msgOrValue, { type });
+    }
+    static Build(type = Condition.ScopeType.AND) {
+        return new Condition({}, { type });
     }
 };
