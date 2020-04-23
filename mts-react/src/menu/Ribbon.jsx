@@ -1,9 +1,9 @@
 import React from "react";
 
-import SectionMain from "./menu/SectionMain";
-import SectionMedia from "./menu/SectionMedia";
-import SectionDisplay from "./menu/SectionDisplay";
-import SectionCanvas from "./menu/SectionCanvas";
+import SectionMain from "./SectionMain";
+import SectionMedia from "./SectionMedia";
+import SectionDisplay from "./SectionDisplay";
+import SectionCanvas from "./SectionCanvas";
 
 export default class Ribbon extends React.Component {
     render() {
