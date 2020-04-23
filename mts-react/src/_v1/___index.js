@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
+import App from "../App";
 
-import MediaStreamNode from "./lib/client/MediaStreamNode";
-import CanvasNode from "./lib/client/CanvasNode";
+import MediaStreamNode from "../lib/client/MediaStreamNode";
+import CanvasNode from "../lib/client/CanvasNode";
 
 const LOG = input => document.getElementById("debug").innerHTML = JSON.stringify(input, null, 2);
 const LOG2 = input => document.getElementById("gubed").innerHTML = JSON.stringify(input, null, 2);

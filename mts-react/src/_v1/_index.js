@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
+import App from "../App";
 
 import KeyboardNode from "./lib/dom/KeyboardNode";
 import MouseNode from "./lib/dom/MouseNode";
