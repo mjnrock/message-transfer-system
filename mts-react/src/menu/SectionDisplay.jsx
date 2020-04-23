@@ -17,6 +17,12 @@ export default class SectionDisplay extends React.Component {
         }
     }
     
+    onDisplayMedia() {
+        this.context.display.getDisplayMedia({
+            callback: this.props.onStream.bind(this),
+        });
+    }
+    
     onControlGroupMessage(msg) {
         if(msg === "cmd.play") {
             this.context.display.controller.play();
@@ -60,20 +66,36 @@ export default class SectionDisplay extends React.Component {
     }
 
     render() {
+        if(this.context.display.stream) {
+            return (
+                <div className="section" id="section-display">
+                    <ControlGroup
+                        onMessage={ this.onControlGroupMessage.bind(this) }
+                        isPaused={ this.state.isStreamPaused }
+                    />
+                    <MuteGroup
+                        video={ true }
+                        audio={ false }
+                        videoIcon={ "mif-display" }
+                        isAudioPaused={ false }
+                        isVideoPaused={ this.context.display.controller.isVideoPaused() }
+                        onMessage={ this.onMuteGroupMessage.bind(this) }
+                    />
+                </div>
+            );
+        }
+
         return (
             <div className="section" id="section-display">
-                <ControlGroup
-                    onMessage={ this.onControlGroupMessage.bind(this) }
-                    isPaused={ this.state.isStreamPaused }
-                />
-                <MuteGroup
-                    video={ true }
-                    audio={ false }
-                    videoIcon={ "mif-display" }
-                    isAudioPaused={ false }
-                    isVideoPaused={ this.context.display.controller.isVideoPaused() }
-                    onMessage={ this.onMuteGroupMessage.bind(this) }
-                />
+                <div className="group">
+                    <button className="ribbon-button" onClick={ this.onDisplayMedia.bind(this) }>
+                        <span className="icon">
+                            <span className="mif-display"></span>
+                        </span>
+                        
+                        <span className="caption">Screen</span>
+                    </button>
+                </div>
             </div>
         );
     }

@@ -16,7 +16,7 @@ export default class MediaBar extends React.Component {
         } else if(message === "stream.play") {
             this.context.controller.play(); 
         } else if(message === "stream.stop") {
-            this.context.controller.stop(); 
+            this.context.controller.stop();
         } else if(message === "stream.audio.mute") {
             this.context.controller.toggle("audio");
         } else if(message === "stream.video.mute") {

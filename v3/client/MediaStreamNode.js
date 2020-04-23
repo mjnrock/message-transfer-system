@@ -364,9 +364,13 @@ export default class MediaStreamNode extends Node {
              */
             stop() {
                 if(_this.stream) {
-                    _this.stream.getTracks().forEach(track => track.stop());
+                    _this.stream.getTracks().forEach(track => {
+                        track.enabled = false;
+                        setTimeout(() => track.stop(), 50);
+                    });
+                
+                    _this.stream = null;
                 }
-                _this.stream = null;
             },
             /**
              * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.
