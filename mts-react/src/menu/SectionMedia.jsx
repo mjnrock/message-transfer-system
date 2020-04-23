@@ -6,6 +6,7 @@ import Context from "./../Context";
 import ControlGroup from "./ControlGroup";
 import MuteGroup from "./MuteGroup";
 import DeviceGroup from "./DeviceGroup";
+import ResolutionGroup from "./ResolutionGroup";
 
 export default class SectionMedia extends React.Component {
     static contextType = Context;
@@ -33,7 +34,7 @@ export default class SectionMedia extends React.Component {
         });
     }
     
-    onControlGroupClick(msg) {
+    onControlGroupMessage(msg) {
         if(msg === "cmd.play") {
             this.context.media.controller.play();
             this.setState({
@@ -53,7 +54,7 @@ export default class SectionMedia extends React.Component {
         this.forceUpdate();
     }
 
-    onMuteGroupClick(msg) {
+    onMuteGroupMessage(msg) {
         if(msg === "cmd.audio") {
             this.context.media.controller.toggle("audio");
         } else if(msg === "cmd.video") {
@@ -74,25 +75,42 @@ export default class SectionMedia extends React.Component {
 
         this.forceUpdate();
     }
+    
+    onDeviceGroupMessage(msg, ...args) {
+        if(msg === "cmd.device") {
+            let [ device ] = args;
+
+            this.context.media.useDevice(device, {
+                callback: this.props.onStream.bind(this),
+            });
+        }
+    }
 
     render() {
         if(this.context.media.stream) {        
             const { audioinput, videoinput } = this.context.media.devices;
+            const current = this.context.media.getCurrentDevices();
     
             return (
                 <div className="section" id="section-media">
                     <ControlGroup
-                        onClick={ this.onControlGroupClick.bind(this) }
+                        onMessage={ this.onControlGroupMessage.bind(this) }
                         isPaused={ this.state.isStreamPaused }
                     />
                     <MuteGroup
                         video={ true }
                         audio={ true }
-                        onClick={ this.onMuteGroupClick.bind(this) }
+                        onMessage={ this.onMuteGroupMessage.bind(this) }
                         isAudioPaused={ this.context.media.controller.isAudioPaused() }
                         isVideoPaused={ this.context.media.controller.isVideoPaused() }
                     />
-                    <DeviceGroup video={ videoinput } audio={ audioinput } />
+                    <DeviceGroup
+                        video={ videoinput }
+                        audio={ audioinput }
+                        current={ current }
+                        onMessage={ this.onDeviceGroupMessage.bind(this) }
+                    />
+                    <ResolutionGroup />
                 </div>
             );
         }

@@ -7,7 +7,7 @@ export default class MuteGroup extends React.Component {
             <div className="group">
                 {
                     this.props.audio ? (
-                        <button className="ribbon-button" onClick={ e => this.props.onClick("cmd.audio") }>
+                        <button className="ribbon-button" onClick={ e => this.props.onMessage("cmd.audio") }>
                             <span className="icon">
                                 <span className={ `${ this.props.audioIcon ? this.props.audioIcon : "mif-mic" } ${ this.props.isAudioPaused ? "fg-red" : "fg-emerald" }` }></span>
                             </span>
@@ -19,7 +19,7 @@ export default class MuteGroup extends React.Component {
 
                 {
                     this.props.video ? (
-                        <button className="ribbon-button" onClick={ e => this.props.onClick("cmd.video") }>
+                        <button className="ribbon-button" onClick={ e => this.props.onMessage("cmd.video") }>
                             <span className="icon">
                                 <span className={ `${ this.props.videoIcon ? this.props.videoIcon : "mif-camera" } ${ this.props.isVideoPaused ? "fg-red" : "fg-emerald" }` }></span>
                             </span>

@@ -7,7 +7,7 @@ export default class ControlGroup extends React.Component {
             <div className="group">
                 {
                     this.props.isPaused ? (
-                        <button className="ribbon-button fg-emerald" onClick={ e => this.props.onClick("cmd.play") }>
+                        <button className="ribbon-button fg-emerald" onClick={ e => this.props.onMessage("cmd.play") }>
                             <span className="icon">
                                 <span className="mif-play"></span>
                             </span>
@@ -15,7 +15,7 @@ export default class ControlGroup extends React.Component {
                             <span className="caption">Play</span>
                         </button>
                     ) : (
-                        <button className="ribbon-button fg-grayBlue" onClick={ e => this.props.onClick("cmd.pause") }>
+                        <button className="ribbon-button fg-grayBlue" onClick={ e => this.props.onMessage("cmd.pause") }>
                             <span className="icon">
                                 <span className="mif-pause"></span>
                             </span>
@@ -25,7 +25,7 @@ export default class ControlGroup extends React.Component {
                     )
                 }
 
-                <button className="ribbon-button fg-red" onClick={ e => this.props.onClick("cmd.stop") }>
+                <button className="ribbon-button fg-red" onClick={ e => this.props.onMessage("cmd.stop") }>
                     <span className="icon">
                         <span className="mif-stop"></span>
                     </span>

@@ -89,6 +89,13 @@ export default class MediaStreamNode extends Node {
             .then(stream => {
                 this.stream = stream;
 
+                for(let track of this.stream.getAudioTracks()) {
+                    track.applyConstraints(cons.audio);
+                }
+                for(let track of this.stream.getVideoTracks()) {
+                    track.applyConstraints(cons.video);
+                }
+
                 this.getMediaDevices();
 
                 return stream;
@@ -100,6 +107,8 @@ export default class MediaStreamNode extends Node {
 
                 if(cons.video) {
                     this._config.type = MediaStreamNode.TrackType.USER;
+                } else if(cons.audio) {
+                    this._config.type = MediaStreamNode.TrackType.AUDIO;
                 }
 
                 return stream;
@@ -123,6 +132,10 @@ export default class MediaStreamNode extends Node {
         navigator.mediaDevices.getDisplayMedia(cons)
             .then(stream => {
                 this.stream = stream;
+
+                for(let track of this.stream.getVideoTracks()) {
+                    track.applyConstraints(cons.video);
+                }
 
                 return stream;
             })
@@ -162,7 +175,7 @@ export default class MediaStreamNode extends Node {
         if(!this.stream) {
             return false;
         }
-        
+
         let track,
             fn;
 
@@ -277,9 +290,7 @@ export default class MediaStreamNode extends Node {
 
     getCurrentDevices() {
         if(this.stream) {
-            let audio = this.stream.getAudioTracks(),
-                video = this.stream.getVideoTracks(),
-                devices = {
+            let devices = {
                     audio: [],
                     video: []
                 };
@@ -287,8 +298,10 @@ export default class MediaStreamNode extends Node {
             for(let track of this.stream.getTracks()) {
                 let settings = track.getSettings();
 
-                if(settings.deviceId) {
+                if(track.kind === "audio") {
                     devices.audio.push(settings.deviceId);
+                } else if(track.kind === "video") {
+                    devices.video.push(settings.deviceId);
                 }
             }
 
@@ -296,6 +309,32 @@ export default class MediaStreamNode extends Node {
         }
 
         return false;
+    }
+
+    useDevice(device, { callback, constraints } = {}) {
+        let audio = this.getAudioTrack(0),
+            video = this.getVideoTrack(0),
+            cons = constraints || {};
+
+        if(audio && !cons.audio) {
+            cons.audio = audio.getConstraints() || this.getDefaultConstraints({ audio: true, video: false });
+        }
+        if(video && !cons.video) {
+            cons.video = video.getConstraints() || this.getDefaultConstraints({ audio: false, video: true });
+        }
+
+        if(device.type === "audioinput") {
+            cons.audio = cons.audio || {};
+            cons.audio.deviceId = { exact: device.id };
+        } else if(device.type === "videoinput") {
+            cons.video = cons.video || {};
+            cons.video.deviceId = { exact: device.id };
+        }
+
+        this.getUserMedia({
+            callback,
+            constraints: cons
+        });
     }
 
     get controller() {
@@ -327,6 +366,7 @@ export default class MediaStreamNode extends Node {
                 if(_this.stream) {
                     _this.stream.getTracks().forEach(track => track.stop());
                 }
+                _this.stream = null;
             },
             /**
              * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.

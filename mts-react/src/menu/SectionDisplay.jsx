@@ -17,7 +17,7 @@ export default class SectionDisplay extends React.Component {
         }
     }
     
-    onControlGroupClick(msg) {
+    onControlGroupMessage(msg) {
         if(msg === "cmd.play") {
             this.context.display.controller.play();
             this.setState({
@@ -37,7 +37,7 @@ export default class SectionDisplay extends React.Component {
         this.forceUpdate();
     }
 
-    onMuteGroupClick(msg) {
+    onMuteGroupMessage(msg) {
         if(msg === "cmd.audio") {
             this.context.display.controller.toggle("audio");
         } else if(msg === "cmd.video") {
@@ -63,7 +63,7 @@ export default class SectionDisplay extends React.Component {
         return (
             <div className="section" id="section-display">
                 <ControlGroup
-                    onClick={ this.onControlGroupClick.bind(this) }
+                    onMessage={ this.onControlGroupMessage.bind(this) }
                     isPaused={ this.state.isStreamPaused }
                 />
                 <MuteGroup
@@ -72,7 +72,7 @@ export default class SectionDisplay extends React.Component {
                     videoIcon={ "mif-display" }
                     isAudioPaused={ false }
                     isVideoPaused={ this.context.display.controller.isVideoPaused() }
-                    onClick={ this.onMuteGroupClick.bind(this) }
+                    onMessage={ this.onMuteGroupMessage.bind(this) }
                 />
             </div>
         );
