@@ -4,23 +4,17 @@ import DeviceList from "./DeviceList";
 
 export default class DeviceGroup extends React.Component {
     render() {
-        const dummyList = [
-            {
-                id: `${ Date.now() }:${ ~~(Math.random() * 100000) }`,
-                label: `${ Date.now() }:${ ~~(Math.random() * 100000) }`,
-                isCurrent: true
-            },
-            {
-                id: `${ Date.now() }:${ ~~(Math.random() * 100000) }`,
-                label: `${ Date.now() }:${ ~~(Math.random() * 100000) }`,
-                isCurrent: false
-            }
-        ];
+        const audio = (this.props.audio || []).length;
+        const video = (this.props.video || []).length;
+
+        if(!(video.length || audio.length)) {
+            return null;
+        }
 
         return (
             <div className="group">                
-                <DeviceList title="Video" iconClass={ `mif-video-camera fg-darkGray` } devices={ dummyList } />
-                <DeviceList title="Audio" iconClass={ `mif-mic fg-darkGray` } devices={ dummyList } />
+                { video.length ? <DeviceList title="Video" iconClass={ `mif-video-camera fg-darkGray` } devices={ video } /> : null }
+                { audio.length ? <DeviceList title="Audio" iconClass={ `mif-mic fg-darkGray` } devices={ audio } /> : null }
                 
                 <span className="title">Devices</span>
             </div>
