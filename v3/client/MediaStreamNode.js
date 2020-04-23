@@ -1,5 +1,5 @@
 import Node from "../Node";
-import CanvasNode from "./CanvasNode";
+// import CanvasNode from "./CanvasNode";
 
 export default class MediaStreamNode extends Node {
     static TrackType = {
@@ -116,7 +116,7 @@ export default class MediaStreamNode extends Node {
             .catch(e => console.log(e));
     }
     getDisplayMedia({ callback, constraints, partial } = {}) {
-        let { video, audio } = this.getDefaultConstraints(),
+        let { video } = this.getDefaultConstraints(),
             cons = constraints || video;
 
         if(partial) {
