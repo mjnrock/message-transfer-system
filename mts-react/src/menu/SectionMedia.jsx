@@ -60,6 +60,18 @@ export default class SectionMedia extends React.Component {
             this.context.media.controller.toggle("video");
         }
 
+        if(this.context.media.controller.isAudioPaused() && this.context.media.controller.isVideoPaused()) {
+            this.setState({
+                ...this.state,
+                isStreamPaused: true
+            });
+        } else if(this.state.isStreamPaused) {
+            this.setState({
+                ...this.state,
+                isStreamPaused: false
+            });
+        }
+
         this.forceUpdate();
     }
 
@@ -69,8 +81,17 @@ export default class SectionMedia extends React.Component {
     
             return (
                 <div className="section" id="section-media">
-                    <ControlGroup onClick={ this.onControlGroupClick.bind(this) } isPaused={ this.state.isStreamPaused } />
-                    <MuteGroup video={ true } audio={ true } onClick={ this.onMuteGroupClick.bind(this) } isAudioPaused={ this.context.media.controller.isAudioPaused() } isVideoPaused={ this.context.media.controller.isVideoPaused() } />
+                    <ControlGroup
+                        onClick={ this.onControlGroupClick.bind(this) }
+                        isPaused={ this.state.isStreamPaused }
+                    />
+                    <MuteGroup
+                        video={ true }
+                        audio={ true }
+                        onClick={ this.onMuteGroupClick.bind(this) }
+                        isAudioPaused={ this.context.media.controller.isAudioPaused() }
+                        isVideoPaused={ this.context.media.controller.isVideoPaused() }
+                    />
                     <DeviceGroup video={ videoinput } audio={ audioinput } />
                 </div>
             );
