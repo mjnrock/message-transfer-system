@@ -15,7 +15,6 @@ export default class App extends React.Component {
         super(props);
 
         this.state = {
-            stream: null,
             message: "",
             messages: [
                 "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero praesentium, eos provident in soluta hic quaerat nulla dolor rem dicta nostrum id reiciendis laboriosam pariatur voluptatibus tenetur neque earum molestiae?",
@@ -27,13 +26,6 @@ export default class App extends React.Component {
         if(message === "update") {
             this.forceUpdate();
         }
-    }
-
-    updateStream(stream) {
-        this.setState({
-            ...this.state,
-            stream
-        });
     }
 
     onMessageEntry(e) {
@@ -72,7 +64,7 @@ export default class App extends React.Component {
 
         return (
             <Container>
-                <MediaBar feedback={ this.feedback.bind(this) } streamUpdater={ this.updateStream.bind(this) } />
+                <MediaBar feedback={ this.feedback.bind(this) } />
 
                 <Container>
                     <Container className="flex items-start">

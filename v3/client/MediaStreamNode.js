@@ -2,6 +2,13 @@ import Node from "../Node";
 import CanvasNode from "./CanvasNode";
 
 export default class MediaStreamNode extends Node {
+    static TrackType = {
+        AUDIO: "audio",
+        VIDEO: "video",
+        SCREEN: "screen",
+        CANVAS: "canvas",
+    };
+
     static Resolution = {
         P240: [ 426, 240 ],
         P360: [ 640, 360 ],
@@ -29,227 +36,60 @@ export default class MediaStreamNode extends Node {
         BDROM: 192000,
     }
 
-    constructor({ name, receive, isPublic, video, stream, placeholder } = {}) {
+    constructor({ name, receive, isPublic, stream, video } = {}) {
         super({ name, receive, isPublic });
 
         this._config = {
             ...this._config,
-            defaultConstraints: {
-                audio: { channels: 2, sampleRate: 44100 },
-                video: { width: { ideal: 1920 }, height: { ideal: 1080 } }
-            },
-            lastConstraints: {},
+            devices: {},
             stream: stream,
-            video: video || document.createElement("video"),
-            devices: {
-                audio: {},
-                video: {},
-                speaker: {}
+            tracks: {
+                video: null,
+                audio: null,
+                screen: null,
+                canvas: null
             },
-            placeholder: placeholder
-        };
-        
-        if(!video) {
-            this.video.setAttribute("autoplay", true);
-            this.video.setAttribute("controls", false);
-            this.size(720, 480);
-        }
-            
-        if(this.placeholder) {
-            this.placeholder.replaceWith(this.video);
-        }
-    }
-
-    get check() {
-        if(this.stream) {
-            return {
-                hasAudio: !!this.getAudioTracks(0),
-                hasVideo: !!this.getVideoTracks(0),
-                isMainAudioMuted: !(this.getAudioTracks(0) || {}).enabled,
-                isMainVideoMuted: !(this.getVideoTracks(0) || {}).enabled,
-                isPaused: (!(this.getAudioTracks(0) || {}).enabled) && (!(this.getVideoTracks(0) || {}).enabled),
-                isActive: this.stream.active || false,
-            };
-        }
-        
-        return {
-            hasAudio: false,
-            hasVideo: false,
-            isMainAudioMuted: true,
-            isMainVideoMuted: true,
-            isPaused: true,
-            isActive: false,
-        };
-    }
-
-    get devices() {
-        return this._config.devices;
-    }
-
-    get currentAudioDevice() {
-        if(this.getAudioTracks(0)) {
-            let id = this.getAudioTracks(0).getSettings().deviceId;
-
-            return this.devices.audio[ id ];
-        }
-
-        return false;
-    }
-    get currentVideoDevice() {
-        if(this.getVideoTracks(0)) {
-            let id = this.getVideoTracks(0).getSettings().deviceId;
-
-            return this.devices.video[ id ];
-        }
-
-        return false;
-    }
-
-    /**
-     * This is meant to be a DOMElement to replace
-     */
-    get placeholder() {
-        return this._config.placeholder;
-    }
-
-    async getMediaDevices() {
-        return await navigator.mediaDevices.enumerateDevices()
-            .then(this._registerDevices.bind(this))
-            .catch(e => console.log(e));
-    }
-
-    _registerDevices(devices) {
-        for(let device of devices) {
-            if (device.kind === "videoinput") {
-                this._config.devices.video[ device.deviceId ] = {
-                    id: device.deviceId,
-                    label: device.label || `Video ${ Object.keys(this._config.devices.video).length + 1}`,
-                    device
-                };
-            } else if (device.kind === "audioinput") {
-                this._config.devices.audio[ device.deviceId ] = {
-                    id: device.deviceId,
-                    label: device.label || `Microphone ${ Object.keys(this._config.devices.audio).length + 1}`,
-                    device
-                };
-            } else if (device.kind === "audiooutput") {
-                this._config.devices.speaker[ device.deviceId ] = {
-                    id: device.deviceId,
-                    label: device.label || `Speaker ${ Object.keys(this._config.devices.speaker).length + 1}`,
-                    device
-                };
-            } 
-        }
-    }
-    
-    static async GetMediaDevices() {
-        let config = {
-            devices: {
-                audio: {},
-                video: {},
-                speaker: {},
-            }
+            video: video || document.createElement("video")
         };
 
-        return await navigator.mediaDevices.enumerateDevices()
-            .then(devices => {                
-                for(let device of devices) {
-                    if (device.kind === "videoinput") {
-                        config.devices.video[ device.deviceId ] = {
-                            id: device.deviceId,
-                            label: device.label || `Video ${ Object.keys(config.devices.video).length + 1}`,
-                            device
-                        };
-                    } else if (device.kind === "audioinput") {
-                        config.devices.audio[ device.deviceId ] = {
-                            id: device.deviceId,
-                            label: device.label || `Microphone ${ Object.keys(config.devices.audio).length + 1}`,
-                            device
-                        };
-                    } else if (device.kind === "audiooutput") {
-                        config.devices.speaker[ device.deviceId ] = {
-                            id: device.deviceId,
-                            label: device.label || `Speaker ${ Object.keys(config.devices.speaker).length + 1}`,
-                            device
-                        };
-                    } 
-                }
-
-                return config;
-            })
-            .catch(e => console.log(e));
+        this.video.setAttribute("autoplay", true);
     }
 
-    useDevice(type = "video", deviceIdOrIndex, { callback, constraints } = {}) {
-        if(type === "audio" || type === "video" || type === "speaker") {
-            let device;
-
-            if(typeof deviceIdOrIndex === "number") {
-                device = Object.values(this._config.devices[ type ])[ deviceIdOrIndex ];
-            } else if(typeof deviceIdOrIndex === "string" || deviceIdOrIndex instanceof String) {
-                device = this._config.devices[ type ][ deviceIdOrIndex ];
-            }
-
-            if(device) {
-                if(type === "speaker") {
-                    this.video.setSinkId(device.id);
-                } else {
-                    let cons = constraints || this._config.lastConstraints || this._config.defaultConstraints;
-
-                    if(!(typeof cons[ type ] === "object")) {
-                        cons[ type ] = this._config.defaultConstraints[ type ];
-                    }
-                    cons[ type ].deviceId = { exact: device.id };
-    
-                    this.getUserMedia({ callback, constraints: cons });
-                }
-
-                return true;
-            }
-        }
-
-        return false;
+    get stream() {
+        return this._config.stream;
     }
-    useVideoDevice(deviceIdOrIndex, constraints = { audio: true }) {
-        return this.useDevice("video", deviceIdOrIndex, constraints);
+    set stream(value) {
+        this.stream = value;
+        this.video.srcObject = value;
     }
-    useAudioDevice(deviceIdOrIndex, constraints = { video: true }) {
-        return this.useDevice("audio", deviceIdOrIndex, constraints);
+
+    get video() {
+        return this._config.video;
     }
-    useSpeakerDevice(deviceIdOrIndex) {
-        return this.useDevice("speaker", deviceIdOrIndex);
+    set video(value) {
+        this.video = value;
+        this.video.srcObject = this.stream;
     }
-    
+
     getUserMedia({ callback, constraints } = {}) {
-        this.controller.stop();
-
-        navigator.mediaDevices.getUserMedia(constraints || this._config.defaultConstraints)
-        .then(stream => {
-            this._config.lastConstraints = constraints || this._config.defaultConstraints;
-
-            this.getMediaDevices();
-            
-            this.stream = stream;
-
-            return stream;
-        })
-        .then(stream => {
-            if(typeof callback === "function") {
-                callback(stream);
-            }
-        })
-            .catch(e => console.log(e));
-
-        return this;
-    }
-    getDisplayMedia({ callback, constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }} } } = {}) {
-        navigator.mediaDevices.getDisplayMedia(constraints)
+        navigator.mediaDevices.getUserMedia(constraints || this.getDefaultConstraints())
             .then(stream => {
-                this.controller.stop();
+                if(!this.stream) {
+                    this.stream = stream;
+                }
+                    
+                if(stream.getAudioTracks().length) {
+                    this.stream.removeTrack(this._config.tracks.audio);
+                    this._config.tracks.audio = stream.getAudioTracks()[ 0 ];
+                    this.stream.addTrack(this._config.tracks.audio);
+                }
+                if(stream.getVideoTracks().length) {
+                    this.stream.removeTrack(this._config.tracks.video);
+                    this._config.tracks.video = stream.getVideoTracks()[ 0 ];
+                    this.stream.addTrack(this._config.tracks.video);
+                }
 
-                this.stream = stream;
-
-                return stream;
+                this.getMediaDevices();
             })
             .then(stream => {
                 if(typeof callback === "function") {
@@ -257,140 +97,187 @@ export default class MediaStreamNode extends Node {
                 }
             })
             .catch(e => console.log(e));
-
-        return this;
     }
-    getCanvasMedia(canvas, { fps = 10, callback } = {}) {
-        this.controller.stop();
+    getDisplayMedia({ callback, constraints } = {}) {
+        let { video, audio } = this.getDefaultConstraints();
 
-        if(canvas instanceof CanvasNode) {
-            this.stream = canvas.canvas.captureStream(fps);
+        navigator.mediaDevices.getDisplayMedia(constraints || { video })
+            .then(stream => {
+                if(!this.stream) {
+                    this.stream = stream;
+                }
+                
+                if(stream.getVideoTracks().length) {
+                    this.stream.removeTrack(this._config.tracks.screen);
+                    this._config.tracks.screen = stream.getVideoTracks()[ 0 ];
+                    this.stream.addTrack(this._config.tracks.screen);
+                }
+
+                if(!this._config.tracks.audio) {
+                    this.getUserMedia({ constraints: { audio, video: false } });
+                }
+            })
+            .then(stream => {
+                if(typeof callback === "function") {
+                    callback(stream);
+                }
+            })
+            .catch(e => console.log(e));
+    }
+
+    getTrack(search, type = MediaStreamNode.TrackType.AUDIO) {
+        let track,
+            fn;
+
+        if(type === "audio") {
+            fn = "getAudioTracks";
+        } else if(type === "video") {
+            fn = "getVideoTracks";
         } else {
-            this.stream = canvas.captureStream(fps);
+            fn = "getTracks";
         }
 
-        if(typeof callback === "function") {
-            callback(this.stream, { fps, canvas });
+        if(typeof search === "number") {
+            // Index
+            track = (this.stream[ fn ]() || [])[ search ];
+        } else if(typeof search === "string" || search instanceof String) {
+            // Track Id
+            track = this.stream.getTrackById(search);
+        } else if(typeof search === "object" && "kind" in search && search.kind === `${ type }input`) {
+            // Track
+            track = search;
         }
 
-        return this;
+        return track;
     }
+    addTrack(search, type = MediaStreamNode.TrackType.AUDIO, setAsMain = true) {
+        let track = this.getTrack(type, search);
 
-    get stream() {
-        return this._config.stream;
-    }
-    set stream(stream) {
-        this._config.stream = stream;
-        this._config.video.srcObject = stream;
-    }
+        if(track && this.stream) {
+            this.stream.addTrack(track);
 
-    get controller() {
-        const _this = this;
-
-        return {
-            /**
-             * This stops the tracks completely and sets `stream.ended = true`
-             */
-            stop() {
-                if(_this.stream) {
-                    _this.stream.getTracks().forEach(track => track.stop());
-                }
-            },
-            /**
-             * This "mutes" the stream by disabling it.  It is still active, but no data will transmit.
-             */
-            pause(type) {
-                if(_this.stream) {
-                    if(type === "audio") {
-                        _this.stream.getAudioTracks().forEach(track => track.enabled = false);
-                    } else if(type === "video") {
-                        _this.stream.getVideoTracks().forEach(track => track.enabled = false);
-                    } else {
-                        _this.stream.getTracks().forEach(track => track.enabled = false);
-                    }
-                }
-            },
-            /**
-             * This "unmutes" the stream by enabling it.
-             */
-            play(type) {
-                if(_this.stream) {
-                    if(type === "audio") {
-                        _this.stream.getAudioTracks().forEach(track => track.enabled = true);
-                    } else if(type === "video") {
-                        _this.stream.getVideoTracks().forEach(track => track.enabled = true);
-                    } else {
-                        _this.stream.getTracks().forEach(track => track.enabled = true);
-                    }
-                }
-            },
-            toggle(type) {
-                if(_this.stream) {
-                    if(type === "audio") {
-                        _this.stream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
-                    } else if(type === "video") {
-                        _this.stream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
-                    } else {
-                        _this.stream.getTracks().forEach(track => track.enabled = !track.enabled);
-                    }
-                }
-            },
-            clear() {
-                _this.stream = null;
+            if(setAsMain === true) {
+                this._config.tracks[ type ] = track;
             }
-        };
-    }
-
-    
-    getTracks(type = "video", ...indexes) {
-        if(this.stream) {
-            let tracks;
-            
-            if(type === "audio") {
-                tracks = this.stream.getAudioTracks();
-            } else if(type === "video") {
-                tracks = this.stream.getVideoTracks();
-            } else {
-                return false;
-            }
-
-            if(indexes.length === 1) {
-                return tracks[ indexes[ 0 ] ];
-            } else if(indexes.length) {
-                return tracks.filter((t, i) => indexes.includes(++i));
-            }
-
-            return tracks;
-        }
-
-        return false;
-    }    
-    getAudioTracks(...indexes) {
-        return this.getTracks("audio", ...indexes);
-    }
-    getVideoTracks(...indexes) {
-        return this.getTracks("video", ...indexes);
-    }
-
-    get video() {
-        return this._config.video;
-    }
-    set video(element) {
-        this._config.video = element;
-    }
-
-    size(width = 720, height = 480) {
-        this.video.style.width = width;
-        this.video.style.height = height;
-    }    
-
-    toCanvas(canvas) {
-        if(this.stream) {
-            canvas.getContext("2d").drawImage(this.video, 0, 0);
 
             return true;
         }
 
         return false;
+    }
+
+    getAudioTrack(search) {
+        return this.getTrack(search, MediaStreamNode.TrackType.AUDIO);
+    }
+    addAudioTrack(input) {
+        return this.addTrack(input, MediaStreamNode.TrackType.AUDIO);
+    }
+
+    getVideoTrack(search) {
+        return this.getTrack(search, MediaStreamNode.TrackType.VIDEO);
+    }
+    addVideoTrack(input) {
+        return this.addTrack(input, MediaStreamNode.TrackType.VIDEO);
+    }
+
+
+    async getMediaDevices() {
+        return await navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                const counts = {
+                    audioinput: 1,
+                    videoinput: 1
+                };
+
+                const packer = device => ({
+                    id: device.deviceId,
+                    type: device.kind,
+                    label: device.label || `${ device.kind === "audioinput" ? "Mic" : "Video" } ${ counts[ device.kind ].length + 1}`,
+                    device
+                });
+
+                for(let device of devices) {
+                    this._config.devices[ device.deviceId ] = packer(device);
+                    counts[ device.kind ] += 1;
+                }
+            })
+            .catch(e => console.log(e));
+    }
+
+    getDevice(search, type = MediaStreamNode.TrackType.AUDIO) {
+        let device;
+
+        if(typeof search === "number") {
+            // Index
+            device = Object.values(this._config.devices)[ search ];
+        } else if(typeof search === "string" || search instanceof String) {
+            // Device Id
+            device = this._config.devices[ search ];
+        } else if(typeof search === "object" && "kind" in search && search.kind === `${ type }input`) {
+            // Audio Track
+            device = search;
+        }
+
+        return device;
+    }
+    getAudioDevice(search) {
+        return this.getDevice(search, MediaStreamNode.TrackType.AUDIO);
+    }
+    getVideoDevice(search) {
+        return this.getDevice(search, MediaStreamNode.TrackType.AUDIO);
+    }
+    
+    get tracks() {
+        return this._config.tracks;
+    }
+    muteTrack(type = MediaStreamNode.TrackType.AUDIO) {
+        if(this.tracks[ type ]) {
+            this.tracks[ type ].enabled = false;
+        }
+    }
+    unmuteTrack(type = MediaStreamNode.TrackType.AUDIO) {
+        if(this.tracks[ type ]) {
+            this.tracks[ type ].enabled = true;
+        }
+    }
+    toggleTrack(type = MediaStreamNode.TrackType.AUDIO) {
+        if(this.tracks[ type ]) {
+            this.tracks[ type ].enabled = !this.tracks[ type ].enabled;
+        }
+    }
+
+    toggleAudio() {
+        this.toggleTrack(MediaStreamNode.TrackType.AUDIO);
+    }
+    toggleVideo() {
+        this.toggleTrack(MediaStreamNode.TrackType.VIDEO);
+    }
+    toggleScreen() {
+        this.toggleTrack(MediaStreamNode.TrackType.SCREEN);
+    }
+    toggleCanvas() {
+        this.toggleTrack(MediaStreamNode.TrackType.CANVAS);
+    }
+
+
+    getDefaultConstraints() {
+        return {
+            audio: {
+                channelCount: 2,
+                sampleRate: 44100
+            },
+            video: {
+                width: {
+                    ideal: 1920
+                },
+                height: {
+                    ideal: 1080
+                }
+            }
+        };
+    }
+
+    cloneElement() {
+        return this.video.cloneNode(true);
     }
 }

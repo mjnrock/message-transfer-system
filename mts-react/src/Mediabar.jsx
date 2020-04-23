@@ -37,10 +37,6 @@ export default class MediaBar extends React.Component {
     }
 
     componentDidMount() {
-        if(!this.props.streamUpdater) {
-            throw new Error(`"streamUpdater" is a required prop and expects a callback function`);
-        }
-
         this.context.getMediaDevices().then(() => {
             this.forceUpdate();
         });
@@ -61,17 +57,17 @@ export default class MediaBar extends React.Component {
     // }
     onShareDisplayMedia(e) {
         this.context.getDisplayMedia({
-            callback: this.props.streamUpdater,
+            callback: stream => this.props.feedback("update"),
         });
     }
     onShareUserMedia(e) {
         this.context.getUserMedia({
-            callback: this.props.streamUpdater,
+            callback: stream => this.props.feedback("update"),
         });
     }
     onShareMicMedia(e) {
         this.context.getUserMedia({
-            callback: this.props.streamUpdater,
+            callback: stream => this.props.feedback("update"),
             constraints: {
                 audio: true,
                 video: false
@@ -81,7 +77,7 @@ export default class MediaBar extends React.Component {
 
     render() {
         return (
-            <nav data-role="ribbonmenu">
+            <nav data-role="ribbonmenu" className="bg-lightCobalt">
                 <ul className="tabs-holder">
                     <li><a href="#section-main">Main</a></li>
                 </ul>
