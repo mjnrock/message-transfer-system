@@ -5,6 +5,7 @@ import Context from "./../Context";
 
 import ControlGroup from "./ControlGroup";
 import MuteGroup from "./MuteGroup";
+import ResolutionGroup from "./ResolutionGroup";
 
 export default class SectionDisplay extends React.Component {
     static contextType = Context;
@@ -64,9 +65,21 @@ export default class SectionDisplay extends React.Component {
 
         this.forceUpdate();
     }
+    
+    onResolutionGroupMessage(msg, ...args) {
+        if(msg === "cmd.resolution") {
+            let [ width, height ] = args;
+
+            this.context.display.changeResolution({
+                width,
+                height,
+                callback: this.props.onStream.bind(this),
+            });
+        }
+    }
 
     render() {
-        if(this.context.display.stream) {
+        if(this.context.display.stream && this.context.display.stream.active) {
             return (
                 <div className="section" id="section-display">
                     <ControlGroup
@@ -80,6 +93,9 @@ export default class SectionDisplay extends React.Component {
                         isAudioPaused={ false }
                         isVideoPaused={ this.context.display.controller.isVideoPaused() }
                         onMessage={ this.onMuteGroupMessage.bind(this) }
+                    />
+                    <ResolutionGroup                        
+                        onMessage={ this.onResolutionGroupMessage.bind(this) }
                     />
                 </div>
             );

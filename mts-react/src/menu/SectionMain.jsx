@@ -57,26 +57,26 @@ export default class SectionMain extends React.Component {
                     
                     <button className="ribbon-button">
                         <span className="icon">
-                            <span className="mif-file-image"></span>
+                            <span className="mif-file-image fg-gray"></span>
                         </span>
                         
-                        <span className="caption">Canvas</span>
+                        <span className="caption fg-gray">Canvas</span>
                     </button>
                     
                     <button className="ribbon-button">
                         <span className="icon">
-                            <span className="mif-piano"></span>
+                            <span className="mif-piano fg-gray"></span>
                         </span>
                         
-                        <span className="caption">Sound</span>
+                        <span className="caption fg-gray">Sound</span>
                     </button>
                     
                     <button className="ribbon-button">
                         <span className="icon">
-                            <span className="mif-squirrel"></span>
+                            <span className="mif-squirrel fg-gray"></span>
                         </span>
                         
-                        <span className="caption">Squirrel</span>
+                        <span className="caption fg-gray">Squirrel</span>
                     </button>
                     
                     <span className="title">Streams</span>

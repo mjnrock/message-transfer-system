@@ -85,9 +85,21 @@ export default class SectionMedia extends React.Component {
             });
         }
     }
+    
+    onResolutionGroupMessage(msg, ...args) {
+        if(msg === "cmd.resolution") {
+            let [ width, height ] = args;
+
+            this.context.media.changeResolution({
+                width,
+                height,
+                callback: this.props.onStream.bind(this),
+            });
+        }
+    }
 
     render() {
-        if(this.context.media.stream) {        
+        if(this.context.media.stream && this.context.media.stream.active) {        
             const { audioinput, videoinput } = this.context.media.devices;
             const current = this.context.media.getCurrentDevices();
     
@@ -110,7 +122,9 @@ export default class SectionMedia extends React.Component {
                         current={ current }
                         onMessage={ this.onDeviceGroupMessage.bind(this) }
                     />
-                    <ResolutionGroup />
+                    <ResolutionGroup                        
+                        onMessage={ this.onResolutionGroupMessage.bind(this) }
+                    />
                 </div>
             );
         }

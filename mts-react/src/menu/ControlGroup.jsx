@@ -27,10 +27,10 @@ export default class ControlGroup extends React.Component {
 
                 <button className="ribbon-button fg-red" onClick={ e => this.props.onMessage("cmd.stop") }>
                     <span className="icon">
-                        <span className="mif-stop"></span>
+                        <span className="mif-cancel"></span>
                     </span>
                     
-                    <span className="caption">Stop</span>
+                    <span className="caption">End</span>
                 </button>
                 
                 <span className="title">Controls</span>

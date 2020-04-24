@@ -1,4 +1,5 @@
 import Node from "../Node";
+import CanvasNode from "./CanvasNode";
 // import CanvasNode from "./CanvasNode";
 
 export default class MediaStreamNode extends Node {
@@ -101,14 +102,14 @@ export default class MediaStreamNode extends Node {
                 return stream;
             })
             .then(stream => {
-                if(typeof callback === "function") {
-                    callback(stream);
-                }
-
                 if(cons.video) {
                     this._config.type = MediaStreamNode.TrackType.USER;
                 } else if(cons.audio) {
                     this._config.type = MediaStreamNode.TrackType.AUDIO;
+                }
+
+                if(typeof callback === "function") {
+                    callback(stream);
                 }
 
                 return stream;
@@ -139,12 +140,12 @@ export default class MediaStreamNode extends Node {
 
                 return stream;
             })
-            .then(stream => {
+            .then(stream => {                        
+                this._config.type = MediaStreamNode.TrackType.DISPLAY;
+
                 if(typeof callback === "function") {
                     callback(stream);
                 }
-                        
-                this._config.type = MediaStreamNode.TrackType.DISPLAY;
 
                 return stream;
             })
@@ -169,6 +170,25 @@ export default class MediaStreamNode extends Node {
             //     return stream;
             // })
             .catch(e => console.log(e));
+    }
+    getCanvasMedia({ fps = 10, canvas, cn, callback } = {}) {
+        let stream = null;
+
+        if(canvas && canvas.captureStream) {
+            stream = canvas.captureStream(fps);
+        } else if(cn instanceof CanvasNode) {
+            stream = cn.getStream(fps)
+        }
+
+        if(stream) {
+            this.stream = stream;
+
+            this._config.type = MediaStreamNode.TrackType.CANVAS;
+
+            if(typeof callback === "function") {
+                callback(stream);
+            }
+        }
     }
 
     getTrack(search, type = MediaStreamNode.TrackType.AUDIO) {
@@ -312,29 +332,79 @@ export default class MediaStreamNode extends Node {
     }
 
     useDevice(device, { callback, constraints } = {}) {
-        let audio = this.getAudioTrack(0),
-            video = this.getVideoTrack(0),
-            cons = constraints || {};
-
-        if(audio && !cons.audio) {
-            cons.audio = audio.getConstraints() || this.getDefaultConstraints({ audio: true, video: false });
-        }
-        if(video && !cons.video) {
-            cons.video = video.getConstraints() || this.getDefaultConstraints({ audio: false, video: true });
-        }
-
-        if(device.type === "audioinput") {
-            cons.audio = cons.audio || {};
-            cons.audio.deviceId = { exact: device.id };
-        } else if(device.type === "videoinput") {
-            cons.video = cons.video || {};
-            cons.video.deviceId = { exact: device.id };
-        }
-
-        this.getUserMedia({
+        this.changeConstraints({ 
             callback,
-            constraints: cons
+            hook: cons => {
+                if(device.type === "audioinput") {
+                    cons.audio = cons.audio || {};
+                    cons.audio.deviceId = { exact: device.id };
+                } else if(device.type === "videoinput") {
+                    cons.video = cons.video || {};
+                    cons.video.deviceId = { exact: device.id };
+                }
+                
+            },
+            constraints
         });
+    }
+
+    /**
+     * @param {string} constrain "exact" | "ideal"
+     */
+    changeResolution({ res = MediaStreamNode.Resolution.P1080, width, height, callback, constrain = "ideal" } = {}) {
+        let [ w, h ] = res;
+
+        if(width) {
+            w = ~~width;
+        }
+        if(height) {
+            h = ~~height;
+        }
+
+        this.changeConstraints({ 
+            callback,
+            hook: cons => {
+                cons.video = cons.video || {};
+                cons.video.width = { [ constrain ]: w };
+                cons.video.height = { [ constrain ]: h };
+            }
+        });
+    }
+
+    changeConstraints({ constraints, hook, callback } = {}) {
+        if(this.stream) {
+            let audio = this.getAudioTrack(0),
+                video = this.getVideoTrack(0),
+                cons = constraints || {};
+    
+            if(audio && !cons.audio) {
+                cons.audio = audio.getConstraints() || this.getDefaultConstraints({ audio: true, video: false });
+            }
+            if(video && !cons.video) {
+                cons.video = video.getConstraints() || this.getDefaultConstraints({ audio: false, video: true });
+            }
+
+            if(typeof hook === "function") {
+                hook(cons);
+            }
+
+            if(this._config.type === MediaStreamNode.TrackType.USER) {                
+                this.getUserMedia({
+                    callback,
+                    constraints: cons
+                });
+            } else if(this._config.type === MediaStreamNode.TrackType.AUDIO) {                
+                this.getUserMedia({
+                    callback,
+                    constraints: cons
+                });
+            } else if(this._config.type === MediaStreamNode.TrackType.DISPLAY) {
+                this.getDisplayMedia({
+                    callback,
+                    constraints: cons
+                });
+            }
+        }
     }
 
     get controller() {
