@@ -5,9 +5,9 @@ import Rule from "./../Rule";
 
 let N1 = new Node({
     name: "Node 1",
-    receive: (msg, feed) => {
+    receive: (signal, feed) => {
         console.time();
-        Rule.Process(msg, { node: N1 })
+        Rule.Process(signal, { node: N1 })
             .if
                 .type("test")
                 .payload()
@@ -32,7 +32,7 @@ let N1 = new Node({
             .done
         console.timeEnd();
 
-        // let res2 = Rule.Process(msg)
+        // let res2 = Rule.Process(signal)
         //     .if()
         //         .type("test2")
         //     .then()
@@ -47,7 +47,7 @@ let N1 = new Node({
 });
 let N2 = new Node({
     name: "Node 2",
-    receive: (msg, feed) => console.log(`[1]:`, message, feed)
+    receive: (signal, feed) => console.log(`[1]:`, signal, feed)
 });
 
 N1.listen(N2);

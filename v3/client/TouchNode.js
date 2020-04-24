@@ -2,7 +2,7 @@ import { GenerateUUID } from "./../util/helper";
 import Node from "./../Node";
 
 export default class TouchNode extends Node {
-    static MessageTypes = {
+    static SignalTypes = {
         TOUCH_MOVE: "TouchNode.TouchMove",
         TOUCH_START: "TouchNode.TouchStart",
         TOUCH_END: "TouchNode.TouchEnd",
@@ -23,8 +23,8 @@ export default class TouchNode extends Node {
         ZOOM: "TouchNode.Zoom",
     };
     
-    static AllMessageTypes(...filter) {
-        return Object.values(TouchNode.MessageTypes).filter(st => {
+    static AllSignalTypes(...filter) {
+        return Object.values(TouchNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -204,7 +204,7 @@ export default class TouchNode extends Node {
         let touches = this.getTouches(e);
 
         this.emit(
-            TouchNode.MessageTypes.TOUCH_MOVE,
+            TouchNode.SignalTypes.TOUCH_MOVE,
             touches,
         );
     
@@ -257,7 +257,7 @@ export default class TouchNode extends Node {
         }
 
         this.emit(
-            TouchNode.MessageTypes.TOUCH_START,
+            TouchNode.SignalTypes.TOUCH_START,
             touches,
         );
     
@@ -268,7 +268,7 @@ export default class TouchNode extends Node {
 
         if(this.supply.Click.length) {
             this.emit(
-                TouchNode.MessageTypes.TOUCH_CLICK,
+                TouchNode.SignalTypes.TOUCH_CLICK,
                 {
                     keys: {
                         ctrl: e.ctrlKey,
@@ -291,7 +291,7 @@ export default class TouchNode extends Node {
 
             if((end - start <= this.config.doubleClick.timeout) && (dx <= this.config.doubleClick.thresholdX) && (dy <= this.config.doubleClick.thresholdY)) {
                 this.emit(
-                    TouchNode.MessageTypes.TOUCH_DOUBLE_CLICK,
+                    TouchNode.SignalTypes.TOUCH_DOUBLE_CLICK,
                     {
                         keys: {
                             ctrl: e.ctrlKey,
@@ -346,7 +346,7 @@ export default class TouchNode extends Node {
                 
                     let eventName = `SWIPE_${ dir.toUpperCase() }`;
                     let arr = [
-                        TouchNode.MessageTypes[ eventName ],
+                        TouchNode.SignalTypes[ eventName ],
                         {
                             id: touch.id,
                             points: {
@@ -380,7 +380,7 @@ export default class TouchNode extends Node {
 
         if(swipes.length > 1) {
             this.emit(
-                TouchNode.MessageTypes.SWIPE_MULTI,
+                TouchNode.SignalTypes.SWIPE_MULTI,
                 {
                     touches: swipes.length,
                     counts: eventTypes,
@@ -390,7 +390,7 @@ export default class TouchNode extends Node {
         }
 
         this.emit(
-            TouchNode.MessageTypes.TOUCH_END,
+            TouchNode.SignalTypes.TOUCH_END,
             touches,
         );
     
@@ -412,7 +412,7 @@ export default class TouchNode extends Node {
             this.supply.Taps.timeout = setTimeout(() => this._endTaps(), this.config.taps.threshold);
         } else {
             this.emit(
-                TouchNode.MessageTypes.TOUCH_MULTI,
+                TouchNode.SignalTypes.TOUCH_MULTI,
                 {
                     count: Object.keys(this.supply.Taps.touches).length,
                     touches: Object.values(this.supply.Taps.touches)
@@ -429,7 +429,7 @@ export default class TouchNode extends Node {
         let touches = this.getTouches(e);
 
         this.emit(
-            TouchNode.MessageTypes.TOUCH_CANCEL,
+            TouchNode.SignalTypes.TOUCH_CANCEL,
             touches,
         );
     

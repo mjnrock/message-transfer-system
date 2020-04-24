@@ -2,12 +2,12 @@ import { GenerateUUID } from "./util/helper";
 import Feed from "./Feed";
 
 export default class Node {
-    static MessageTypes = {
+    static SignalTypes = {
         STATE_CHANGE: "Node.StateChange",
     };
     
-    static AllMessageTypes(...filter) {
-        return Object.values(Node.MessageTypes).filter(st => {
+    static AllSignalTypes(...filter) {
+        return Object.values(Node.SignalTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -51,7 +51,7 @@ export default class Node {
 
             if(this.config.isPublic === true) {
                 this.emit(
-                    Node.MessageTypes.STATE_CHANGE,
+                    Node.SignalTypes.STATE_CHANGE,
                     {
                         current: this.state,
                         previous: oldValue
@@ -174,9 +174,9 @@ export default class Node {
         }
     }
 
-    receive(msg, feed) {
+    receive(signal, feed) {
         if(typeof this._hooks.receive === "function") {
-            return this._hooks.receive(msg, feed);
+            return this._hooks.receive(signal, feed);
         }
     }
 };

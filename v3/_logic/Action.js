@@ -2,10 +2,10 @@ import Node from "../Node";
 import Rule from "./Rule";
 
 export default class Action {
-    constructor({ node, state = {}, message = null, result = true } = {}) {
+    constructor({ node, state = {}, signal = null, result = true } = {}) {
         this._node = node;
         this._state = state;
-        this._message = message;
+        this._signal = signal;
 
         this._result = result;
         this.__reverter = this;
@@ -13,7 +13,7 @@ export default class Action {
 
     get elseif() {
         return new Rule (
-            this.__reverter._message || this.__reverter._value,
+            this.__reverter._signal || this.__reverter._value,
             {
                 type: this.__reverter._scope.type,
                 node: this.__reverter._action._node,
@@ -129,7 +129,7 @@ export default class Action {
         nodes.push(this._node);
         for(let node of nodes) {
             if(this._node instanceof Node) {
-                node.receive(this._message);
+                node.receive(this._signal);
             }
         }
 

@@ -1,11 +1,11 @@
-import Message from "../Message";
+import Signal from "../Signal";
 
 export default class Condition {
     static FocusType = {
-        TYPE: 1,    //  Message property
-        PAYLOAD: 2, //  Message property
-        SHAPE: 3,   //  Message property
-        TIMESTAMP: 4,   //  Message property
+        TYPE: 1,    //  Signal property
+        PAYLOAD: 2, //  Signal property
+        SHAPE: 3,   //  Signal property
+        TIMESTAMP: 4,   //  Signal property
 
         VALUE: 5,   //  A generic custom value for ad hoc purposes
     };
@@ -17,13 +17,13 @@ export default class Condition {
         NOR: "nand",
     };
 
-    constructor(msgOrValue, type = Condition.ScopeType.AND) {
-        if(Message.Conforms(msgOrValue)) {
-            this._message = msgOrValue;
+    constructor(signalOrValue, type = Condition.ScopeType.AND) {
+        if(Signal.Conforms(signalOrValue)) {
+            this._signal = signalOrValue;
             this._value = null;
         } else {
-            this._message = null;
-            this._value = msgOrValue;
+            this._signal = null;
+            this._value = signalOrValue;
         }
 
         this._scope = {
@@ -66,7 +66,7 @@ export default class Condition {
 
         if(prop) {
             let props = prop.split("."),
-                res = this._message.payload;
+                res = this._signal.payload;
 
             for(let p of props) {
                 if(res[ p ] !== void 0) {
@@ -96,7 +96,7 @@ export default class Condition {
 
     value(value) {
         if(typeof value === "function") {
-            this._value = value({ s: this._message, p: this._message.payload, t: this._message.type, sh: this._message.shape });
+            this._value = value({ s: this._signal, p: this._signal.payload, t: this._signal.type, sh: this._signal.shape });
         } else {
             this._value = value;
         }
@@ -118,13 +118,13 @@ export default class Condition {
     
     _getFocus() {
         if(this._focus === Condition.FocusType.TYPE) {
-            return this._message.type;
+            return this._signal.type;
         } else if(this._focus === Condition.FocusType.PAYLOAD) {
-            return this._message.payload;
+            return this._signal.payload;
         } else if(this._focus === Condition.FocusType.SHAPE) {
-            return this._message.shape;
+            return this._signal.shape;
         } else if(this._focus === Condition.FocusType.TIMESTAMP) {
-            return this._message.timestamp;
+            return this._signal.timestamp;
         } else if(this._focus === Condition.FocusType.VALUE) {
             return this._value;
         }
@@ -269,8 +269,8 @@ export default class Condition {
 
         return result;
     }
-    get getMessage() {
-        return this._message;
+    get getSignal() {
+        return this._signal;
     }
     get getScope() {
         return this._scope;
@@ -279,11 +279,11 @@ export default class Condition {
 
     debug(fn = console.log) {
         if(typeof fn === "function") {
-            fn.call(this, this._message);
+            fn.call(this, this._signal);
         }
     }
 
-    static Process(msgOrValue, type = Condition.ScopeType.AND) {
-        return new Condition(msgOrValue, type);
+    static Process(signalOrValue, type = Condition.ScopeType.AND) {
+        return new Condition(signalOrValue, type);
     }
 };

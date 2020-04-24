@@ -1,10 +1,10 @@
 import ByteBuffer from "./util/ByteBuffer";
 
-export default class Message {
+export default class Signal {
     constructor(type, payload, { shape = "s0", timestamp = Date.now(), source, destination } = {}) {
-        this.type = type;           //  The Message type, used for conditional work
+        this.type = type;           //  The Signal type, used for conditional work
         this.shape = shape;         //  The payload data shape, describing its conformation
-        this.payload = payload;     //  The actual data of the Message
+        this.payload = payload;     //  The actual data of the Signal
 
         this.source = source;
         this.destination = destination;
@@ -109,7 +109,7 @@ export default class Message {
             obj = JSON.parse(obj);
         }
         
-        return new Message(
+        return new Signal(
             obj.type,
             obj.payload,
             {
@@ -123,7 +123,7 @@ export default class Message {
     }
 
     /**
-     * This will extract a Message buffer and return a new Message, leveraging `Message.FromJson`
+     * This will extract a Signal buffer and return a new Signal, leveraging `Signal.FromJson`
      * @typeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
      * @type [ value of @typeLength in bytes ] This is the actual @type data
      * @shapeLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
@@ -131,7 +131,7 @@ export default class Message {
      * @timestampLength [ 1 byte ] This describes how many bytes to read, capped at 255, as it uses UINT8
      * @timestamp [ value of @timestampLength in bytes ] This is the actual @timestamp data
      * @payload [ the remainder of the buffer ] Calculated by taking the buffer length and subtracting the current position (at this point in the read)
-     *  ! CAVEAT: Because this assumes that the `Message.toMessageBuffer` method was used, @payload will undergo a `JSON.parse()` before being returned
+     *  ! CAVEAT: Because this assumes that the `Signal.toSignalBuffer` method was used, @payload will undergo a `JSON.parse()` before being returned
      */
     static FromBuffer(buffer) {
         let bb = new ByteBuffer(buffer);
@@ -176,13 +176,13 @@ export default class Message {
             obj.payload = JSON.parse(obj.payload);
         } catch (e) {}
 
-        return Message.FromJson(obj);
+        return Signal.FromJson(obj);
     }
 
     static FromJsonBuffer(buffer) {
         let json = ByteBuffer.ReadString(buffer);
 
-        return Message.FromJson(json);
+        return Signal.FromJson(json);
     }
 
     static Conforms(obj) {

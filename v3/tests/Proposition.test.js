@@ -3,10 +3,10 @@ import Condition from "./../Condition";
 
 let RES = null;
 let N1 = new Node({
-    receive: (msg, signature) => {
-        // console.log(`[1]:`, message, signature);
+    receive: (signal, signature) => {
+        // console.log(`[1]:`, signal, signature);
 
-        let res = Condition.Process(msg)
+        let res = Condition.Process(signal)
             .type("test")
             .payload("c.d.e")
                 .between(2, 9)
@@ -17,7 +17,7 @@ let N1 = new Node({
             .end()
             .getScope
 
-        RES = Condition.Process(msg)
+        RES = Condition.Process(signal)
             .type("test")
             .payload("c.d.e")
                 .between(2, 9)
@@ -28,12 +28,12 @@ let N1 = new Node({
             .end()
         .package
 
-        console.log(`[1]:`, msg);
+        console.log(`[1]:`, signal);
         console.log(`[1]:`, res);
     }
 });
 let N2 = new Node({
-    receive: (msg, signature) => console.log(`[1]:`, message, signature)
+    receive: (signal, signature) => console.log(`[1]:`, signal, signature)
 });
 
 N1.listen(N2);

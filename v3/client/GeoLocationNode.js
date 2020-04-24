@@ -2,13 +2,13 @@ import { GenerateUUID } from "./../util/helper";
 import Node from "./../Node";
 
 export default class GeoLocationNode extends Node {
-    static MessageTypes = {
+    static SignalTypes = {
         POSITION: "GeoLocationNode.Position",
         ERROR: "GeoLocationNode.Error",
     };
     
-    static AllMessageTypes(...filter) {
-        return Object.values(GeoLocationNode.MessageTypes).filter(st => {
+    static AllSignalTypes(...filter) {
+        return Object.values(GeoLocationNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -32,13 +32,13 @@ export default class GeoLocationNode extends Node {
     getPosition({ enableHighAccuracy = true, timeout = 5000, maximumAge = 0 } = {}) {
         navigator.geolocation.getCurrentPosition(position => {
             this.emit(
-                GeoLocationNode.MessageTypes.POSITION,
+                GeoLocationNode.SignalTypes.POSITION,
                 position.coords
             );
         }, e => {
             this.emit(
-                GeoLocationNode.MessageTypes.ERROR,
-                e.message || "Unspecified error"
+                GeoLocationNode.SignalTypes.ERROR,
+                e.signal || "Unspecified error"
             );
         }, {
             enableHighAccuracy,
@@ -50,13 +50,13 @@ export default class GeoLocationNode extends Node {
     watchPosition({ enableHighAccuracy = true, timeout = 5000, maximumAge = 0 } = {}) {
         navigator.geolocation.watchPosition(position => {
             this.emit(
-                GeoLocationNode.MessageTypes.POSITION,
+                GeoLocationNode.SignalTypes.POSITION,
                 position.coords
             );
         }, e => {
             this.emit(
-                GeoLocationNode.MessageTypes.ERROR,
-                e.message || "Unspecified error"
+                GeoLocationNode.SignalTypes.ERROR,
+                e.signal || "Unspecified error"
             );
         }, {
             enableHighAccuracy,

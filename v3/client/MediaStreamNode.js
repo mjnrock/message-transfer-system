@@ -364,13 +364,7 @@ export default class MediaStreamNode extends Node {
              */
             stop() {
                 if(_this.stream) {
-                    _this.stream.getTracks().forEach(track => {
-                        //? This is to ensure that a black screen is shown when "STOP" is called
-                        new Promise(() => track.enabled = false)    // There is an async quality about this sequence, and through extensive testing, only async wrappers with a non-0 time-delay work as expected.  This avoids that nonsense.
-                            .then(() => track.stop());
-                    });
-                
-                    _this.stream = null;
+                    _this.stream.getTracks().forEach(track => track.stop());
                 }
             },
             /**

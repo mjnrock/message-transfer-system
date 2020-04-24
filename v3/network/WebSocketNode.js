@@ -1,10 +1,10 @@
 import { GenerateUUID } from "./../helper";
 import Node from "./../Node";
-import Message from "./../Message";
+import Signal from "./../Signal";
 import Packet from "./Packet";
 
 export default class WebSocketNode extends Node {
-    static MessageTypes = {
+    static SignalTypes = {
         CLIENT_ID: `WebSocketNode.ClientId`,
         ACKNOWLEDGE: `WebSocketNode.Acknowledge`,
         OPEN: `WebSocketNode.Open`,
@@ -14,8 +14,8 @@ export default class WebSocketNode extends Node {
         ERROR: `WebSocketNode.Error`,
     };
     
-    static AllMessageTypes(...filter) {
-        return Object.values(WebSocketNode.MessageTypes).filter(st => {
+    static AllSignalTypes(...filter) {
+        return Object.values(WebSocketNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -80,7 +80,7 @@ export default class WebSocketNode extends Node {
 
         this.ws.onerror = this._onWsError.bind(this);
         this.ws.onclose = this._onWsClose.bind(this);
-        this.ws.onmessage = this._onWsMessage.bind(this);
+        this.ws.onsignal = this._onWsSignal.bind(this);
 
         return this;
     }
@@ -88,28 +88,28 @@ export default class WebSocketNode extends Node {
         if(this.ws) {
             this.ws.close();
 
-            this.emit(WebSocketNode.MessageTypes.CLOSE, this.id);
+            this.emit(WebSocketNode.SignalTypes.CLOSE, this.id);
         }
     }
 
     wssend(type, payload) {
-        let msg = new Message(type, payload, this.signet);
+        let signal = new Signal(type, payload, this.signet);
         
-        this.ws.send(msg.toJson());
+        this.ws.send(signal.toJson());
     }
 
-    _onWsMessage(e) {
+    _onWsSignal(e) {
         try {
             //TODO  What to do when the data comes in: should account for JSON and BUFFER
         } catch(e) {
-            this._onWsMessageError(e);
+            this._onWsSignalError(e);
         }
     }
-    _onWsMessageError(e) {
-        this.emit(WebSocketNode.MessageTypes.MESSAGE_ERROR, e);
+    _onWsSignalError(e) {
+        this.emit(WebSocketNode.SignalTypes.MESSAGE_ERROR, e);
     }
     _onWsOpen(e) {
-        this.emit(WebSocketNode.MessageTypes.OPEN, e);
+        this.emit(WebSocketNode.SignalTypes.OPEN, e);
 
         if(typeof this._hooks.onOpen === "function") {
             this._hooks.onOpen(this, e);
@@ -121,14 +121,14 @@ export default class WebSocketNode extends Node {
             payload = WebSocketNode.CloseCode[ e.code ];
         }
         
-        this.emit(WebSocketNode.MessageTypes.CLOSE, payload);
+        this.emit(WebSocketNode.SignalTypes.CLOSE, payload);
 
         if(typeof this._hooks.onClose === "function") {
             this._hooks.onClose(this, payload);
         }
     }
     _onWsError(e) {
-        this.emit(WebSocketNode.MessageTypes.ERROR, e);
+        this.emit(WebSocketNode.SignalTypes.ERROR, e);
     }
 
     static CloseCode = {
@@ -138,7 +138,7 @@ export default class WebSocketNode extends Node {
         1003: [ 1003, "CLOSE_UNSUPPORTED", "Endpoint received an unsupported frame (e.g. binary-only endpoint received text frame)" ],
         1005: [ 1005, "CLOSED_NO_STATUS", "Expected close status, received none" ],
         1006: [ 1006, "CLOSE_ABNORMAL", "No close code frame has been receieved" ],
-        1007: [ 1007, "UNSUPPORTED PAYLOAD", "Endpoint received inconsistent message (e.g. malformed UTF-8)" ],
+        1007: [ 1007, "UNSUPPORTED PAYLOAD", "Endpoint received inconsistent signal (e.g. malformed UTF-8)" ],
         1008: [ 1008, "POLICY VIOLATION", "Generic code used for situations other than 1003 and 1009" ],
         1009: [ 1009, "CLOSE_TOO_LARGE", "Endpoint won't process large frame" ],
         1010: [ 1010, "MANDATORY EXTENSION", "Client wanted an extension which server did not negotiate" ],

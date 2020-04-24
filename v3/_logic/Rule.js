@@ -2,8 +2,8 @@ import Condition from "./Condition";
 import Action from "./Action";
 
 export default class Rule extends Condition {
-    constructor(msgOrValue, { type, node, state } = {}) {
-        super(msgOrValue, type);
+    constructor(signalOrValue, { type, node, state } = {}) {
+        super(signalOrValue, type);
 
         this._action = new Action({ node, state });
     }
@@ -18,7 +18,7 @@ export default class Rule extends Condition {
         return this._action;
     }
 
-    static Process(msgOrValue, { type, node, state } = {}) {
-        return new Rule(msgOrValue, { type, node, state });
+    static Process(signalOrValue, { type, node, state } = {}) {
+        return new Rule(signalOrValue, { type, node, state });
     }
 };

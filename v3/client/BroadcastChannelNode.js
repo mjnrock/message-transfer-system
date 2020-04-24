@@ -1,16 +1,16 @@
 import { GenerateUUID } from "./../util/helper";
 import Node from "./../Node";
-import Message from "./../Message";
+import Signal from "./../Signal";
 
 export default class BroadcastChannelNode extends Node {
-    static MessageTypes = {
-        MESSAGE: "BroadcastChannelNode.Message",
-        MESSAGE_ERROR: "BroadcastChannelNode.MessageError",
+    static SignalTypes = {
+        MESSAGE: "BroadcastChannelNode.Signal",
+        MESSAGE_ERROR: "BroadcastChannelNode.SignalError",
         ERROR: "BroadcastChannelNode.Error",
     };
     
-    static AllMessageTypes(...filter) {
-        return Object.values(BroadcastChannelNode.MessageTypes).filter(st => {
+    static AllSignalTypes(...filter) {
+        return Object.values(BroadcastChannelNode.SignalTypes).filter(st => {
             if(filter.includes(st)) {
                 return false;
             }
@@ -39,8 +39,8 @@ export default class BroadcastChannelNode extends Node {
     connect(name) {
         let bc = new BroadcastChannel(name);
 
-        bc.onmessage = this._onBcMessage.bind(this);
-        bc.onmessageerror = this._onBcMessageError.bind(this);
+        bc.onsignal = this._onBcSignal.bind(this);
+        bc.onsignalerror = this._onBcSignalError.bind(this);
 
         this.supply.Name = name;
         this.supply.Channel = bc;
@@ -58,38 +58,38 @@ export default class BroadcastChannelNode extends Node {
         return this;
     }
 
-    receive(msg) {
-        if(Message.conforms(msg) && msg.type === BroadcastChannelNode.MessageTypes.MESSAGE) {
-            this.bcmessage(msg.payload);
+    receive(signal) {
+        if(Signal.conforms(signal) && signal.type === BroadcastChannelNode.SignalTypes.MESSAGE) {
+            this.bcsignal(signal.payload);
         }
     }
     bcsend(type, payload) {
-        let msg = new Message(type, payload, this.signet);
+        let signal = new Signal(type, payload, this.signet);
         
-        this.bcmessage(msg);
+        this.bcsignal(signal);
     }
-    bcmessage(msg) {
+    bcsignal(signal) {
         try {
-            if(Message.conforms(msg)) {
-                this.supply.Channel.postMessage(msg);
+            if(Signal.conforms(signal)) {
+                this.supply.Channel.postSignal(signal);
             }
         } catch(e) {
-            this.emit(BroadcastChannelNode.MessageTypes.ERROR, e);
+            this.emit(BroadcastChannelNode.SignalTypes.ERROR, e);
         }
     }
 
-    _onBcMessage(e) {        
+    _onBcSignal(e) {        
         try {
-            let msg = e.data;
+            let signal = e.data;
 
-            if(Message.conforms(msg)) {
-                this.emit(msg);
+            if(Signal.conforms(signal)) {
+                this.emit(signal);
             }
         } catch(e) {
-            this._onBcMessageError(e);
+            this._onBcSignalError(e);
         }
     }
-    _onBcMessageError(e) {
-        this.emit(BroadcastChannelNode.MessageTypes.MESSAGE_ERROR, e);
+    _onBcSignalError(e) {
+        this.emit(BroadcastChannelNode.SignalTypes.MESSAGE_ERROR, e);
     }
 };

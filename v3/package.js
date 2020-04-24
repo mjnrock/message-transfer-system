@@ -1,5 +1,5 @@
 import Condition from "./Condition";
-import Message from "./Message";
+import Signal from "./Signal";
 import Feed from "./Feed";
 import Registry from "./Registry";
 import Node from "./Node";
@@ -10,7 +10,7 @@ import Client from "./client/package";
 
 export default {
     Condition,
-    Message,
+    Signal,
     Feed,
     Registry,
     Node,

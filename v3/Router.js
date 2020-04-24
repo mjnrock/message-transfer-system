@@ -26,12 +26,12 @@ export default class Router extends Node {
         }
     }
 
-    receive(msg, feed) {
-        super.receive(msg, feed);
+    receive(signal, feed) {
+        super.receive(signal, feed);
 
         for(let { node, condition } of Object.values(this._routes)) {
-            if(condition(msg, feed) === true) {
-                node.receive(msg, feed);
+            if(condition(signal, feed) === true) {
+                node.receive(signal, feed);
             }
         }
     }
