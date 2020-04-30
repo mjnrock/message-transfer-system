@@ -1,5 +1,6 @@
 import Node from "./Node";
 import Signal from "./Signal";
+import { GenerateUUID } from "./util/helper";
 
 export default class Port {
     static Type = {
@@ -13,7 +14,9 @@ export default class Port {
         DATA: 2,
     };
 
-    constructor(source, { filter, listeners, type } = {}) {
+    constructor(source, { name, filter, listeners, type } = {}) {
+        this._name = name || GenerateUUID();
+
         this._source = source;
         this._listeners = {};
         // this._type = type || Port.Type.MIXED;
@@ -33,14 +36,18 @@ export default class Port {
         }
     }
 
-    attach(node) {
-        if(node instanceof Node) {
+    get name() {
+        return this._name;
+    }
 
+    attach(port) {
+        if(port instanceof Port) {
+            this._listeners[ port.name ] = port;
         }
     }
-    detach(node) {
-        if(node instanceof Node) {
-            
+    detach(port) {
+        if(port instanceof Port) {
+            delete this._listeners[ port.name ];
         }
     }
 

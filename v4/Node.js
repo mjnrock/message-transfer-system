@@ -1,4 +1,6 @@
 import Port from "./Port";
+import InputPort from "./InputPort";
+import OutputPort from "./OutputPort";
 
 export default class Node {
     constructor({ input, output } = {}) {
@@ -8,20 +10,40 @@ export default class Node {
         };
     }
 
-    inport(index) {
-        let port = Object.keys(this._ports.input)[ index ];
+    inport(input) {
+        if(input instanceof InputPort) {
+            return input;
+        } else if(typeof input === "string" || input instanceof String) {
+            let [ port ] = Object.keys(this._ports.input).filter(p => p.name === input) || [];
 
-        if(port instanceof Port) {
-            return port;
+            if(port instanceof Port) {
+                return port;
+            }
+        } else if(typeof input === "number") {
+            let port = Object.keys(this._ports.input)[ input ];
+
+            if(port instanceof Port) {
+                return port;
+            }
         }
 
         return false;
     }
-    outport(index) {
-        let port = Object.keys(this._ports.output)[ index ];
+    outport(input) {
+        if(input instanceof InputPort) {
+            return input;
+        } else if(typeof input === "string" || input instanceof String) {
+            let [ port ] = Object.keys(this._ports.output).filter(p => p.name === input) || [];
 
-        if(port instanceof Port) {
-            return port;
+            if(port instanceof Port) {
+                return port;
+            }
+        } else if(typeof input === "number") {
+            let port = Object.keys(this._ports.output)[ input ];
+
+            if(port instanceof Port) {
+                return port;
+            }
         }
 
         return false;
@@ -44,6 +66,22 @@ export default class Node {
             }
         } else if(port.type === Port.Type.OUTPUT) {
             // Do something with payload
+        }
+    }
+
+    in(outport, inport) {
+        let inp = this.inport(inport);
+
+        if(inp instanceof InputPort && outport instanceof OutputPort) {
+            outport.attach(inp);
+        }
+    }
+    //TODO InputPort currently uses the Node as the proxy to send output, but this implementation breaks that paradigm.
+    out(inport, outport) {
+        let outp = this.outport(outport);
+
+        if(inport instanceof InputPort && outp instanceof OutputPort) {
+            inport.attach(outp);
         }
     }
 };
