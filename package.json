@@ -1,13 +1,13 @@
 {
-    "name": "@lespantsfancy/message-transfer-system",
-    "version": "0.2.8",
+    "name": "@lespantsfancy/hive",
+    "version": "0.1.0",
     "description": "",
     "main": "lib/index.js",
     "directories": {
         "test": "tests"
     },
+    "private": false,
     "scripts": {
-        "react": "babel --plugins transform-object-rest-spread,transform-class-properties src --out-dir mts-react/src/lib",
         "prepublish": "babel --plugins transform-object-rest-spread,transform-class-properties src --out-dir lib",
         "deploy": "npm version patch && npm publish --access=public",
         "start": "node esm-index.js",

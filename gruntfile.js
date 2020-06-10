@@ -3,13 +3,13 @@ module.exports = function (grunt) {
         copy: {
             files: {
                 expand: true,
-                dest: 'mts-react/src/lib',
-                cwd: 'v3/',
-                src: '**'
+                dest: "lib",
+                cwd: "v3/",
+                src: "**"
             }
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.registerTask('default', 'copy');
-}
+    grunt.loadNpmTasks("grunt-contrib-copy");
+    grunt.registerTask("default", "copy");
+};

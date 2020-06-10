@@ -1,238 +1,241 @@
-import { GenerateUUID } from "./helper";
+import EventEmitter from "events";
+import { v4 as uuidv4 } from "uuid";
+
+import { freeze, freezeCopy } from "./functions";
 import Message from "./Message";
 
-export default class Node {
-    static SignalTypes = {
-        STATE_CHANGE: "Node.StateChange",
-        PROP_CHANGE: "Node.PropChange",
-    };
-    
-    static AllSignalTypes(...filter) {
-        return Object.values(Node.SignalTypes).filter(st => {
-            if(filter.includes(st)) {
-                return false;
-            }
+export const EnumEventType = {
+    STATE: "state",
+    MESSAGE: "message",
+};
 
-            return true;
-        });
-    }
+export default class Node extends EventEmitter {
+    constructor(state = {}) {
+        super();
 
-    constructor({ name = null, receive = null, mnode = null, packager = null } = {}) {
-        this.id = GenerateUUID();
-        this.name = name;
+        this.id = uuidv4();
+        this._state = freeze(state);
+        this._reducers = [];
+        this._config = {
+            isSelfMessaging: true
+        };
 
-        this._mnode = mnode;
-        this._packager = packager || ((type, payload, source = null) => new Message(type, payload, source || this.signet));
-        this._receive = receive || (() => true);
-        this._subscriptions = {};
-        this._internal = {};
-
-        this._state = {};
-        this._emitStateChange = false;
-        this._emitOnSend = false;
-    }
-
-    /**
-     * Should the Node ALSO invoke `this.emit(...)` whenever `this.send(...)` is invoked.
-     */
-    toggleSimulcast(value) {
-        if(value === true || value === false) {
-            this._emitOnSend = value;
-        } else {
-            this._emitOnSend = !this._emitOnSend;
-        }
-
-        return this;
-    }
-
-    /**
-     * Should the Node `this.emit(...)` whenever its `this.state` is changed.
-     * NOTE: This is intended for immutable state monitoring ONLY.  It will only function in cases where the literal `this.state = newState` is assigned directly.
-     */
-    toggleStateEmission(value) {
-        if(value === true || value === false) {
-            this._emitStateChange = value;
-        } else {
-            this._emitStateChange = !this._emitStateChange;
-        }
-
-        return this;
-    }
-
-    get internal() {
-        return this._internal;
-    }
-    set internal(value) {
-        this._internal = value;
+        this.on(EnumEventType.MESSAGE, this.onMessage.bind(this));
     }
 
     get state() {
         return this._state;
     }
-    set state(value) {        
-        this._state = value;
+    set state(newState) {
+        const oldState = this._state;
 
-        if(this._emitStateChange === true) {
-            this.emit(Node.SignalTypes.STATE_CHANGE, {
-                previous: this._state,
-                current: value
-            });
-        }
+        this._state = newState;
+
+        this.emit(EnumEventType.STATE, freezeCopy({
+            previous: oldState,
+            current: newState
+        }));
+    }
+    get config() {
+        return this._config;
     }
 
-    get signet() {
-        return this.id;
-    }
-
-    get receive() {
-        return this._receive;
-    }
-    set receive(fn) {
-        if(typeof fn === "function") {
-            this._receive = fn;
-
-            return true;
+    flagOn(configEntry) {
+        if(configEntry in this._config) {
+            this._config[ configEntry ] = true;
         }
 
-        return false;
+        return this;
     }
-
-    get packager() {
-        return this._packager;
-    }
-    set packager(fn) {
-        if(typeof fn === "function") {
-            this._packager = fn;
-
-            return true;
+    flagOff(configEntry) {
+        if(configEntry in this._config) {
+            this._config[ configEntry ] = false;
         }
 
-        return false;
+        return this;
+    }
+    flagToggle(configEntry) {
+        if(configEntry in this._config) {
+            this._config[ configEntry ] = !this._config[ configEntry ];
+        }
+
+        return this;
     }
 
-    send(type, payload, { elevate = null, defaultConfig = true } = {}) {
-        this.message(this.packager(
+    dispatch(type, payload) {
+        this.emit(EnumEventType.MESSAGE, new Message(
             type,
             payload,
-            this.signet
-        ), { elevate, defaultConfig });
+            this
+        ));
     }
-    message(msg, { elevate = null, defaultConfig = true } = {}) {
-        if(Message.conforms(msg)) {
-            if(elevate !== null && elevate !== void 0) {
-                msg.elevate(elevate);
+    onMessage(msg) {
+        if(!Message.Conforms(msg)) {
+            return;
+        }
+
+        if((this.config.isSelfMessaging && msg.emitter.id === this.id) || msg.emitter.id !== this.id) {            
+            if(typeof this.before === "function") {
+                this.before(msg, this);
             }
 
-            this._mnode.Router.route(msg);
+            for(let reducer of this._reducers) {
+                if(typeof reducer === "function") {
+                    let newState = reducer.call(this, this._state, msg) || this.state;
 
-            if(defaultConfig === true && this._emitOnSend === true) {
-                this.emit(msg);
+                    if(!(typeof newState === "object" || Array.isArray(newState))) {
+                        newState = [ newState ];
+                    }
+
+                    this.state = newState;
+                }
+            }
+            
+            if(typeof this.after === "function") {
+                this.after(msg, this);
             }
         }
     }
+    watchMessages(node, twoWay = false) {
+        if(node instanceof EventEmitter) {
+            node.on(EnumEventType.MESSAGE, this.onMessage.bind(this));
 
-    emit(type, payload) {
-        let msg;
-        if(Message.conforms(type)) {
-            msg = type;
-        } else {
-            msg = this.packager(
-                type,
-                payload,
-                this.signet
-            );
+            if(twoWay) {
+                this.on(EnumEventType.MESSAGE, node.onMessage.bind(node));
+            }
         }
 
-        for(let sub of Object.values(this._subscriptions)) {
-            if(typeof sub.receive === "function") {
-                sub.receive(msg);
-            } else if(typeof sub === "function") {
-                sub(msg);
+        return this;
+    }
+    unwatchMessages(node, twoWay = false) {
+        if(node instanceof EventEmitter) {
+            node.off(EnumEventType.MESSAGE, this.onMessage.bind(this));
+
+            if(twoWay) {
+                this.off(EnumEventType.MESSAGE, node.onMessage.bind(node));
             }
         }
 
         return this;
     }
 
-    subscribe(nodeOrFn) {
-        let id,
-            sub;
+    onState(stateObj) {}
+    watchState(node, twoWay = false) {
+        if(node instanceof EventEmitter) {
+            node.on(EnumEventType.STATE, stateObj => {
+                this.onState(stateObj);
+            });
 
-        if(nodeOrFn instanceof Node) {
-            sub = nodeOrFn;
-            id = nodeOrFn.id;
-        } else if(typeof nodeOrFn === "function" || typeof nodeOrFn.receive === "function") {
-            sub = nodeOrFn;
-            id = GenerateUUID();
+            if(twoWay) {
+                this.on(EnumEventType.STATE, stateObj => {
+                    node.onState(stateObj);
+                });
+            }
         }
 
-        if(id) {
-            this._subscriptions[ id ] = sub;
+        return this;
+    }
+    unwatchState(node, twoWay = false) {
+        if(node instanceof EventEmitter) {
+            node.off(EnumEventType.STATE, stateObj => {
+                this.onState(stateObj);
+            });
 
-            return id;
+            if(twoWay) {
+                this.off(EnumEventType.STATE, stateObj => {
+                    node.onState(stateObj);
+                });
+            }
         }
 
-        return false;
+        return this;
     }
 
-    subscribeTo(node) {
-        if(node instanceof Node) {
-            return node.subscribe(this);
-        }
+    addReducer() {
+        if(arguments.length === 1) {
+            const [ reducer ] = arguments;
 
-        return false;
-    }
-    
-    unsubscribe(nodeFnOrId) {
-        let hashCode = str => {
-            let hash = 0, i, chr;
-
-            if(str.length === 0) {
-                return hash;
+            if(typeof reducer === "function") {
+                this._reducers.push(reducer);
             }
-
-            for(i = 0; i < str.length; i++) {
-                chr = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-
-            return hash;
-        };
-
-        if (nodeFnOrId instanceof Node) {
-            delete this._subscriptions[ nodeFnOrId.id ];
-
-            return true;
-        } else if (typeof nodeFnOrId === "string" || nodeFnOrId instanceof String) {
-            delete this._subscriptions[ nodeFnOrId ];
-
-            return true;
-        } else if (typeof nodeFnOrId.receive === "function" || typeof nodeFnOrId === "function") {
-            let fn = nodeFnOrId.receive || nodeFnOrId,
-                hash = hashCode(fn.toString());
-
-            for (let [ key, sub ] of Object.entries(this._subscriptions)) {
-                if (typeof sub.receive === "function" || typeof sub === "function") {
-                    let ifn = sub.receive || sub;
-
-                    if (hashCode(ifn.toString()) === hash) {
-                        delete this._subscriptions[key];
-
-                        return true;
+        } else if(arguments.length === 2) {
+            const [ type, reducer ] = arguments;
+            
+            if(typeof reducer === "function") {
+                this._reducers.push((state, msg) => {
+                    if(msg.type === type) {
+                        return reducer(state, msg);
                     }
+
+                    return state;
+                });
+            }
+        }
+
+        return this;
+    }    
+    clearReducers() {
+        this._reducers = [];
+
+        return this;
+    }
+
+    flatten() {
+        const recurse = (state, ancestry = []) => {
+            const arr = [];
+
+            for(let key in state) {
+                let element = state[ key ];
+
+                if(typeof element === "object" && !Array.isArray(element)) {
+                    arr.push(...recurse(element, [ ...ancestry, key ]));
+                } else {
+                    arr.push([
+                        [ ...ancestry, key ].join("."),
+                        element
+                    ]);
                 }
             }
-        }
 
-        return false;
+            return arr;
+        };
+
+        return recurse(this.state, []);
     }
+    unflatten(input) {
+        let state = {};
 
-    unsubscribeTo(node) {
-        if(node instanceof Node) {
-            return node.unsubscribe(this);
+        for(let [ key, value ] of input) {
+            if(key.includes(".")) {
+                let ancestry = key.split(".");
+                let obj = state,
+                    pointer = obj;
+
+                for(let i = 0; i < ancestry.length; i++) {
+                    let k = ancestry[ i ];
+
+                    if(!pointer[ k ]) {
+                        pointer[ k ] = {};
+                    }
+
+                    if(i < ancestry.length - 1) {
+                        pointer = pointer[ k ];
+                    }
+                }
+
+                pointer[ ancestry[ ancestry.length - 1] ] = value;
+                
+                state = {
+                    ...state,
+                    ...obj
+                };
+            } else {
+                state[ key ] = value;
+            }
         }
 
-        return false;
+        this._state = state;
+
+        return this.state;
     }
 };
