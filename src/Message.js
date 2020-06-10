@@ -1,61 +1,49 @@
-import { v4 as uuidv4 } from "uuid";
-
 export default class Message {
-    constructor(type, payload, emitter, { id, timestamp } = {}) {
-        this.id = id || uuidv4();
+    constructor(type, payload, source, { destination = null } = {}) {
         this.type = type;
         this.payload = payload;
-        this.timestamp = timestamp || Date.now();
-        this.emitter = emitter;
+        this.source = source;
+        this.timestamp = Date.now();
 
-        return Object.seal(this);
+        if(destination !== null && destination !== void 0) {
+            this.elevate(destination)
+        }
+
+        return this;
+    }
+
+    elevate(destination = true) {
+        this._elevate = destination;
+
+        return this;
     }
 
     toJson() {
         return JSON.stringify(this);
     }
-    toObject() {
-        return JSON.parse(JSON.stringify(this));
-    }
 
-    static FromJson(json) {
+    static fromJson(json) {
         let obj = json;
 
         while(typeof obj === "string" || obj instanceof String) {
             obj = JSON.parse(obj);
         }
-
+        
         return new Message(
             obj.type,
             obj.payload,
-            obj.emitter,
-            {
-                id: obj.id,
-                timestamp: obj.timestamp
-            }
+            obj.source
         );
     }
 
-    static Conforms(obj) {
-        if(obj instanceof Message) {
-            return true;
-        } else if(typeof obj !== "object") {
-            return false;
+    static conforms(obj) {
+        if(typeof obj === "object") {
+            return ("type" in obj)
+                && ("payload" in obj)
+                && ("source" in obj)
+                && ("timestamp" in obj);
         }
 
-        return "id" in obj
-            && "type" in obj
-            && "payload" in obj
-            && "timestamp" in obj
-            && "emitter" in obj;
+        return false;
     }
-    static JsonConforms(json) {
-        let obj = json;
-
-        while(typeof obj === "string" || obj instanceof String) {
-            obj = JSON.parse(obj);
-        }
-
-        return Message.Conforms(obj);
-    }
-}
+};
