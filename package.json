@@ -1,6 +1,6 @@
 {
     "name": "@lespantsfancy/hive",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "",
     "main": "lib/index.js",
     "directories": {
@@ -9,9 +9,9 @@
     "private": false,
     "scripts": {
         "prepublish": "babel --plugins transform-object-rest-spread,transform-class-properties src --out-dir lib",
-        "deploy": "npm version patch && npm publish --access=public",
-        "start": "node esm-index.js",
-        "server": "node esm-server.js"
+        "deploy": "yarn version --patch && yarn publish --access=public",
+        "start": "yarn esm-index.js",
+        "server": "yarn esm-server.js"
     },
     "repository": {
         "type": "git",
